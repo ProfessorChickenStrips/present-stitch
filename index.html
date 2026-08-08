@@ -206,7 +206,7 @@
 
 var DEFAULTS = {
   meta: {name:"Present Stitch Biz Dashboard", v:1, saved:""},
-  settings: {r:25, horizon:5, tv:0, scenario:"base", target:3000, hpw:8, hg:34, ohm:45, ohg:25, adminH:96},
+  settings: {r:25, horizon:5, tv:0, scenario:"base", target:3000, hpw:8, hg:34, ohm:45, ohg:25, adminH:96, cap:true},
   streams: [
     {id:"custom",   name:"Custom commissions",     c:"--s1", start:1, u:1.5, ug:28, p:85, pg:25, cogs:8,  fees:8,  hpu:6.5,  fh:0,  on:true, unit:"pieces/mo",
      why:"Personalized name & gift hoops, made to order. Typical 6″ custom runs $100–175; premium artists charge $250–900."},
@@ -281,13 +281,17 @@ try {
   window.localStorage.removeItem("psbd-test");
   canStore = true;
 } catch(e){ canStore = false; }
+function normalize(obj){
+  if (obj.settings.cap === undefined) obj.settings.cap = true;
+  return obj;
+}
 function loadSaved(){
   if (!canStore) return;
   try {
     var raw = window.localStorage.getItem(STORE_KEY);
     if (!raw) return;
     var obj = JSON.parse(raw);
-    if (obj && obj.streams && obj.settings && obj.roadmap) S = obj;
+    if (obj && obj.streams && obj.settings && obj.roadmap) S = normalize(obj);
   } catch(e){}
 }
 var saveT;
@@ -307,31 +311,51 @@ var SCEN = {
   stretch: {u:1.7,  g:1.15, p:1.15, d:0, label:"Stretch"}
 };
 
-/* ---------- financial model ---------- */
+/* ---------- financial model ----------
+   Demand: units grow per stream. Capacity: Maggie's hours.
+   With settings.cap on, hour-consuming production is trimmed to fit
+   the hours she actually has — unserved demand is reported as `lost`. */
 function runModel(S, scenKey){
   var st = S.settings, SC = SCEN[scenKey || st.scenario];
   var H = st.horizon, years = [];
   for (var y=1; y<=H; y++){
-    var revBy = {}, rev=0, cogs=0, fees=0, hours=0;
-    S.streams.forEach(function(s){
-      revBy[s.id] = 0;
-      if (!s.on) return;
+    var rows = S.streams.map(function(s){
+      if (!s.on) return {s:s, active:false};
       var eff = s.start + (s.start>1 ? SC.d : 0);
       var t = y - eff;
-      if (t < 0) return;
-      var units = s.u * SC.u * Math.pow(1 + (s.ug*SC.g)/100, t);
-      var price = s.p * SC.p * Math.pow(1 + s.pg/100, t);
-      var r = units * price * 12;
-      revBy[s.id] = r; rev += r;
-      cogs += r * s.cogs/100; fees += r * s.fees/100;
-      hours += units*12*s.hpu + s.fh;
+      if (t < 0) return {s:s, active:false};
+      return {s:s, active:true,
+              units: s.u * SC.u * Math.pow(1 + (s.ug*SC.g)/100, t),
+              price: s.p * SC.p * Math.pow(1 + s.pg/100, t)};
+    });
+    var fixedH = 0, varH = 0;
+    rows.forEach(function(r){
+      if (!r.active) return;
+      fixedH += r.s.fh;
+      varH += r.units*12*r.s.hpu;
+    });
+    var avail = st.hpw*52*Math.pow(1+st.hg/100, y-1);
+    var availVar = Math.max(0, avail - fixedH - st.adminH);
+    var factor = 1;
+    if (st.cap && varH > availVar && varH > 0) factor = availVar/varH;
+    var revBy = {}, rev=0, revUncap=0, cogs=0, fees=0, usedVar=0;
+    rows.forEach(function(r){
+      revBy[r.s.id] = 0;
+      if (!r.active) return;
+      var u = r.s.hpu > 0 ? r.units*factor : r.units;
+      var rv = u * r.price * 12;
+      revBy[r.s.id] = rv; rev += rv;
+      revUncap += r.units * r.price * 12;
+      cogs += rv * r.s.cogs/100; fees += rv * r.s.fees/100;
+      usedVar += u*12*r.s.hpu;
     });
     var oh = st.ohm*12*Math.pow(1+st.ohg/100, y-1);
     var sde = rev - cogs - fees - oh;
-    var need = hours + st.adminH;
-    var avail = st.hpw*52*Math.pow(1+st.hg/100, y-1);
-    years.push({y:y, revBy:revBy, rev:rev, cogs:cogs, fees:fees, oh:oh, sde:sde,
-                need:need, avail:avail, util:avail>0?need/avail:0, wage:need>0?sde/need:0});
+    var need = varH + fixedH + st.adminH;
+    var used = usedVar + fixedH + st.adminH;
+    years.push({y:y, revBy:revBy, rev:rev, lost:revUncap-rev, cogs:cogs, fees:fees, oh:oh, sde:sde,
+                need:need, used:used, avail:avail, capped:factor<0.999,
+                util:avail>0?need/avail:0, wage:used>0?sde/used:0});
   }
   var r = st.r/100, npv=0, cum=0, disc=[];
   years.forEach(function(yr){
@@ -503,7 +527,7 @@ function sdeChart(container, model){
       return '<div class="t">Year '+yr.y+'</div>'+
         '<div class="r"><span><span class="sw" style="background:var(--accent)"></span>Owner earnings</span><b>'+fm$f(yr.sde)+'</b></div>'+
         '<div class="r"><span><span class="sw" style="background:var(--ink-3)"></span>Cumulative, discounted</span><b>'+fm$f(cum[i])+'</b></div>'+
-        '<div class="r"><span>Hours needed</span><b>'+Math.round(yr.need)+'</b></div>'+
+        '<div class="r"><span>Hours worked</span><b>'+Math.round(yr.used)+'</b></div>'+
         '<div class="r"><span>Effective wage</span><b>$'+yr.wage.toFixed(0)+'/hr</b></div>';
     });
   });
@@ -605,7 +629,9 @@ function renderOverview(el){
   var wage = last.hrs>0 ? sde/last.hrs : 0;
   var mC = runModel(S,"cons"), mB = runModel(S,"base"), mS = runModel(S,"stretch");
   var finalYr = m.years[m.years.length-1];
-  var overCap = m.years.find(function(y){return y.util>1.05;});
+  var capYr = st.cap ? m.years.find(function(y){return y.lost>50;}) : null;
+  var overCap = !st.cap ? m.years.find(function(y){return y.util>1.05;}) : null;
+  var lostTot = m.years.reduce(function(a,y){return a+y.lost;},0);
 
   var html = '';
   html += '<div class="card">'+
@@ -619,7 +645,8 @@ function renderOverview(el){
       '<div class="tile"><div class="lbl">Year-'+st.horizon+' earnings</div><div class="val">'+fm$(finalYr.sde/12)+'<span style="font-size:13px;color:var(--ink-2)">/mo</span></div>'+
       '<div class="dlt">'+fmPct(m.repl)+' of $'+st.target+'/mo target</div></div>'+
     '</div>'+
-    (overCap ? '<div class="pill-warn">⚠ Capacity: Year '+overCap.y+' needs ~'+Math.round(overCap.need/52)+' hrs/wk vs '+Math.round(overCap.avail/52)+' planned. Raise prices or shift mix toward digital.</div>' : '')+
+    (capYr ? '<div class="pill-warn">⚠ Hours are the bottleneck from year '+capYr.y+': ~'+fm$(lostTot)+' of demand over '+st.horizon+' yrs goes unserved at planned hours. More hours, higher prices, or digital mix would capture it.</div>' : '')+
+    (overCap ? '<div class="pill-warn">⚠ Capacity: Year '+overCap.y+' needs ~'+Math.round(overCap.need/52)+' hrs/wk vs '+Math.round(overCap.avail/52)+' planned (cap is off, so the NPV includes work she has no hours for).</div>' : '')+
   '</div>';
 
   html += '<div class="card"><h2>Next task</h2>'+
@@ -680,6 +707,11 @@ function renderPlan(el){
       '<div><label class="f">Overhead ($/mo, yr 1)</label><input type="number" id="inOhm" value="'+st.ohm+'"></div>'+
       '<div><label class="f">Hours/week, yr 1</label><input type="number" id="inHpw" value="'+st.hpw+'" step="0.5"></div>'+
       '<div><label class="f">Hours growth %/yr</label><input type="number" id="inHg" value="'+st.hg+'"></div>'+
+    '</div>'+
+    '<label class="f">Cap production by available hours <span class="muted">(on = handmade output can’t exceed her hours; unserved demand is flagged)</span></label>'+
+    '<div class="seg" id="segCap">'+
+      '<button data-c="1" class="'+(st.cap?"active":"")+'">On</button>'+
+      '<button data-c="0" class="'+(!st.cap?"active":"")+'">Off</button>'+
     '</div></div>';
 
   html += '<div class="card">'+
@@ -697,11 +729,11 @@ function renderPlan(el){
     '<div class="legend"><span class="k"><span class="sw" style="background:var(--accent)"></span>Owner earnings (per year)</span><span class="k"><span class="sw" style="background:var(--ink-3)"></span>Cumulative, discounted</span></div>'+
     '<div class="chart-wrap" id="chSde"></div></div>';
 
-  html += '<div class="card"><h2>Year by year</h2><div class="tscroll"><table class="data"><thead><tr><th>Yr</th><th>Revenue</th><th>Materials</th><th>Fees</th><th>Overhead</th><th>Earnings</th><th>$/mo</th><th>Hrs/wk</th><th>Load</th><th>$/hr</th></tr></thead><tbody>'+
+  html += '<div class="card"><h2>Year by year</h2><div class="tscroll"><table class="data"><thead><tr><th>Yr</th><th>Revenue</th><th>Unserved</th><th>Materials</th><th>Fees</th><th>Overhead</th><th>Earnings</th><th>$/mo</th><th>Hrs/wk</th><th>Demand</th><th>$/hr</th></tr></thead><tbody>'+
     m.years.map(function(y){
-      return '<tr><td>Y'+y.y+'</td><td>'+fm$f(y.rev)+'</td><td>'+fm$f(y.cogs)+'</td><td>'+fm$f(y.fees)+'</td><td>'+fm$f(y.oh)+'</td><td><b>'+fm$f(y.sde)+'</b></td><td>'+fm$f(y.sde/12)+'</td><td>'+(y.need/52).toFixed(1)+'</td><td'+(y.util>1.05?' style="color:var(--crit);font-weight:600"':'')+'>'+fmPct(y.util)+'</td><td>$'+y.wage.toFixed(0)+'</td></tr>';
+      return '<tr><td>Y'+y.y+'</td><td>'+fm$f(y.rev)+'</td><td'+(y.lost>50?' style="color:var(--crit)"':'')+'>'+(y.lost>50?fm$f(y.lost):'—')+'</td><td>'+fm$f(y.cogs)+'</td><td>'+fm$f(y.fees)+'</td><td>'+fm$f(y.oh)+'</td><td><b>'+fm$f(y.sde)+'</b></td><td>'+fm$f(y.sde/12)+'</td><td>'+(y.used/52).toFixed(1)+'</td><td'+(y.util>1.05?' style="color:var(--crit);font-weight:600"':'')+'>'+fmPct(y.util)+'</td><td>$'+y.wage.toFixed(0)+'</td></tr>';
     }).join("")+'</tbody></table></div>'+
-    '<div class="muted" style="margin-top:6px">Load = hours the plan needs ÷ hours Maggie plans to give it. Over 100% means the plan is physically impossible without price rises or digital leverage.</div></div>';
+    '<div class="muted" style="margin-top:6px">Demand = hours demand wants ÷ hours planned. Hrs/wk = hours actually worked. With the cap on, years over 100% get trimmed to fit — the trimmed revenue shows as Unserved. With the cap off, over 100% means the NPV includes work she has no hours for.</div></div>';
 
   var rates = [15,20,25,30,35];
   html += '<div class="card"><h2>Sensitivity — NPV by discount rate</h2><div class="tscroll"><table class="data"><thead><tr><th>Scenario</th>'+
@@ -712,7 +744,7 @@ function renderPlan(el){
       return '<tr><td>'+SCEN[k].label+'</td>'+cells+'</tr>';
     }).join("")+'</tbody></table></div></div>';
 
-  html += '<div class="callout"><b>Method & honesty notes.</b> (1) This is a DCF of projected owner earnings — for a pre-revenue micro-business it is a planning tool, not a price someone would pay. (2) Discount rate: small-business valuations typically use ~12–20% for established firms and 30–70% for seed-stage ventures; the 25% default treats this as a high-risk but founder-run project. (3) Most value arrives in years 3–5 from streams that don’t exist yet (patterns, kits, membership) — that is the model telling you where to invest, and also its biggest uncertainty. (4) Fewer than 1 in 1,000 startups meet their own projections (Berkus) — re-run this quarterly against Tracker actuals.</div>';
+  html += '<div class="callout"><b>Method & honesty notes.</b> (1) This is a DCF of projected owner earnings — for a pre-revenue micro-business it is a planning tool, not a price someone would pay. (2) Discount rate: small-business valuations typically use ~12–20% for established firms and 30–70% for seed-stage ventures; the 25% default treats this as a high-risk but founder-run project. (3) Revenue is min(demand, capacity): unit volumes model demand, and with the cap on, hour-consuming production is trimmed to the hours Maggie actually has — so hours, prices, and mix all move the valuation, as they should. (4) Most value arrives in years 3–5 from streams that don’t exist yet (patterns, kits, membership) — that is the model telling you where to invest, and also its biggest uncertainty. (5) Fewer than 1 in 1,000 startups meet their own projections (Berkus) — re-run this quarterly against Tracker actuals.</div>';
 
   el.innerHTML = html;
 
@@ -728,6 +760,7 @@ function renderPlan(el){
   el.querySelectorAll("#segScen button").forEach(function(b){ b.addEventListener("click", function(){ S.settings.scenario = b.getAttribute("data-k"); renderCurrent(); }); });
   el.querySelectorAll("#segHor button").forEach(function(b){ b.addEventListener("click", function(){ S.settings.horizon = +b.getAttribute("data-h"); renderCurrent(); }); });
   el.querySelectorAll("#segTv button").forEach(function(b){ b.addEventListener("click", function(){ S.settings.tv = +b.getAttribute("data-t"); renderCurrent(); }); });
+  el.querySelectorAll("#segCap button").forEach(function(b){ b.addEventListener("click", function(){ S.settings.cap = b.getAttribute("data-c")==="1"; renderCurrent(); }); });
   var rs = el.querySelector("#rSlide");
   rs.addEventListener("input", function(){ el.querySelector("#rVal").textContent = rs.value+"%"; });
   rs.addEventListener("change", function(){ S.settings.r = +rs.value; renderCurrent(); });
@@ -1007,7 +1040,7 @@ function renderData(el){
     try {
       var obj = JSON.parse(el.querySelector("#imArea").value);
       if (!obj || !obj.streams || !obj.settings) throw new Error("not a snapshot");
-      S = obj; el.querySelector("#imMsg").textContent = "Restored ✓";
+      S = normalize(obj); el.querySelector("#imMsg").textContent = "Restored ✓";
       setTimeout(renderCurrent, 400);
     } catch(e){ el.querySelector("#imMsg").textContent = "Couldn’t parse that — paste the full exported JSON."; }
   });
