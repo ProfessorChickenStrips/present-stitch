@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Present Stitch Biz Dashboard</title>
+<meta name="theme-color" content="#f9f9f7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Present Stitch">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%232a78d6' stroke-width='7'/%3E%3Cpath d='M20 38 Q32 22 44 34' fill='none' stroke='%23eb6834' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    color-scheme: light;
+    --page:#f9f9f7; --surface-1:#fcfcfb;
+    --ink-1:#0b0b0b; --ink-2:#52514e; --ink-3:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,0.10);
+    --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300;
+    --seq-250:#86b6ef; --seq-150:#b7d3f6; --seq-100:#cde2fb;
+    --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b;
+    --delta-good:#006300; --accent:#2a78d6;
+    --wash:rgba(42,120,214,.10);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:where(:not([data-theme="light"])){
+      color-scheme: dark;
+      --page:#0d0d0d; --surface-1:#1a1a19;
+      --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+      --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,0.10);
+      --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+      --seq-250:#1c5cab; --seq-150:#184f95; --seq-100:#104281;
+      --delta-good:#0ca30c; --accent:#3987e5;
+      --wash:rgba(57,135,229,.14);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --page:#0d0d0d; --surface-1:#1a1a19;
+    --ink-1:#ffffff; --ink-2:#c3c2b7; --ink-3:#898781;
+    --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,0.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
+    --seq-250:#1c5cab; --seq-150:#184f95; --seq-100:#104281;
+    --delta-good:#0ca30c; --accent:#3987e5;
+    --wash:rgba(57,135,229,.14);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background:var(--page); color:var(--ink-1);
+    font-size:15px; line-height:1.45;
+    padding-bottom:56px;
+  }
+  header.app{
+    padding:18px 16px 10px; max-width:1080px; margin:0 auto;
+  }
+  header.app h1{font-size:20px; font-weight:700; letter-spacing:-.01em;}
+  header.app .sub{color:var(--ink-2); font-size:13px; margin-top:2px;}
+  .hdr-row{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .theme-btn{
+    border:1px solid var(--ring); background:var(--surface-1); color:var(--ink-2);
+    border-radius:8px; padding:6px 10px; font-size:12px; cursor:pointer; flex:none;
+  }
+  nav.tabs{
+    position:sticky; top:0; z-index:30; background:var(--page);
+    display:flex; gap:6px; overflow-x:auto; padding:8px 16px 10px;
+    max-width:1080px; margin:0 auto; scrollbar-width:none;
+    border-bottom:1px solid var(--grid);
+  }
+  nav.tabs::-webkit-scrollbar{display:none;}
+  nav.tabs button{
+    flex:none; border:1px solid var(--ring); background:var(--surface-1);
+    color:var(--ink-2); border-radius:999px; padding:7px 14px; font-size:13px;
+    cursor:pointer; font-weight:500;
+  }
+  nav.tabs button.active{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600;}
+  main{max-width:1080px; margin:0 auto; padding:14px 12px 40px;}
+  section.tab{display:none;}
+  section.tab.active{display:block;}
+  .card{
+    background:var(--surface-1); border:1px solid var(--ring); border-radius:14px;
+    padding:14px 14px 16px; margin-bottom:12px;
+  }
+  .card h2{font-size:15px; font-weight:650; margin-bottom:2px;}
+  .card .note{color:var(--ink-2); font-size:12.5px; margin-bottom:8px;}
+  .card h3{font-size:13.5px; font-weight:650; margin:12px 0 4px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .grid3{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  @media(min-width:760px){ .grid3{grid-template-columns:repeat(4,1fr);} }
+  /* stat tiles */
+  .tile{background:var(--surface-1); border:1px solid var(--ring); border-radius:12px; padding:10px 12px;}
+  .tile .lbl{font-size:11.5px; color:var(--ink-2); font-weight:500;}
+  .tile .val{font-size:22px; font-weight:650; letter-spacing:-.01em; margin-top:1px;}
+  .tile .dlt{font-size:11.5px; margin-top:1px; color:var(--ink-3);}
+  .tile .dlt.up{color:var(--delta-good);} .tile .dlt.down{color:var(--crit);}
+  .hero{font-size:44px; font-weight:700; letter-spacing:-.02em; line-height:1.05;}
+  @media(min-width:600px){ .hero{font-size:52px;} }
+  .hero-sub{color:var(--ink-2); font-size:13px; margin-top:4px;}
+  /* meter */
+  .meter{height:10px; border-radius:6px; background:var(--seq-100); overflow:hidden; margin-top:8px;}
+  .meter>i{display:block; height:100%; border-radius:6px; background:var(--accent);}
+  /* controls */
+  label.f{display:block; font-size:12px; color:var(--ink-2); font-weight:550; margin:8px 0 3px;}
+  input[type=number], input[type=text], input[type=month], select, textarea{
+    width:100%; border:1px solid var(--axis); background:var(--surface-1); color:var(--ink-1);
+    border-radius:9px; padding:8px 10px; font-size:14px; font-family:inherit;
+  }
+  input[type=range]{width:100%; accent-color:var(--accent);}
+  .seg{display:flex; gap:6px; flex-wrap:wrap;}
+  .seg button{
+    border:1px solid var(--ring); background:var(--surface-1); color:var(--ink-2);
+    border-radius:8px; padding:6px 12px; font-size:12.5px; cursor:pointer;
+  }
+  .seg button.active{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600;}
+  button.primary{
+    background:var(--accent); color:#fff; border:none; border-radius:9px;
+    padding:9px 14px; font-size:13.5px; font-weight:600; cursor:pointer;
+  }
+  button.ghost{
+    background:none; border:1px solid var(--ring); color:var(--ink-2); border-radius:9px;
+    padding:8px 12px; font-size:12.5px; cursor:pointer;
+  }
+  /* legend */
+  .legend{display:flex; flex-wrap:wrap; gap:8px 14px; margin:8px 0 2px;}
+  .legend .k{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-2);}
+  .legend .sw{width:10px; height:10px; border-radius:3px; flex:none;}
+  /* tables */
+  table.data{width:100%; border-collapse:collapse; font-size:12.5px; margin-top:6px;}
+  table.data th{color:var(--ink-2); font-weight:600; text-align:right; padding:5px 6px; border-bottom:1px solid var(--grid); white-space:nowrap;}
+  table.data td{padding:5px 6px; text-align:right; border-bottom:1px solid var(--grid); font-variant-numeric:tabular-nums; white-space:nowrap;}
+  table.data th:first-child, table.data td:first-child{text-align:left;}
+  .tscroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  /* checklists */
+  ul.check{list-style:none;}
+  ul.check li{display:flex; gap:9px; align-items:flex-start; padding:7px 0; border-bottom:1px solid var(--grid); font-size:13.5px;}
+  ul.check li:last-child{border-bottom:none;}
+  ul.check input{width:17px; height:17px; margin-top:1px; accent-color:var(--accent); flex:none;}
+  ul.check li.done span{color:var(--ink-3); text-decoration:line-through;}
+  .phase-head{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .pbar{height:6px; border-radius:4px; background:var(--seq-100); overflow:hidden; margin-top:6px;}
+  .pbar>i{display:block; height:100%; background:var(--accent); border-radius:4px;}
+  .badge{display:inline-block; font-size:11px; font-weight:650; border-radius:6px; padding:2px 7px; background:var(--wash); color:var(--accent);}
+  .pill-warn{display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--ink-1); background:var(--surface-1); border:1px solid var(--ring); border-left:3px solid var(--warn); border-radius:8px; padding:5px 9px; margin-top:8px;}
+  .callout{border:1px solid var(--ring); border-left:3px solid var(--accent); border-radius:10px; padding:10px 12px; font-size:13px; color:var(--ink-2); margin-top:10px; background:var(--surface-1);}
+  .callout b{color:var(--ink-1);}
+  .src{font-size:11px; color:var(--ink-3); margin-top:8px; line-height:1.5;}
+  .src a{color:var(--ink-3);}
+  /* tooltip */
+  #tip{
+    position:fixed; z-index:99; pointer-events:none; display:none;
+    background:var(--surface-1); border:1px solid var(--ring); border-radius:9px;
+    box-shadow:0 4px 14px rgba(0,0,0,.14); padding:8px 10px; font-size:12px; color:var(--ink-1);
+    max-width:240px;
+  }
+  #tip .t{font-weight:650; margin-bottom:3px;}
+  #tip .r{display:flex; justify-content:space-between; gap:12px; color:var(--ink-2);}
+  #tip .r b{color:var(--ink-1); font-weight:600; font-variant-numeric:tabular-nums;}
+  #tip .r .sw{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px;}
+  svg text{font-family:inherit;}
+  .chart-wrap{margin-top:8px;}
+  .task-row{display:flex; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid var(--grid); font-size:13.5px;}
+  .task-row:last-child{border-bottom:none;}
+  .task-row .pri{font-size:10.5px; font-weight:700; border-radius:5px; padding:2px 6px; flex:none;}
+  .pri.P1{background:var(--wash); color:var(--accent);}
+  .pri.P2{background:rgba(137,135,129,.15); color:var(--ink-2);}
+  .task-row button.x{margin-left:auto; border:none; background:none; color:var(--ink-3); cursor:pointer; font-size:15px; flex:none;}
+  .addrow{display:flex; gap:8px; margin-top:10px;}
+  .addrow input{flex:1;}
+  .bench-card{border:1px solid var(--ring); border-radius:11px; padding:10px 12px; margin-bottom:8px;}
+  .bench-card .nm{font-weight:650; font-size:13.5px;}
+  .bench-card .meta{font-size:12px; color:var(--ink-2); margin:2px 0 4px;}
+  .bench-card .les{font-size:12.5px; color:var(--ink-2);}
+  .bench-card .les b{color:var(--ink-1); font-weight:600;}
+  details{border:1px solid var(--ring); border-radius:10px; padding:9px 12px; margin-top:8px;}
+  details summary{font-size:13px; font-weight:600; color:var(--ink-2); cursor:pointer;}
+  details[open] summary{margin-bottom:8px;}
+  .stream-card{border:1px solid var(--ring); border-radius:11px; padding:10px 12px; margin-bottom:8px;}
+  .stream-card .sh{display:flex; align-items:center; gap:8px;}
+  .stream-card .sh .sw{width:11px; height:11px; border-radius:3px; flex:none;}
+  .stream-card .sh .nm{font-weight:650; font-size:13.5px; flex:1;}
+  .stream-card .sh input[type=checkbox]{width:17px; height:17px; accent-color:var(--accent);}
+  .mini-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;}
+  .mini-grid label.f{margin:0 0 3px;}
+  .muted{color:var(--ink-3); font-size:12px;}
+  .flex-between{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap;}
+</style>
+</head>
+<body>
+<header class="app">
+  <div class="hdr-row">
+    <div>
+      <h1>Present Stitch Biz Dashboard</h1>
+      <div class="sub">Maggie&rsquo;s embroidery business &mdash; plan &middot; launch &middot; grow</div>
+    </div>
+    <button class="theme-btn" id="themeBtn">◐ Theme</button>
+  </div>
+</header>
+<nav class="tabs" id="tabs"></nav>
+<main id="main"><noscript><div class="card" style="margin:14px">This dashboard needs JavaScript. Open the file in a regular browser (Safari, Chrome, Edge) and it will load fully.</div></noscript></main>
+<div id="tip"></div>
+<script>
+"use strict";
+/* ============ Present Stitch Biz Dashboard ============
+   All data lives in memory. Use the Data tab to export/import
+   a JSON snapshot (this page cannot save by itself).            */
+
+var DEFAULTS = {
+  meta: {name:"Present Stitch Biz Dashboard", v:1, saved:""},
+  settings: {r:25, horizon:5, tv:0, scenario:"base", target:3000, hpw:8, hg:34, ohm:45, ohg:25, adminH:96},
+  streams: [
+    {id:"custom",   name:"Custom commissions",     c:"--s1", start:1, u:1.5, ug:28, p:85, pg:25, cogs:8,  fees:8,  hpu:6.5,  fh:0,  on:true, unit:"pieces/mo",
+     why:"Personalized name & gift hoops, made to order. Typical 6″ custom runs $100–175; premium artists charge $250–900."},
+    {id:"finished", name:"Finished goods & fairs", c:"--s2", start:1, u:4.5, ug:15, p:44, pg:8,  cogs:20, fees:11, hpu:3.2,  fh:0,  on:true, unit:"pieces/mo",
+     why:"Ready-made hoops on Etsy + local craft fairs. Etsy finished hoops cluster $18–40; artist one-offs $40–90."},
+    {id:"patterns", name:"PDF patterns",           c:"--s3", start:2, u:12,  ug:65, p:9,  pg:3,  cogs:2,  fees:13, hpu:0.15, fh:80, on:true, unit:"sales/mo",
+     why:"Digital downloads — near-zero marginal cost. Etsy patterns $3–8 single, bundles $17–29. This is how most full-timers scaled."},
+    {id:"kits",     name:"Kits",                   c:"--s4", start:3, u:8,   ug:55, p:34, pg:3,  cogs:23, fees:12, hpu:0.5,  fh:36, on:true, unit:"kits/mo",
+     why:"Beginner kits (pattern + materials). Brand kits sell $30–50; component cost ≈ $5–8. Jessica Long: 90k+ Etsy kit-era sales."},
+    {id:"workshops",name:"Workshops",              c:"--s5", start:3, u:2.3, ug:70, p:60, pg:6,  cogs:15, fees:3,  hpu:0.9,  fh:0,  on:true, unit:"seats/mo",
+     why:"In-person beginner classes. US tickets cluster $50–100/seat. Also feeds custom + kit sales."},
+    {id:"member",   name:"Membership & content",   c:"--s6", start:3, u:25,  ug:95, p:7,  pg:4,  cogs:4,  fees:11, hpu:0,    fh:90, on:true, unit:"avg members",
+     why:"Patreon-style club ($3–10/mo typical; Cozyblue ran $15–18/mo for 11 yrs) + occasional nano sponsorships ($10–200/post)."}
+  ],
+  tasks: [
+    {t:"Post 3× this week on IG (1 reel, 1 carousel, 1 story set) — restart the cadence", pri:"P1", done:false},
+    {t:"Write price list from the Streams tab calculator (stop guessing per piece)", pri:"P1", done:false},
+    {t:"Open Etsy shop with first 8–10 listings (mix: 5 ready-made, 3 made-to-order)", pri:"P2", done:false}
+  ],
+  roadmap: [
+    {ph:"Phase 0 · Foundation", when:"Now → ~1 mo", items:[
+      {t:"Pick the niche wedge: personalized gift embroidery (names, pets, milestones) — gifting ≈ 27% of Etsy sales and growing", done:false},
+      {t:"Set up cost + hours tracking (use the Tracker tab monthly)", done:false},
+      {t:"Price list: floor = materials + hours × $20/hr + 15% fees (Streams tab)", done:false},
+      {t:"Restart IG: 3 posts/wk minimum for 8 weeks (account has been quiet ~6 months — consistency beats polish)", done:false},
+      {t:"Simple order form (Google Form) + DM auto-reply with prices & turnaround", done:false},
+      {t:"Open a separate bank account; log every expense", done:false}
+    ]},
+    {ph:"Phase 1 · Launch", when:"Months 1–3", items:[
+      {t:"Etsy shop live with 10–15 listings (personalized = search traffic; use all 13 tags)", done:false},
+      {t:"Book 2 local craft fairs / markets (booths $25–300 local)", done:false},
+      {t:"Ask every buyer for a review + photo; reviews are the Etsy flywheel", done:false},
+      {t:"Email capture: free mini-pattern for signups (email is the anti-algorithm asset)", done:false},
+      {t:"Log first full month in Tracker; set baseline", done:false}
+    ]},
+    {ph:"Phase 2 · Traction", when:"Months 3–9", items:[
+      {t:"First $500 month", done:false},
+      {t:"Raise custom prices 15–25% once backlog > 2 weeks", done:false},
+      {t:"Launch first PDF pattern (test digital — it’s the scalability lever)", done:false},
+      {t:"1,000 IG followers & 250 email subs", done:false},
+      {t:"Q4 plan ready by September (Q4 ≈ 31% of handmade annual sales)", done:false}
+    ]},
+    {ph:"Phase 3 · Scale", when:"Months 9–24", items:[
+      {t:"Launch beginner kit line (COGS $5–8, price $32–40)", done:false},
+      {t:"Teach first local workshop (aim 6–8 seats × $50–70)", done:false},
+      {t:"Open membership/club beta at ~5k engaged followers", done:false},
+      {t:"Test wholesale via Faire or 2 local shops (wholesale = 50% of retail)", done:false},
+      {t:"$1,500/mo average over 3 consecutive months", done:false}
+    ]},
+    {ph:"Phase 4 · Full-time gate", when:"Month 24+", items:[
+      {t:"6 consecutive months of SDE ≥ 60–75% of target income (most people wait for ≥75%)", done:false},
+      {t:"6-month personal emergency fund saved", done:false},
+      {t:"Health insurance plan priced and chosen", done:false},
+      {t:"Order backlog or recurring revenue ≥ 8 weeks forward", done:false},
+      {t:"Decision review: readiness score ≥ 80 on Overview tab", done:false}
+    ]}
+  ],
+  tracker: [
+    {m:"2026-08", rev:0, cost:0, hrs:0, orders:0, fol:0, email:0}
+  ],
+  ready: {fund:false, ins:false, backlog:false, email:false, repeat:false}
+};
+
+var S = JSON.parse(JSON.stringify(DEFAULTS));
+
+/* ---------- device autosave (works when hosted or opened in a browser;
+   silently disabled in sandboxed previews) ---------- */
+var STORE_KEY = "psbd-v1";
+var canStore = false;
+try {
+  window.localStorage.setItem("psbd-test","1");
+  window.localStorage.removeItem("psbd-test");
+  canStore = true;
+} catch(e){ canStore = false; }
+function loadSaved(){
+  if (!canStore) return;
+  try {
+    var raw = window.localStorage.getItem(STORE_KEY);
+    if (!raw) return;
+    var obj = JSON.parse(raw);
+    if (obj && obj.streams && obj.settings && obj.roadmap) S = obj;
+  } catch(e){}
+}
+var saveT;
+function saveNow(){
+  if (!canStore) return;
+  try { window.localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){}
+}
+function save(){
+  if (!canStore) return;
+  clearTimeout(saveT); saveT = setTimeout(saveNow, 300);
+}
+loadSaved();
+
+var SCEN = {
+  cons:    {u:0.45, g:0.7,  p:0.9,  d:1, label:"Conservative"},
+  base:    {u:1,    g:1,    p:1,    d:0, label:"Base"},
+  stretch: {u:1.7,  g:1.15, p:1.15, d:0, label:"Stretch"}
+};
+
+/* ---------- financial model ---------- */
+function runModel(S, scenKey){
+  var st = S.settings, SC = SCEN[scenKey || st.scenario];
+  var H = st.horizon, years = [];
+  for (var y=1; y<=H; y++){
+    var revBy = {}, rev=0, cogs=0, fees=0, hours=0;
+    S.streams.forEach(function(s){
+      revBy[s.id] = 0;
+      if (!s.on) return;
+      var eff = s.start + (s.start>1 ? SC.d : 0);
+      var t = y - eff;
+      if (t < 0) return;
+      var units = s.u * SC.u * Math.pow(1 + (s.ug*SC.g)/100, t);
+      var price = s.p * SC.p * Math.pow(1 + s.pg/100, t);
+      var r = units * price * 12;
+      revBy[s.id] = r; rev += r;
+      cogs += r * s.cogs/100; fees += r * s.fees/100;
+      hours += units*12*s.hpu + s.fh;
+    });
+    var oh = st.ohm*12*Math.pow(1+st.ohg/100, y-1);
+    var sde = rev - cogs - fees - oh;
+    var need = hours + st.adminH;
+    var avail = st.hpw*52*Math.pow(1+st.hg/100, y-1);
+    years.push({y:y, revBy:revBy, rev:rev, cogs:cogs, fees:fees, oh:oh, sde:sde,
+                need:need, avail:avail, util:avail>0?need/avail:0, wage:need>0?sde/need:0});
+  }
+  var r = st.r/100, npv=0, cum=0, disc=[];
+  years.forEach(function(yr){
+    npv += yr.sde/Math.pow(1+r, yr.y);
+    cum += yr.sde;
+    disc.push(npv);
+  });
+  var tv = st.tv>0 ? st.tv*Math.max(years[H-1].sde,0)/Math.pow(1+r,H) : 0;
+  return {years:years, npv:npv+tv, npvOps:npv, tv:tv, cum:cum, disc:disc,
+          repl: years[H-1].sde/12/st.target, finalSde: years[H-1].sde};
+}
+
+/* margin per hour by stream (steady state = each stream's 3rd active year, base params) */
+function marginPerHour(S){
+  return S.streams.filter(function(s){return s.on;}).map(function(s){
+    var t = 2; // 3rd active year
+    var units = s.u*Math.pow(1+s.ug/100, t), price = s.p*Math.pow(1+s.pg/100, t);
+    var rev = units*price*12;
+    var margin = rev*(1 - s.cogs/100 - s.fees/100);
+    var hrs = units*12*s.hpu + s.fh;
+    return {id:s.id, name:s.name, c:s.c, v: hrs>0 ? margin/hrs : 0};
+  }).sort(function(a,b){return b.v-a.v;});
+}
+
+/* ---------- formatting ---------- */
+function fm$(v){
+  var neg = v<0 ? "−" : "";
+  v = Math.abs(v);
+  if (v>=1e6) return neg+"$"+(v/1e6).toFixed(1)+"M";
+  if (v>=10000) return neg+"$"+(v/1000).toFixed(1)+"k";
+  if (v>=1000) return neg+"$"+(v/1000).toFixed(2)+"k";
+  return neg+"$"+Math.round(v);
+}
+function fm$f(v){
+  var neg = v<0 ? "−" : ""; v=Math.abs(v);
+  return neg+"$"+Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+function fmPct(v){ return Math.round(v*100)+"%"; }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function cv(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function niceTicks(max, n){
+  n = n||4;
+  if (max<=0) return [0,1];
+  var raw = max/n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  var step = [1,1.5,2,2.5,3,4,5,7.5,10].map(function(m){return m*mag;})
+    .find(function(s){return Math.ceil(max/s)<=n;}) || 10*mag;
+  var top = Math.ceil(max/step - 0.001)*step;
+  var ticks=[]; for(var v=0; v<=top+step*0.001; v+=step) ticks.push(v);
+  return ticks;
+}
+
+/* ---------- tooltip ---------- */
+var tipEl;
+function showTip(html, x, y){
+  tipEl.innerHTML = html; tipEl.style.display = "block";
+  var w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+  var px = Math.min(Math.max(8, x - w/2), window.innerWidth - w - 8);
+  var py = y - h - 14; if (py < 8) py = y + 18;
+  tipEl.style.left = px+"px"; tipEl.style.top = py+"px";
+}
+function hideTip(){ tipEl.style.display = "none"; }
+
+function bindHover(node, htmlFn){
+  function mv(e){ showTip(htmlFn(), e.clientX, e.clientY); }
+  node.addEventListener("pointerenter", mv);
+  node.addEventListener("pointermove", mv);
+  node.addEventListener("pointerleave", hideTip);
+}
+
+/* ---------- stacked revenue columns ---------- */
+function stackedChart(container, model, S){
+  var W = Math.max(280, container.clientWidth), H = 250;
+  var padL = 44, padR = 8, padT = 10, padB = 24;
+  var iw = W - padL - padR, ih = H - padT - padB;
+  var years = model.years;
+  var maxRev = Math.max.apply(null, years.map(function(y){return y.rev;}).concat([1]));
+  var ticks = niceTicks(maxRev, 4);
+  var tmax = ticks[ticks.length-1];
+  var band = iw / years.length;
+  var bw = Math.min(24, band*0.55);
+  var active = S.streams.filter(function(s){return s.on;});
+  var svg = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Projected revenue by stream per year">';
+  ticks.forEach(function(t){
+    var y = padT + ih - (t/tmax)*ih;
+    svg += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--grid)" stroke-width="1" shape-rendering="crispEdges"/>';
+    svg += '<text x="'+(padL-6)+'" y="'+(y+3.5)+'" text-anchor="end" font-size="10.5" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">'+fm$(t)+'</text>';
+  });
+  var baseY = padT + ih;
+  svg += '<line x1="'+padL+'" y1="'+baseY+'" x2="'+(W-padR)+'" y2="'+baseY+'" stroke="var(--axis)" stroke-width="1" shape-rendering="crispEdges"/>';
+  years.forEach(function(yr, i){
+    var cx = padL + band*i + band/2;
+    var x = cx - bw/2;
+    var acc = 0;
+    var segs = active.map(function(s){ return {s:s, v: yr.revBy[s.id]||0}; }).filter(function(o){return o.v>0.5;});
+    segs.forEach(function(o, j){
+      var h = (o.v/tmax)*ih;
+      var yTop = baseY - acc - h;
+      acc += h;
+      var isTop = (j === segs.length-1);
+      var gap = isTop ? 0 : 2;
+      var hh = Math.max(0, h - gap);
+      if (hh < 0.5) return;
+      if (isTop && hh > 4){
+        svg += '<path d="M'+x+' '+(yTop+hh)+' L'+x+' '+(yTop+4)+' Q'+x+' '+yTop+' '+(x+4)+' '+yTop+' L'+(x+bw-4)+' '+yTop+' Q'+(x+bw)+' '+yTop+' '+(x+bw)+' '+(yTop+4)+' L'+(x+bw)+' '+(yTop+hh)+' Z" fill="var('+o.s.c+')"/>';
+      } else {
+        svg += '<rect x="'+x+'" y="'+yTop+'" width="'+bw+'" height="'+hh+'" fill="var('+o.s.c+')"/>';
+      }
+    });
+    svg += '<text x="'+cx+'" y="'+(H-7)+'" text-anchor="middle" font-size="11" fill="var(--ink-3)">Y'+yr.y+'</text>';
+    svg += '<rect class="hband" data-i="'+i+'" x="'+(padL+band*i)+'" y="'+padT+'" width="'+band+'" height="'+ih+'" fill="transparent"/>';
+  });
+  svg += '</svg>';
+  container.innerHTML = svg;
+  container.querySelectorAll(".hband").forEach(function(r){
+    var i = +r.getAttribute("data-i"), yr = years[i];
+    bindHover(r, function(){
+      var rows = active.map(function(s){
+        var v = yr.revBy[s.id]||0; if (v<0.5) return "";
+        return '<div class="r"><span><span class="sw" style="background:var('+s.c+')"></span>'+esc(s.name)+'</span><b>'+fm$(v)+'</b></div>';
+      }).join("");
+      return '<div class="t">Year '+yr.y+'</div>'+rows+
+        '<div class="r" style="margin-top:3px;border-top:1px solid var(--grid);padding-top:3px"><span>Revenue</span><b>'+fm$(yr.rev)+'</b></div>'+
+        '<div class="r"><span>Owner earnings</span><b>'+fm$(yr.sde)+'</b></div>';
+    });
+  });
+}
+
+/* ---------- SDE line chart (emphasis + context) ---------- */
+function sdeChart(container, model){
+  var W = Math.max(280, container.clientWidth), H = 230;
+  var padL = 44, padR = 52, padT = 12, padB = 24;
+  var iw = W - padL - padR, ih = H - padT - padB;
+  var years = model.years;
+  var sde = years.map(function(y){return y.sde;});
+  var cum = model.disc;
+  var all = sde.concat(cum).concat([0]);
+  var maxV = Math.max.apply(null, all), minV = Math.min.apply(null, all);
+  var ticks = niceTicks(maxV, 3);
+  var tmax = ticks[ticks.length-1];
+  var lo = Math.min(0, minV);
+  function yPos(v){ return padT + ih - ((v-lo)/(tmax-lo))*ih; }
+  function xPos(i){ return padL + (years.length===1 ? iw/2 : (i/(years.length-1))*iw); }
+  var svg = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Owner earnings per year and cumulative discounted value">';
+  ticks.forEach(function(t){
+    var y = yPos(t);
+    svg += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--grid)" stroke-width="1" shape-rendering="crispEdges"/>';
+    svg += '<text x="'+(padL-6)+'" y="'+(y+3.5)+'" text-anchor="end" font-size="10.5" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">'+fm$(t)+'</text>';
+  });
+  svg += '<line x1="'+padL+'" y1="'+yPos(0)+'" x2="'+(W-padR)+'" y2="'+yPos(0)+'" stroke="var(--axis)" stroke-width="1" shape-rendering="crispEdges"/>';
+  function path(vals){ return vals.map(function(v,i){ return (i?"L":"M")+xPos(i)+" "+yPos(v); }).join(" "); }
+  svg += '<path d="'+path(cum)+'" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  svg += '<path d="'+path(sde)+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+  var li = years.length-1;
+  svg += '<circle cx="'+xPos(li)+'" cy="'+yPos(cum[li])+'" r="4.5" fill="var(--ink-3)" stroke="var(--surface-1)" stroke-width="2"/>';
+  svg += '<circle cx="'+xPos(li)+'" cy="'+yPos(sde[li])+'" r="4.5" fill="var(--accent)" stroke="var(--surface-1)" stroke-width="2"/>';
+  var lY1 = yPos(sde[li]), lY2 = yPos(cum[li]);
+  if (Math.abs(lY1-lY2) < 14){ if (lY1 < lY2){ lY1 -= 7; lY2 += 7; } else { lY1 += 7; lY2 -= 7; } }
+  svg += '<text x="'+(xPos(li)+8)+'" y="'+(lY1+3.5)+'" font-size="11" font-weight="600" fill="var(--ink-1)">'+fm$(sde[li])+'</text>';
+  svg += '<text x="'+(xPos(li)+8)+'" y="'+(lY2+3.5)+'" font-size="11" fill="var(--ink-2)">'+fm$(cum[li])+'</text>';
+  years.forEach(function(yr,i){
+    svg += '<text x="'+xPos(i)+'" y="'+(H-7)+'" text-anchor="middle" font-size="11" fill="var(--ink-3)">Y'+yr.y+'</text>';
+    svg += '<rect class="hband" data-i="'+i+'" x="'+(xPos(i)-iw/(2*Math.max(years.length-1,1)))+'" y="'+padT+'" width="'+(iw/Math.max(years.length-1,1))+'" height="'+ih+'" fill="transparent"/>';
+  });
+  svg += '</svg>';
+  container.innerHTML = svg;
+  container.querySelectorAll(".hband").forEach(function(r){
+    var i = +r.getAttribute("data-i"), yr = years[i];
+    bindHover(r, function(){
+      return '<div class="t">Year '+yr.y+'</div>'+
+        '<div class="r"><span><span class="sw" style="background:var(--accent)"></span>Owner earnings</span><b>'+fm$f(yr.sde)+'</b></div>'+
+        '<div class="r"><span><span class="sw" style="background:var(--ink-3)"></span>Cumulative, discounted</span><b>'+fm$f(cum[i])+'</b></div>'+
+        '<div class="r"><span>Hours needed</span><b>'+Math.round(yr.need)+'</b></div>'+
+        '<div class="r"><span>Effective wage</span><b>$'+yr.wage.toFixed(0)+'/hr</b></div>';
+    });
+  });
+}
+
+/* ---------- margin per hour horizontal bars ---------- */
+function marginChart(container, S){
+  var data = marginPerHour(S);
+  var W = Math.max(280, container.clientWidth);
+  var rowH = 44, padT = 4, padL = 8, padR = 56;
+  var H = padT + data.length*rowH + 6;
+  var maxV = Math.max.apply(null, data.map(function(d){return d.v;}).concat([1]));
+  var iw = W - padL - padR;
+  var svg = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Contribution margin per hour of Maggie&#39;s time, by stream">';
+  data.forEach(function(d, i){
+    var y = padT + i*rowH;
+    var bw = Math.max(3, (d.v/maxV)*iw);
+    svg += '<text x="'+padL+'" y="'+(y+12)+'" font-size="12" fill="var(--ink-2)">'+esc(d.name)+'</text>';
+    var bh = 16, by = y + 18;
+    svg += '<path d="M'+padL+' '+by+' L'+(padL+bw-4)+' '+by+' Q'+(padL+bw)+' '+by+' '+(padL+bw)+' '+(by+4)+' L'+(padL+bw)+' '+(by+bh-4)+' Q'+(padL+bw)+' '+(by+bh)+' '+(padL+bw-4)+' '+(by+bh)+' L'+padL+' '+(by+bh)+' Z" fill="var('+d.c+')"/>';
+    svg += '<text x="'+(padL+bw+7)+'" y="'+(by+bh/2+4)+'" font-size="12" font-weight="600" fill="var(--ink-1)" style="font-variant-numeric:tabular-nums">$'+d.v.toFixed(0)+'/hr</text>';
+  });
+  svg += '</svg>';
+  container.innerHTML = svg;
+}
+
+/* ---------- sparkline ---------- */
+function sparkline(vals, w, h){
+  w = w||110; h = h||30;
+  if (!vals.length) return "";
+  vals = vals.slice(-12);
+  var max = Math.max.apply(null, vals), min = Math.min.apply(null, vals);
+  if (max === min){ max = min + 1; }
+  var pad = 4;
+  function x(i){ return pad + (vals.length===1 ? (w-2*pad)/2 : (i/(vals.length-1))*(w-2*pad)); }
+  function y(v){ return h - pad - ((v-min)/(max-min))*(h-2*pad); }
+  var p = vals.map(function(v,i){ return (i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1); }).join(" ");
+  var li = vals.length-1;
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" aria-hidden="true">'+
+    '<path d="'+p+'" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
+    '<circle cx="'+x(li).toFixed(1)+'" cy="'+y(vals[li]).toFixed(1)+'" r="3.5" fill="var(--accent)" stroke="var(--surface-1)" stroke-width="2"/></svg>';
+}
+
+/* ---------- legend builder ---------- */
+function legendHtml(streams){
+  return '<div class="legend">'+streams.map(function(s){
+    return '<span class="k"><span class="sw" style="background:var('+s.c+')"></span>'+esc(s.name)+'</span>';
+  }).join("")+'</div>';
+}
+
+/* ================= renderers ================= */
+var TABS = [
+  {id:"overview", label:"Overview"},
+  {id:"plan",     label:"Valuation"},
+  {id:"streams",  label:"Streams & Pricing"},
+  {id:"roadmap",  label:"Roadmap"},
+  {id:"tracker",  label:"Tracker"},
+  {id:"bench",    label:"Benchmarks"},
+  {id:"data",     label:"Data"}
+];
+var currentTab = "overview";
+var mainEl;
+
+function num(v, d){ var n = parseFloat(v); return isNaN(n) ? d : n; }
+
+function nextTask(){
+  var t = S.tasks.find(function(x){return !x.done && x.pri==="P1";}) ||
+          S.tasks.find(function(x){return !x.done;});
+  if (t) return {txt:t.t, src:"Task board"};
+  for (var i=0;i<S.roadmap.length;i++){
+    var it = S.roadmap[i].items.find(function(x){return !x.done;});
+    if (it) return {txt:it.t, src:S.roadmap[i].ph};
+  }
+  return {txt:"All clear — add the next milestone on the Roadmap tab.", src:""};
+}
+
+function readiness(){
+  var st = S.settings, rows = S.tracker.filter(function(r){return r.rev>0 || r.cost>0 || r.hrs>0;});
+  var last3 = rows.slice(-3);
+  var avgSde = last3.length ? last3.reduce(function(a,r){return a+(r.rev-r.cost);},0)/last3.length : 0;
+  var incomePts = Math.max(0, Math.min(40, (avgSde/(0.6*st.target))*40));
+  var trendPts = 0;
+  if (rows.length>=2 && rows[rows.length-1].rev > rows[rows.length-2].rev) trendPts = 10;
+  var manual = (S.ready.fund?10:0)+(S.ready.ins?10:0)+(S.ready.backlog?10:0)+(S.ready.email?10:0)+(S.ready.repeat?10:0);
+  var score = Math.round(incomePts + trendPts + manual);
+  return {score:score, incomePts:Math.round(incomePts), trendPts:trendPts, manual:manual, avgSde:avgSde};
+}
+
+/* ---------- OVERVIEW ---------- */
+function renderOverview(el){
+  var m = runModel(S);
+  var st = S.settings;
+  var rd = readiness();
+  var nt = nextTask();
+  var rows = S.tracker;
+  var last = rows[rows.length-1] || {rev:0,cost:0,hrs:0,fol:0,email:0};
+  var prev = rows[rows.length-2];
+  var sde = last.rev - last.cost;
+  var wage = last.hrs>0 ? sde/last.hrs : 0;
+  var mC = runModel(S,"cons"), mB = runModel(S,"base"), mS = runModel(S,"stretch");
+  var finalYr = m.years[m.years.length-1];
+  var overCap = m.years.find(function(y){return y.util>1.05;});
+
+  var html = '';
+  html += '<div class="card">'+
+    '<div class="lbl" style="font-size:12px;color:var(--ink-2);font-weight:550">Planning valuation — '+SCEN[st.scenario].label+' scenario</div>'+
+    '<div class="hero">'+fm$(m.npv)+'</div>'+
+    '<div class="hero-sub">NPV of '+st.horizon+' years of owner earnings at '+st.r+'% discount'+(st.tv>0?(' + terminal value ×'+st.tv):'')+'. A planning estimate built on pre-revenue assumptions — not a market appraisal. Tune everything on the Valuation tab.</div>'+
+    '<div class="grid3" style="margin-top:12px">'+
+      '<div class="tile"><div class="lbl">Conservative</div><div class="val">'+fm$(mC.npv)+'</div></div>'+
+      '<div class="tile"><div class="lbl">Base</div><div class="val">'+fm$(mB.npv)+'</div></div>'+
+      '<div class="tile"><div class="lbl">Stretch</div><div class="val">'+fm$(mS.npv)+'</div></div>'+
+      '<div class="tile"><div class="lbl">Year-'+st.horizon+' earnings</div><div class="val">'+fm$(finalYr.sde/12)+'<span style="font-size:13px;color:var(--ink-2)">/mo</span></div>'+
+      '<div class="dlt">'+fmPct(m.repl)+' of $'+st.target+'/mo target</div></div>'+
+    '</div>'+
+    (overCap ? '<div class="pill-warn">⚠ Capacity: Year '+overCap.y+' needs ~'+Math.round(overCap.need/52)+' hrs/wk vs '+Math.round(overCap.avail/52)+' planned. Raise prices or shift mix toward digital.</div>' : '')+
+  '</div>';
+
+  html += '<div class="card"><h2>Next task</h2>'+
+    '<div style="font-size:15px;font-weight:600;margin:6px 0 2px">'+esc(nt.txt)+'</div>'+
+    (nt.src?'<div class="muted">'+esc(nt.src)+'</div>':'')+
+    '<div style="margin-top:10px"><button class="ghost" id="ovGoRoad">Open roadmap →</button></div></div>';
+
+  html += '<div class="card"><div class="flex-between"><h2>Full-time readiness</h2><span class="badge">'+rd.score+' / 100</span></div>'+
+    '<div class="meter"><i style="width:'+Math.min(100,rd.score)+'%"></i></div>'+
+    '<div class="note" style="margin-top:8px">Income '+rd.incomePts+'/40 (3-mo avg earnings vs 60% of target) · Trend '+rd.trendPts+'/10 · Safety checklist '+rd.manual+'/50</div>'+
+    '<ul class="check" id="readyList">'+
+      [["fund","6-month personal emergency fund saved"],
+       ["ins","Health-insurance plan priced & chosen"],
+       ["backlog","≥ 8 weeks of orders or recurring revenue booked"],
+       ["email","Email list ≥ 500"],
+       ["repeat","Repeat-customer rate ≥ 20%"]].map(function(p){
+        return '<li class="'+(S.ready[p[0]]?"done":"")+'"><input type="checkbox" data-k="'+p[0]+'" '+(S.ready[p[0]]?"checked":"")+'><span>'+p[1]+'</span></li>';
+      }).join("")+
+    '</ul>'+
+    '<div class="muted" style="margin-top:6px">Benchmark: 57% of workers say a side business must replace ≥75% of salary before they’d quit (FlexJobs 2025). Gate, don’t guess.</div></div>';
+
+  html += '<div class="grid3">'+
+    '<div class="tile"><div class="lbl">Latest month revenue</div><div class="val">'+fm$(last.rev)+'</div>'+
+      (prev?'<div class="dlt '+(last.rev>=prev.rev?"up":"down")+'">'+(last.rev>=prev.rev?"▲":"▼")+' vs '+esc(prev.m)+'</div>':'<div class="dlt">log months in Tracker</div>')+'</div>'+
+    '<div class="tile"><div class="lbl">Latest month earnings</div><div class="val">'+fm$(sde)+'</div><div class="dlt">'+(last.hrs>0?('$'+wage.toFixed(0)+'/hr effective'):"—")+'</div></div>'+
+    '<div class="tile"><div class="lbl">IG followers</div><div class="val">'+(last.fol||0)+'</div>'+
+      (prev&&prev.fol?'<div class="dlt '+(last.fol>=prev.fol?"up":"down")+'">'+(last.fol>=prev.fol?"▲ +":"▼ ")+(last.fol-prev.fol)+'</div>':'<div class="dlt">first lever: consistency</div>')+'</div>'+
+    '<div class="tile"><div class="lbl">Email subscribers</div><div class="val">'+(last.email||0)+'</div><div class="dlt">the anti-algorithm asset</div></div>'+
+  '</div>';
+
+  html += '<div class="callout"><b>Reality check (why the Conservative tab exists):</b> the mean active Etsy shop grosses ≈ $1.9k/yr and the median US side hustle nets $200/mo — most craft shops stay hobbies. The plan above beats those base rates only through consistent posting, personalization niche, and (later) digital leverage. Evidence on the Benchmarks tab.</div>';
+
+  el.innerHTML = html;
+  el.querySelector("#ovGoRoad").addEventListener("click", function(){ switchTab("roadmap"); });
+  el.querySelectorAll('#readyList input').forEach(function(cb){
+    cb.addEventListener("change", function(){ S.ready[cb.getAttribute("data-k")] = cb.checked; renderCurrent(); });
+  });
+}
+
+/* ---------- VALUATION ---------- */
+function renderPlan(el){
+  var st = S.settings;
+  var m = runModel(S);
+  var active = S.streams.filter(function(s){return s.on;});
+  var html = '';
+
+  html += '<div class="card"><h2>Model controls</h2><div class="note">Every number is an assumption you can change. Defaults are benchmarked (see Streams & Benchmarks tabs).</div>'+
+    '<label class="f">Scenario</label><div class="seg" id="segScen">'+
+      Object.keys(SCEN).map(function(k){return '<button data-k="'+k+'" class="'+(st.scenario===k?"active":"")+'">'+SCEN[k].label+'</button>';}).join("")+'</div>'+
+    '<div class="grid2" style="margin-top:4px">'+
+      '<div><label class="f">Horizon (years)</label><div class="seg" id="segHor">'+[3,5,7,10].map(function(h){return '<button data-h="'+h+'" class="'+(st.horizon===h?"active":"")+'">'+h+'</button>';}).join("")+'</div></div>'+
+      '<div><label class="f">Terminal value (× final-year earnings)</label><div class="seg" id="segTv">'+[0,1,1.5,2].map(function(t){return '<button data-t="'+t+'" class="'+(st.tv===t?"active":"")+'">×'+t+'</button>';}).join("")+'</div></div>'+
+    '</div>'+
+    '<label class="f">Discount rate: <b id="rVal">'+st.r+'%</b> <span class="muted">(20–30% is a defensible floor for a solo pre-revenue venture; 40%+ = seed-stage)</span></label>'+
+    '<input type="range" id="rSlide" min="10" max="50" step="1" value="'+st.r+'">'+
+    '<div class="grid2">'+
+      '<div><label class="f">Target income ($/mo, net to Maggie)</label><input type="number" id="inTarget" value="'+st.target+'"></div>'+
+      '<div><label class="f">Overhead ($/mo, yr 1)</label><input type="number" id="inOhm" value="'+st.ohm+'"></div>'+
+      '<div><label class="f">Hours/week, yr 1</label><input type="number" id="inHpw" value="'+st.hpw+'" step="0.5"></div>'+
+      '<div><label class="f">Hours growth %/yr</label><input type="number" id="inHg" value="'+st.hg+'"></div>'+
+    '</div></div>';
+
+  html += '<div class="card">'+
+    '<div class="lbl" style="font-size:12px;color:var(--ink-2);font-weight:550">'+SCEN[st.scenario].label+' · '+st.horizon+'-yr NPV @ '+st.r+'%</div>'+
+    '<div class="hero">'+fm$(m.npv)+'</div>'+
+    '<div class="hero-sub">'+fm$(m.npvOps)+' from operating earnings'+(m.tv>0?(' + '+fm$(m.tv)+' terminal value'):'; terminal value ×0 (an owner-stitched business has little transferable value — sale multiples of 2–3× earnings only apply once patterns, kits or a brand can run without her)')+'. Undiscounted total: '+fm$(m.cum)+'.</div>'+
+    (st.horizon>5?'<div class="pill-warn">⚠ Growth defaults were calibrated for 5 years — over '+st.horizon+' they compound optimistically. Trim volume-growth %s on the Streams tab before trusting this number.</div>':'')+
+  '</div>';
+
+  html += '<div class="card"><h2>Revenue by stream</h2><div class="note">Projected gross revenue per year. Tap a column for detail; table view below.</div>'+
+    legendHtml(active)+'<div class="chart-wrap" id="chStack"></div>'+
+    '<details><summary>Table view</summary><div class="tscroll" id="tblStack"></div></details></div>';
+
+  html += '<div class="card"><h2>Owner earnings & valuation build-up</h2><div class="note">Earnings = revenue − materials − platform fees − overhead, before Maggie’s pay and taxes (SDE convention). Gray line = cumulative discounted value → ends at the NPV.</div>'+
+    '<div class="legend"><span class="k"><span class="sw" style="background:var(--accent)"></span>Owner earnings (per year)</span><span class="k"><span class="sw" style="background:var(--ink-3)"></span>Cumulative, discounted</span></div>'+
+    '<div class="chart-wrap" id="chSde"></div></div>';
+
+  html += '<div class="card"><h2>Year by year</h2><div class="tscroll"><table class="data"><thead><tr><th>Yr</th><th>Revenue</th><th>Materials</th><th>Fees</th><th>Overhead</th><th>Earnings</th><th>$/mo</th><th>Hrs/wk</th><th>Load</th><th>$/hr</th></tr></thead><tbody>'+
+    m.years.map(function(y){
+      return '<tr><td>Y'+y.y+'</td><td>'+fm$f(y.rev)+'</td><td>'+fm$f(y.cogs)+'</td><td>'+fm$f(y.fees)+'</td><td>'+fm$f(y.oh)+'</td><td><b>'+fm$f(y.sde)+'</b></td><td>'+fm$f(y.sde/12)+'</td><td>'+(y.need/52).toFixed(1)+'</td><td'+(y.util>1.05?' style="color:var(--crit);font-weight:600"':'')+'>'+fmPct(y.util)+'</td><td>$'+y.wage.toFixed(0)+'</td></tr>';
+    }).join("")+'</tbody></table></div>'+
+    '<div class="muted" style="margin-top:6px">Load = hours the plan needs ÷ hours Maggie plans to give it. Over 100% means the plan is physically impossible without price rises or digital leverage.</div></div>';
+
+  var rates = [15,20,25,30,35];
+  html += '<div class="card"><h2>Sensitivity — NPV by discount rate</h2><div class="tscroll"><table class="data"><thead><tr><th>Scenario</th>'+
+    rates.map(function(r){return '<th>'+r+'%</th>';}).join("")+'</tr></thead><tbody>'+
+    Object.keys(SCEN).map(function(k){
+      var save = st.r, cells = rates.map(function(r){ st.r = r; var mm = runModel(S,k); return '<td>'+fm$(mm.npv)+'</td>'; }).join("");
+      st.r = save;
+      return '<tr><td>'+SCEN[k].label+'</td>'+cells+'</tr>';
+    }).join("")+'</tbody></table></div></div>';
+
+  html += '<div class="callout"><b>Method & honesty notes.</b> (1) This is a DCF of projected owner earnings — for a pre-revenue micro-business it is a planning tool, not a price someone would pay. (2) Discount rate: small-business valuations typically use ~12–20% for established firms and 30–70% for seed-stage ventures; the 25% default treats this as a high-risk but founder-run project. (3) Most value arrives in years 3–5 from streams that don’t exist yet (patterns, kits, membership) — that is the model telling you where to invest, and also its biggest uncertainty. (4) Fewer than 1 in 1,000 startups meet their own projections (Berkus) — re-run this quarterly against Tracker actuals.</div>';
+
+  el.innerHTML = html;
+
+  stackedChart(el.querySelector("#chStack"), m, S);
+  sdeChart(el.querySelector("#chSde"), m);
+  var tbl = '<table class="data"><thead><tr><th>Stream</th>'+m.years.map(function(y){return '<th>Y'+y.y+'</th>';}).join("")+'</tr></thead><tbody>'+
+    active.map(function(s){
+      return '<tr><td>'+esc(s.name)+'</td>'+m.years.map(function(y){return '<td>'+fm$f(y.revBy[s.id]||0)+'</td>';}).join("")+'</tr>';
+    }).join("")+
+    '<tr><td><b>Total</b></td>'+m.years.map(function(y){return '<td><b>'+fm$f(y.rev)+'</b></td>';}).join("")+'</tr></tbody></table>';
+  el.querySelector("#tblStack").innerHTML = tbl;
+
+  el.querySelectorAll("#segScen button").forEach(function(b){ b.addEventListener("click", function(){ S.settings.scenario = b.getAttribute("data-k"); renderCurrent(); }); });
+  el.querySelectorAll("#segHor button").forEach(function(b){ b.addEventListener("click", function(){ S.settings.horizon = +b.getAttribute("data-h"); renderCurrent(); }); });
+  el.querySelectorAll("#segTv button").forEach(function(b){ b.addEventListener("click", function(){ S.settings.tv = +b.getAttribute("data-t"); renderCurrent(); }); });
+  var rs = el.querySelector("#rSlide");
+  rs.addEventListener("input", function(){ el.querySelector("#rVal").textContent = rs.value+"%"; });
+  rs.addEventListener("change", function(){ S.settings.r = +rs.value; renderCurrent(); });
+  el.querySelector("#inTarget").addEventListener("change", function(e){ S.settings.target = num(e.target.value, 3000); renderCurrent(); });
+  el.querySelector("#inOhm").addEventListener("change", function(e){ S.settings.ohm = num(e.target.value, 45); renderCurrent(); });
+  el.querySelector("#inHpw").addEventListener("change", function(e){ S.settings.hpw = num(e.target.value, 8); renderCurrent(); });
+  el.querySelector("#inHg").addEventListener("change", function(e){ S.settings.hg = num(e.target.value, 30); renderCurrent(); });
+}
+
+/* ---------- STREAMS & PRICING ---------- */
+function renderStreams(el){
+  var html = '';
+  html += '<div class="card"><h2>Where an hour of stitching pays best</h2><div class="note">Contribution margin per hour of Maggie’s time, each stream in its 3rd active year (base assumptions). This chart is the strategy: handwork earns today, digital + teaching scale tomorrow.</div>'+
+    '<div class="chart-wrap" id="chMargin"></div>'+
+    '<div class="muted">Membership & patterns look high per hour because marginal cost ≈ 0 — but they only sell once an audience exists. Custom work funds the audience-building.</div></div>';
+
+  html += '<div class="card"><h2>Pricing calculator</h2><div class="note">Floor price for one piece. Charging less = paying customers for the privilege of working.</div>'+
+    '<div class="grid2">'+
+      '<div><label class="f">Hours of stitching</label><input type="number" id="pcH" value="6" step="0.5"></div>'+
+      '<div><label class="f">Your hourly rate ($)</label><input type="number" id="pcR" value="20"></div>'+
+      '<div><label class="f">Materials ($)</label><input type="number" id="pcM" value="7"></div>'+
+      '<div><label class="f">Platform fees (%)</label><input type="number" id="pcF" value="13"></div>'+
+    '</div><div id="pcOut" style="margin-top:10px"></div>'+
+    '<div class="muted" style="margin-top:6px">Beginners typically price $20–35/hr, experienced hands $40–75/hr. Wholesale = your price ×2 becomes the retail price.</div></div>';
+
+  html += '<div class="card"><h2>Revenue stream assumptions</h2><div class="note">Toggle streams on/off and edit the levers — the Valuation tab recomputes instantly.</div>'+
+    S.streams.map(function(s, i){
+      return '<div class="stream-card">'+
+        '<div class="sh"><span class="sw" style="background:var('+s.c+')"></span><span class="nm">'+esc(s.name)+'</span>'+
+        '<span class="muted">yr '+s.start+'+</span><input type="checkbox" data-i="'+i+'" class="stOn" '+(s.on?"checked":"")+'></div>'+
+        '<div class="muted" style="margin-top:4px">'+esc(s.why)+'</div>'+
+        '<div class="mini-grid">'+
+          '<div><label class="f">'+esc(s.unit)+', yr 1</label><input type="number" step="0.1" class="stIn" data-i="'+i+'" data-k="u" value="'+s.u+'"></div>'+
+          '<div><label class="f">Volume growth %/yr</label><input type="number" class="stIn" data-i="'+i+'" data-k="ug" value="'+s.ug+'"></div>'+
+          '<div><label class="f">Price $'+(s.id==="member"?"/member/mo":"")+'</label><input type="number" step="0.5" class="stIn" data-i="'+i+'" data-k="p" value="'+s.p+'"></div>'+
+          '<div><label class="f">Price growth %/yr</label><input type="number" class="stIn" data-i="'+i+'" data-k="pg" value="'+s.pg+'"></div>'+
+        '</div>'+
+        '<details><summary>Advanced (costs, fees, hours)</summary><div class="mini-grid">'+
+          '<div><label class="f">Materials % of price</label><input type="number" class="stIn" data-i="'+i+'" data-k="cogs" value="'+s.cogs+'"></div>'+
+          '<div><label class="f">Platform fees %</label><input type="number" class="stIn" data-i="'+i+'" data-k="fees" value="'+s.fees+'"></div>'+
+          '<div><label class="f">Hours per unit</label><input type="number" step="0.05" class="stIn" data-i="'+i+'" data-k="hpu" value="'+s.hpu+'"></div>'+
+          '<div><label class="f">Fixed hours/yr</label><input type="number" class="stIn" data-i="'+i+'" data-k="fh" value="'+s.fh+'"></div>'+
+          '<div><label class="f">Starts in year</label><input type="number" min="1" class="stIn" data-i="'+i+'" data-k="start" value="'+s.start+'"></div>'+
+        '</div></details>'+
+      '</div>';
+    }).join("")+'</div>';
+
+  html += '<div class="card"><h2>Benchmark price sheet (2025–26, sourced)</h2><div class="tscroll"><table class="data"><thead><tr><th>Item</th><th>Typical</th><th>Premium</th></tr></thead><tbody>'+
+    [["Custom 6″ hoop (hand)","$100–175","$250+"],
+     ["Pet/family portrait (thread-painted)","$85–190 outline","$600–900 (Staub)"],
+     ["Ready-made hoop, Etsy","$18–40","$40–90 artist one-off"],
+     ["PDF pattern","$3–8","$17–29 bundle"],
+     ["Beginner kit (brand shops)","$30–44","$50 (Clever Poppy)"],
+     ["Workshop seat (US)","$50–70","$100"],
+     ["Membership / club","$3–10 /mo","$15–18 /mo w/ materials"],
+     ["Nano sponsorship (1–10k)","$10–100 /post","$200"],
+     ["Wholesale","50% of retail","—"],
+     ["Etsy all-in fees","≈12–13% + $0.20","+15% offsite-ad orders"]].map(function(r){
+      return '<tr><td style="text-align:left">'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>';
+    }).join("")+'</tbody></table></div>'+
+    '<div class="src">Sources: Etsy fee schedule (Feb 2026); The Creative’s Hour pricing guide (Apr 2026); stitchingsabbatical.com price list; ClassBento US listings; artist shops (cleverpoppy.com, jessicalongembroidery.com, cozybluehandmade.com); IMH/Stan creator-rate guides (2026).</div></div>';
+
+  el.innerHTML = html;
+  marginChart(el.querySelector("#chMargin"), S);
+
+  function pcCalc(){
+    var h = num(el.querySelector("#pcH").value,6), r = num(el.querySelector("#pcR").value,20),
+        mt = num(el.querySelector("#pcM").value,7), f = num(el.querySelector("#pcF").value,13)/100;
+    var floor = (mt + h*r)/(1-Math.min(f,0.9));
+    var out = '<div class="grid2">'+
+      '<div class="tile"><div class="lbl">Floor price (direct)</div><div class="val">'+fm$f(floor)+'</div></div>'+
+      '<div class="tile"><div class="lbl">If wholesaling: retail</div><div class="val">'+fm$f(floor*2)+'</div><div class="dlt">you receive '+fm$f(floor)+'</div></div></div>';
+    el.querySelector("#pcOut").innerHTML = out;
+  }
+  ["pcH","pcR","pcM","pcF"].forEach(function(id){ el.querySelector("#"+id).addEventListener("input", pcCalc); });
+  pcCalc();
+
+  el.querySelectorAll(".stOn").forEach(function(cb){
+    cb.addEventListener("change", function(){ S.streams[+cb.getAttribute("data-i")].on = cb.checked; renderCurrent(); });
+  });
+  el.querySelectorAll(".stIn").forEach(function(inp){
+    inp.addEventListener("change", function(){
+      var s = S.streams[+inp.getAttribute("data-i")], k = inp.getAttribute("data-k");
+      s[k] = num(inp.value, s[k]);
+      save();
+      marginChart(el.querySelector("#chMargin"), S);
+    });
+  });
+}
+
+/* ---------- ROADMAP ---------- */
+function renderRoadmap(el){
+  var html = '';
+  var open = S.tasks.filter(function(t){return !t.done;}).length;
+  html += '<div class="card"><div class="flex-between"><h2>Task board</h2><span class="badge">'+open+' open</span></div>'+
+    '<div id="taskList">'+S.tasks.map(function(t,i){
+      return '<div class="task-row"><input type="checkbox" data-i="'+i+'" class="tkDone" '+(t.done?"checked":"")+' style="width:17px;height:17px;accent-color:var(--accent)">'+
+        '<span class="pri '+t.pri+'">'+t.pri+'</span><span style="'+(t.done?"color:var(--ink-3);text-decoration:line-through":"")+'">'+esc(t.t)+'</span>'+
+        '<button class="x tkDel" data-i="'+i+'">✕</button></div>';
+    }).join("")+'</div>'+
+    '<div class="addrow"><input type="text" id="tkNew" placeholder="Add a task…"><select id="tkPri" style="width:76px"><option>P1</option><option selected>P2</option></select><button class="primary" id="tkAdd">Add</button></div></div>';
+
+  S.roadmap.forEach(function(ph, pi){
+    var done = ph.items.filter(function(i){return i.done;}).length;
+    var pct = ph.items.length ? Math.round(done/ph.items.length*100) : 0;
+    html += '<div class="card"><div class="phase-head"><h2>'+esc(ph.ph)+'</h2><span class="muted">'+esc(ph.when)+' · '+done+'/'+ph.items.length+'</span></div>'+
+      '<div class="pbar"><i style="width:'+pct+'%"></i></div>'+
+      '<ul class="check">'+ph.items.map(function(it, ii){
+        return '<li class="'+(it.done?"done":"")+'"><input type="checkbox" class="rdItem" data-p="'+pi+'" data-i="'+ii+'" '+(it.done?"checked":"")+'><span>'+esc(it.t)+'</span></li>';
+      }).join("")+'</ul></div>';
+  });
+
+  el.innerHTML = html;
+  el.querySelectorAll(".tkDone").forEach(function(cb){ cb.addEventListener("change", function(){ S.tasks[+cb.getAttribute("data-i")].done = cb.checked; renderCurrent(); }); });
+  el.querySelectorAll(".tkDel").forEach(function(b){ b.addEventListener("click", function(){ S.tasks.splice(+b.getAttribute("data-i"),1); renderCurrent(); }); });
+  el.querySelector("#tkAdd").addEventListener("click", function(){
+    var v = el.querySelector("#tkNew").value.trim();
+    if (v){ S.tasks.push({t:v, pri:el.querySelector("#tkPri").value, done:false}); renderCurrent(); }
+  });
+  el.querySelectorAll(".rdItem").forEach(function(cb){
+    cb.addEventListener("change", function(){ S.roadmap[+cb.getAttribute("data-p")].items[+cb.getAttribute("data-i")].done = cb.checked; renderCurrent(); });
+  });
+}
+
+/* ---------- TRACKER ---------- */
+function renderTracker(el){
+  var rows = S.tracker;
+  var html = '';
+  html += '<div class="card"><h2>Log a month</h2><div class="note">Five minutes on the 1st of each month. Actuals beat assumptions — export from the Data tab and send to Claude to re-benchmark the plan.</div>'+
+    '<div class="grid2">'+
+      '<div><label class="f">Month</label><input type="month" id="trM" value="2026-09"></div>'+
+      '<div><label class="f">Revenue ($)</label><input type="number" id="trR" value="0"></div>'+
+      '<div><label class="f">Costs: materials + fees + overhead ($)</label><input type="number" id="trC" value="0"></div>'+
+      '<div><label class="f">Hours worked</label><input type="number" id="trH" value="0"></div>'+
+      '<div><label class="f">Orders</label><input type="number" id="trO" value="0"></div>'+
+      '<div><label class="f">IG followers</label><input type="number" id="trF" value="0"></div>'+
+      '<div><label class="f">Email subs</label><input type="number" id="trE" value="0"></div>'+
+    '</div><div style="margin-top:10px"><button class="primary" id="trAdd">Save month</button></div></div>';
+
+  var nz = rows.filter(function(r){return r.rev>0||r.hrs>0||r.fol>0;});
+  html += '<div class="card"><h2>Trends</h2>'+
+    '<div class="grid3">'+
+      '<div class="tile"><div class="lbl">Revenue</div>'+sparkline(nz.map(function(r){return r.rev;}))+'</div>'+
+      '<div class="tile"><div class="lbl">Earnings</div>'+sparkline(nz.map(function(r){return r.rev-r.cost;}))+'</div>'+
+      '<div class="tile"><div class="lbl">Followers</div>'+sparkline(nz.map(function(r){return r.fol;}))+'</div>'+
+      '<div class="tile"><div class="lbl">$/hr</div>'+sparkline(nz.map(function(r){return r.hrs>0?(r.rev-r.cost)/r.hrs:0;}))+'</div>'+
+    '</div>'+
+    (nz.length<2?'<div class="muted" style="margin-top:8px">Sparklines appear after two logged months.</div>':'')+
+  '</div>';
+
+  html += '<div class="card"><h2>History</h2><div class="tscroll"><table class="data"><thead><tr><th>Month</th><th>Revenue</th><th>Costs</th><th>Earnings</th><th>Hrs</th><th>$/hr</th><th>Orders</th><th>IG</th><th>Email</th><th></th></tr></thead><tbody>'+
+    rows.map(function(r,i){
+      var sde = r.rev-r.cost;
+      return '<tr><td>'+esc(r.m)+'</td><td>'+fm$f(r.rev)+'</td><td>'+fm$f(r.cost)+'</td><td><b>'+fm$f(sde)+'</b></td><td>'+r.hrs+'</td><td>'+(r.hrs>0?"$"+(sde/r.hrs).toFixed(0):"—")+'</td><td>'+r.orders+'</td><td>'+r.fol+'</td><td>'+r.email+'</td>'+
+      '<td><button class="x trDel" data-i="'+i+'" style="border:none;background:none;color:var(--ink-3);cursor:pointer">✕</button></td></tr>';
+    }).join("")+'</tbody></table></div></div>';
+
+  el.innerHTML = html;
+  el.querySelector("#trAdd").addEventListener("click", function(){
+    var r = {m:el.querySelector("#trM").value||"2026-09", rev:num(el.querySelector("#trR").value,0), cost:num(el.querySelector("#trC").value,0),
+             hrs:num(el.querySelector("#trH").value,0), orders:num(el.querySelector("#trO").value,0), fol:num(el.querySelector("#trF").value,0), email:num(el.querySelector("#trE").value,0)};
+    var ex = S.tracker.findIndex(function(x){return x.m===r.m;});
+    if (ex>=0) S.tracker[ex] = r; else S.tracker.push(r);
+    S.tracker.sort(function(a,b){return a.m<b.m?-1:1;});
+    renderCurrent();
+  });
+  el.querySelectorAll(".trDel").forEach(function(b){ b.addEventListener("click", function(){ S.tracker.splice(+b.getAttribute("data-i"),1); renderCurrent(); }); });
+}
+
+/* ---------- BENCHMARKS ---------- */
+var BENCH = [
+  {n:"Sarah K. Benning", f:"438k IG", m:"Monthly pattern drops ($20), originals, kits, book", l:"Went full-time after ~18 months of nights & weekends. <b>Recurring pattern drops = recurring revenue.</b>"},
+  {n:"Jessica Long Embroidery", f:"308k IG · 92k YT", m:"Kits $30–62 w/ video tutorials, patterns, 2 books — 90,937 lifetime Etsy sales", l:"<b>Kits + free YouTube tutorials</b> built the biggest Etsy engine in the niche."},
+  {n:"Clever Poppy (Julie)", f:"710k IG", m:"Beginner kits $40–50 → $37 course → Maker's Academy membership", l:"Started on maternity leave, husband now CEO. <b>Kit → course → membership funnel, email-first.</b>"},
+  {n:"Charles & Elin", f:"203k IG", m:"Online academy: courses $27–99, $399 bundle; YouTube as free funnel", l:"YouTube ad revenue ≈ $20–56/mo — trivial. <b>The courses are the money; content is the funnel.</b>"},
+  {n:"Michelle Staub · Stitching Sabbatical", f:"184k IG", m:"Pet portraits $600–900, 12+ week waitlist; Domestika course (14k students); book", l:"<b>The ceiling for personalized embroidery</b> — premium pricing via emotional niche + scarcity."},
+  {n:"Emillie Ferris", f:"202k IG", m:"Was $-heavy pet commissions → now patterns $14–21, books, pins", l:"Deliberately <b>pivoted from 18-hour commissions to products</b> once the audience existed."},
+  {n:"MCreativeJ (Melissa Galbraith)", f:"52k IG", m:"Kits, 3 books, guild workshops, wholesale, Domestika", l:"Mid-tier proof: <b>teaching + wholesale beats the algorithm</b> — no virality required."},
+  {n:"Trish Burr", f:"35k IG", m:"Books, PDF lessons $10–13, online classes $38–46", l:"A <b>35k-follower account can support a global niche education business</b> via authority."},
+  {n:"Cozyblue (Liz)", f:"38k IG", m:"Stitch Club subscription $15–18/mo — ran monthly for 11 years", l:"Recurring club longevity — and a caution: <b>solo capacity caps growth</b> (she scaled back in 2026)."},
+  {n:"And Other Adventures", f:"124k IG", m:"Kits $30–44, Faire wholesale, studio", l:"Candid 2021 post: growth plateaued post-Covid. <b>Kits are a business, not a lottery ticket.</b>"},
+  {n:"Sarah Homfray", f:"273k YT", m:"Video kits (7+ hrs HD + materials), distance classes, goldwork supplies", l:"<b>Long-form YouTube converts</b> to premium kits; credentials (Royal School) compound."},
+  {n:"Abbode (adjacent — machine)", f:"—", m:"Personalized embroidery events/retail: $719k (2023) → $1.6M (2024)", l:"Machine-based, so not her economics — but <b>proof of demand for personalized embroidered gifts</b>."}
+];
+
+function renderBench(el){
+  var html = '';
+  html += '<div class="card"><h2>Where Present Stitch is today</h2>'+
+    '<div class="note">@presentstitchembroidery · “Maggie”</div>'+
+    '<div style="font-size:13.5px;line-height:1.55">Publicly visible: ~12 posts of personalized name & gift pieces (TYLER, DAISY, THEO…), engagement 1–6 likes/post, and no posts in roughly 6 months. No Etsy shop, website, or link-in-bio found. Translation: <b>pre-audience, pre-revenue — the asset is the craft skill and the niche.</b> The first 90 days are about consistency, not perfection: the personalized-gift wedge is genuinely good (gifting ≈ 27% of Etsy sales and growing).</div></div>';
+
+  html += '<div class="card"><h2>How embroidery artists actually monetize</h2><div class="note">Every full-timer we found follows the same arc: handwork → audience → products (patterns/kits) → teaching/membership. None got there on commissions alone.</div>'+
+    BENCH.map(function(b){
+      return '<div class="bench-card"><div class="nm">'+b.n+'</div><div class="meta">'+b.f+' · '+b.m+'</div><div class="les">'+b.l+'</div></div>';
+    }).join("")+
+    '<div class="src">Follower counts via imginn mirror & socialcounts, Aug 8 2026 (third-party, approximate). Prices from artists’ own shops/pricing pages. No profiled hand-embroidery artist publishes revenue; Etsy sale counts and price lists are the hardest public proxies.</div></div>';
+
+  html += '<div class="card"><h2>Base rates — the honest denominators</h2>'+
+    '<ul class="check" style="font-size:13px">'+
+      ['Mean active Etsy shop grosses ≈ <b>$1.9k/yr</b> (2025: $10.46B GMS ÷ 5.6M sellers; median is lower)',
+       'Median US side hustle: <b>$200/mo</b> (Bankrate, Jun 2025)',
+       'Etsy active sellers fell <b>7.0M → 5.6M</b> in a year; marketplace GMS has shrunk 4 straight years',
+       '~30% of Etsy census respondents call the shop their sole occupation — engaged-respondent bias makes the true rate lower',
+       '57% of workers want <b>≥75% salary replacement</b> before quitting (FlexJobs 2025)'].map(function(t){
+        return '<li><span style="margin-left:2px">'+t+'</span></li>';
+      }).join("")+'</ul>'+
+    '<div class="muted" style="margin-top:6px">These aren’t reasons to skip it — they’re the reason the plan leans on personalization premiums, fairs, and (later) digital leverage instead of “list it and hope.”</div></div>';
+
+  html += '<div class="card"><h2>Growth channels, 2026</h2>'+
+    '<ul class="check" style="font-size:13px">'+
+      ['<b>Reels</b> still reach best for small accounts (~9.8% reach rate at 1–5k followers); carousels retain. Organic reach is structurally declining — treat IG as acquisition, not the asset.',
+       '<b>Email list</b> is the durable asset (arts/crafts opens ≈ 30–34%). Free mini-pattern = the signup magnet.',
+       '<b>Etsy search</b> is where personalized-gift buyers already are — reviews compound.',
+       '<b>Pinterest</b> (640M users, record 2026) suits evergreen pattern/kit discovery.',
+       '<b>YouTube</b> pays ≈ $2.4 RPM in craft — negligible ads, but it converts kits & courses like nothing else.'].map(function(t){
+        return '<li><span style="margin-left:2px">'+t+'</span></li>';
+      }).join("")+'</ul></div>';
+
+  html += '<div class="card"><h2>Seasonality planner</h2>'+
+    '<div class="tscroll"><table class="data"><thead><tr><th>Window</th><th>What</th><th>Do by</th></tr></thead><tbody>'+
+    [["Q4 (Oct–Dec)","≈ 30–31.5% of annual handmade sales; personalized gifts peak","Listings live mid-Sept; custom cutoff ~Dec 1"],
+     ["Mother’s Day (May)","Names, family, pet pieces bump","Promote from late March"],
+     ["Grad season (May–Jun)","Etsy reports double-digit graduation-gift growth","List in April"],
+     ["Weddings (Sep–Oct peak)","Bouquet/heirloom commissions booked 2–6 mo ahead","Market in spring–summer"],
+     ["Jan–Feb","Slowest retail — build patterns, kits, course content","Use the quiet quarter"]].map(function(r){
+      return '<tr><td style="text-align:left">'+r[0]+'</td><td style="text-align:left">'+r[1]+'</td><td style="text-align:left">'+r[2]+'</td></tr>';
+    }).join("")+'</tbody></table></div>'+
+    '<div class="src">Q4 share computed from Etsy SEC filings 2021–2025; occasions from Etsy Q2-24 exhibit; weddings from The Knot Real Weddings Study.</div></div>';
+
+  el.innerHTML = html;
+}
+
+/* ---------- DATA ---------- */
+function renderData(el){
+  var html = '';
+  html += '<div class="card"><h2>Backup & restore</h2><div class="note" id="saveNote"></div>'+
+    '<div class="seg" style="margin-bottom:8px"><button class="primary" id="exBtn">Copy JSON</button><button class="ghost" id="dlBtn">Download .json</button><button class="ghost" id="rsBtn">Reset to defaults</button></div>'+
+    '<textarea id="exArea" rows="6" spellcheck="false" style="font-size:11px"></textarea>'+
+    '<label class="f" style="margin-top:12px">Restore: paste a snapshot, then Apply</label>'+
+    '<textarea id="imArea" rows="4" spellcheck="false" placeholder="Paste exported JSON here…" style="font-size:11px"></textarea>'+
+    '<div style="margin-top:8px"><button class="primary" id="imBtn">Apply snapshot</button> <span id="imMsg" class="muted"></span></div></div>';
+
+  html += '<div class="card"><h2>About this model</h2><div style="font-size:13px;color:var(--ink-2);line-height:1.55">'+
+    'Built Aug 8, 2026 from: Etsy fee schedule & SEC filings; artist shop pages & interviews (Benning, Long, Clever Poppy, Charles & Elin, Staub, Galbraith, Burr, Cozyblue, Homfray); pricing guides (The Creative’s Hour, Apr 2026); BizBuySell 2025 multiples; Pepperdine/KPMG discount-rate surveys; Bankrate & FlexJobs 2025 surveys; Socialinsider/Metricool 2026 reach benchmarks. Assumptions are Maggie’s to overwrite — the sources just set the starting lines.<br><br>'+
+    '<b>Known limitations:</b> pre-revenue projections are speculative by nature; no profiled artist publishes revenue, so stream defaults are triangulated from prices × visible volume; the NPV is a planning number, not an appraisal; growth rates assume consistent weekly execution, which is the single biggest risk.</div></div>';
+
+  el.innerHTML = html;
+  el.querySelector("#saveNote").innerHTML = canStore
+    ? '<b>Autosave is on for this device</b> — changes persist in this browser automatically. Use the JSON export to back up, move to another device, or send your numbers to Claude for a plan review.'
+    : '<b>This viewer cannot save</b> — edits live only while the page is open. Export a snapshot (copy or download) and paste it back next time, or open the hosted version where autosave works.';
+  var ex = el.querySelector("#exArea");
+  function refresh(){ S.meta.saved = new Date().toISOString().slice(0,10); ex.value = JSON.stringify(S); }
+  refresh();
+  el.querySelector("#exBtn").addEventListener("click", function(){
+    refresh(); ex.select(); ex.setSelectionRange(0, 999999);
+    try { document.execCommand("copy"); } catch(e){}
+    if (navigator.clipboard) navigator.clipboard.writeText(ex.value).catch(function(){});
+    el.querySelector("#exBtn").textContent = "Copied ✓";
+    setTimeout(function(){ var b = el.querySelector("#exBtn"); if (b) b.textContent = "Copy JSON"; }, 1500);
+  });
+  el.querySelector("#dlBtn").addEventListener("click", function(){
+    refresh();
+    var blob = new Blob([ex.value], {type:"application/json"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "present-stitch-data-"+S.meta.saved+".json";
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  el.querySelector("#rsBtn").addEventListener("click", function(){
+    if (confirm("Reset everything to the built-in defaults?")){
+      S = JSON.parse(JSON.stringify(DEFAULTS));
+      if (canStore){ try { window.localStorage.removeItem(STORE_KEY); } catch(e){} }
+      renderCurrent();
+    }
+  });
+  el.querySelector("#imBtn").addEventListener("click", function(){
+    try {
+      var obj = JSON.parse(el.querySelector("#imArea").value);
+      if (!obj || !obj.streams || !obj.settings) throw new Error("not a snapshot");
+      S = obj; el.querySelector("#imMsg").textContent = "Restored ✓";
+      setTimeout(renderCurrent, 400);
+    } catch(e){ el.querySelector("#imMsg").textContent = "Couldn’t parse that — paste the full exported JSON."; }
+  });
+}
+
+/* ---------- plumbing ---------- */
+var RENDER = {overview:renderOverview, plan:renderPlan, streams:renderStreams, roadmap:renderRoadmap, tracker:renderTracker, bench:renderBench, data:renderData};
+
+function switchTab(id){
+  currentTab = id;
+  document.querySelectorAll("nav.tabs button").forEach(function(b){
+    b.classList.toggle("active", b.getAttribute("data-t")===id);
+  });
+  document.querySelectorAll("section.tab").forEach(function(s){
+    s.classList.toggle("active", s.id==="tab-"+id);
+  });
+  hideTip();
+  renderCurrent();
+  window.scrollTo({top:0});
+}
+function renderCurrent(){
+  save();
+  var el = document.getElementById("tab-"+currentTab);
+  if (el && RENDER[currentTab]) RENDER[currentTab](el);
+}
+
+function init(){
+  tipEl = document.getElementById("tip");
+  mainEl = document.getElementById("main");
+  var nav = document.getElementById("tabs");
+  nav.innerHTML = TABS.map(function(t){
+    return '<button data-t="'+t.id+'" class="'+(t.id===currentTab?"active":"")+'">'+t.label+'</button>';
+  }).join("");
+  mainEl.innerHTML = TABS.map(function(t){
+    return '<section class="tab'+(t.id===currentTab?" active":"")+'" id="tab-'+t.id+'"></section>';
+  }).join("");
+  nav.querySelectorAll("button").forEach(function(b){
+    b.addEventListener("click", function(){ switchTab(b.getAttribute("data-t")); });
+  });
+  document.getElementById("themeBtn").addEventListener("click", function(){
+    var r = document.documentElement;
+    var cur = r.getAttribute("data-theme");
+    var next = cur==="dark" ? "light" : "dark";
+    r.setAttribute("data-theme", next);
+    renderCurrent();
+  });
+  var rT;
+  window.addEventListener("resize", function(){ clearTimeout(rT); rT = setTimeout(renderCurrent, 200); });
+  document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "hidden") saveNow(); });
+  window.addEventListener("pagehide", saveNow);
+  document.addEventListener("pointerdown", function(e){
+    if (!e.target.closest || !e.target.closest(".hband")) hideTip();
+  });
+  renderCurrent();
+}
+if (document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+
+</script>
+</body>
+</html>
