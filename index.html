@@ -101,7 +101,7 @@
   .meter>i{display:block; height:100%; border-radius:6px; background:var(--accent);}
   /* controls */
   label.f{display:block; font-size:12px; color:var(--ink-2); font-weight:550; margin:8px 0 3px;}
-  input[type=number], input[type=text], input[type=month], select, textarea{
+  input[type=number], input[type=text], input[type=month], input[type=date], select, textarea{
     width:100%; border:1px solid var(--axis); background:var(--surface-1); color:var(--ink-1);
     border-radius:9px; padding:8px 10px; font-size:14px; font-family:inherit;
   }
@@ -221,7 +221,7 @@
     display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;
     font-size:11px;font-weight:650;border:1px solid var(--ring);background:var(--surface-1);
   }
-  .status-chip.complete,.status-chip.validated{color:var(--good);}
+  .status-chip.complete,.status-chip.completed,.status-chip.validated{color:var(--good);}
   .status-chip.blocked{color:var(--ink-3);}
   .status-chip.waiting{color:#8a5500;}
   :root[data-theme="dark"] .status-chip.waiting{color:#ffd27d;}
@@ -262,6 +262,17 @@
   .source-list li{display:block!important;}
   .error-text{color:var(--crit);font-size:12px;margin-top:5px;}
   .good-text{color:var(--good);}
+  .warn-text{color:#8a5500;}
+  :root[data-theme="dark"] .warn-text{color:#ffd27d;}
+  .hdr-actions{display:flex;gap:6px;align-items:center;}
+  .undo-btn[disabled]{opacity:.45;cursor:not-allowed;}
+  .source-meta{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0;color:var(--ink-2);font-size:11.5px;}
+  .source-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;background:var(--good);}
+  .ledger-item{border-left:3px solid var(--accent);padding:7px 9px;margin:7px 0;background:var(--wash);border-radius:0 8px 8px 0;font-size:12.5px;}
+  .allocation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:9px;align-items:start;margin-top:8px;}
+  .allocation-grid fieldset{border:1px solid var(--ring);border-radius:10px;padding:9px;margin:0;display:grid;gap:6px;}
+  .allocation-grid legend{font-size:12px;font-weight:700;padding:0 4px;}
+  .decision-bar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;border-radius:10px;background:var(--wash);padding:10px;margin-top:10px;font-size:12px;color:var(--ink-2);}
   .chart-svg{width:100%;height:auto;display:block;}
   .icon-button{min-width:44px;min-height:44px;}
   .seg button[aria-pressed="true"]{background:var(--accent);color:var(--page);border-color:var(--accent);font-weight:650;}
@@ -273,6 +284,7 @@
     .card{padding:12px;}
     .grid2,.grid3,.grid4,.mini-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
     .grid2 > div:has(textarea),.grid4 > div:has(textarea){grid-column:1/-1;}
+    .grid2 > div:has(textarea),.grid4 > div:has(textarea){grid-column:1/-1;}
     .hero{font-size:38px;}
     .quick-add{grid-template-columns:1fr 88px;}
     .quick-add button{grid-column:1/-1;}
@@ -280,6 +292,8 @@
     .addrow input{flex-basis:100%;}
     .task-tools{width:100%;margin-top:6px;}
     .evidence-row{grid-template-columns:1fr;}
+    .allocation-grid{grid-template-columns:1fr;}
+    .hdr-actions{flex-direction:column;align-items:stretch;}
     table.data{font-size:12px;}
   }
 </style>
@@ -291,7 +305,7 @@
       <h1>Present Stitch Biz Dashboard</h1>
       <div class="sub">Maggie&rsquo;s embroidery business &mdash; evidence &middot; execute &middot; decide</div>
     </div>
-    <button class="theme-btn" id="themeBtn">◐ Theme</button>
+    <div class="hdr-actions"><button class="theme-btn undo-btn" id="undoBtn" data-action="undo" disabled aria-label="Nothing to undo">↶ Undo</button><button class="theme-btn" id="themeBtn">◐ Theme</button></div>
   </div>
 </header>
 <nav class="tabs" id="tabs"></nav>
@@ -301,11 +315,12 @@
 <script>
 "use strict";
 
-/* Present Stitch Biz Dashboard v2
+/* Present Stitch Biz Dashboard v3
    Evidence-led execution, transparent planning value, and backward-compatible data. */
 
-const APP_VERSION = 2;
-const STORE_KEY = "psbd-v2";
+const APP_VERSION = 3;
+const STORE_KEY = "psbd-v3";
+const LEGACY_V2_KEY = "psbd-v2";
 const LEGACY_KEY = "psbd-v1";
 const APP_START = "2026-08-08";
 const SCENARIOS = {
@@ -401,13 +416,7 @@ const PRICE_SHEET=[
   ["Wholesale","use the wholesale calculator","—"],
   ["Etsy all-in fees","≈12–13% + $0.20 listing","+12–15% offsite-ad orders"]
 ];
-const SEASONS=[
-  ["Q4 (Oct–Dec)","≈ 30–31.5% of annual handmade sales; personalized gifts peak","Listings live mid-Sept; custom cutoff ~Dec 1"],
-  ["Mother's Day (May)","Names, family, and pet pieces bump","Promote from late March"],
-  ["Grad season (May–Jun)","Etsy reports double-digit graduation-gift growth","List in April"],
-  ["Weddings (Sep–Oct peak)","Bouquet and heirloom commissions booked 2–6 months ahead","Market in spring–summer"],
-  ["Jan–Feb","Slowest retail — build patterns, kits, and course content","Use the quiet quarter"]
-];
+
 function task(id, title, type, phaseId, dueDate, effortMinutes, definitionOfDone, why, options={}) {
   return {
     id, title, type, phaseId, dueDate, effortMinutes, definitionOfDone, why,
@@ -417,6 +426,9 @@ function task(id, title, type, phaseId, dueDate, effortMinutes, definitionOfDone
     order: options.order || 0,
     points: options.points || (effortMinutes <= 30 ? 5 : effortMinutes <= 90 ? 10 : 20),
     result: options.result || "",
+    resultClassification: options.resultClassification || "",
+    decision: options.decision || "",
+    evidenceAt: options.evidenceAt || "",
     metric: options.metric || null,
     impact: options.impact || null,
     evidenceLevel: options.evidenceLevel || "hypothesis",
@@ -429,98 +441,59 @@ function task(id, title, type, phaseId, dueDate, effortMinutes, definitionOfDone
   };
 }
 
-const DEFAULT_TASKS = [
-  task("launch-measure", "Measure three representative pieces", "action", "launch", "2026-08-10", 60,
-    "Three records contain materials, active stitching time, finishing time, and packaging.",
-    "Replaces guessed unit economics with direct evidence.", {priority:"P1", order:10}),
-  task("launch-price", "Set channel-specific prices for three launch offers", "experiment", "launch", "2026-08-12", 60,
-    "Direct and Etsy prices meet the editable contribution-per-hour floor under explicit fees.",
-    "Makes price a transparent business hypothesis rather than a guess.", {
-      priority:"P1", dependsOn:["launch-measure"], order:20,
-      impact:{label:"Custom starting-price sensitivity", scope:"core", streamId:"custom", field:"p", low:100, base:125, high:150, caveat:"Holds unit demand constant; this is sensitivity, not a causal forecast."}
-    }),
-  task("launch-offers", "Select three launch offers", "gate", "launch", "2026-08-13", 45,
-    "Each offer has a buyer/occasion, options, price, turnaround, and expected production time.",
-    "Constrains the launch to a learnable assortment.", {priority:"P1", dependsOn:["launch-price"], order:30}),
-  task("launch-limits", "Set weekly capacity and order limits", "action", "launch", "2026-08-14", 30,
-    "Weekly hours, maximum open orders, turnaround, and provisional holiday cutoff are documented.",
-    "Prevents overbooking and makes delivery promises credible.", {priority:"P1", dependsOn:["launch-measure"], order:40}),
-  task("launch-intake", "Build and test the order-intake system", "action", "launch", "2026-08-16", 75,
-    "Order form, reply template, payment rule, revision policy, and turnaround are testable end to end.",
-    "Turns interest into consistent, trackable inquiries.", {dependsOn:["launch-offers","launch-limits"], order:50}),
-  task("launch-list-plan", "Plan eight Etsy listings", "action", "launch", "2026-08-18", 90,
-    "The listing matrix contains offer, search intent, photos, price, personalization, and 13 relevant nonduplicative tags.",
-    "Creates a complete production queue before opening the shop.", {dependsOn:["launch-offers"], order:60}),
-  task("launch-photo", "Produce the first photography and content batch", "action", "launch", "2026-08-21", 150,
-    "Complete image sets exist for three listings plus reusable social assets.",
-    "Supplies both the shop and the first acquisition experiment.", {dependsOn:["launch-list-plan"], order:70}),
-  task("launch-3-listings", "Publish the first three Etsy listings", "experiment", "launch", "2026-08-23", 90,
-    "Three listings are live, proofread, priced, tagged, and connected to source tracking.",
-    "Begins observable demand testing.", {priority:"P1", dependsOn:["launch-photo","launch-intake"], order:80, milestone:"First listings live"}),
-  task("launch-ig", "Schedule four CTA-bearing Instagram posts", "experiment", "launch", "2026-08-28", 90,
-    "Four posts are scheduled across two weeks with a trackable CTA; visits, inquiries, and orders will be logged.",
-    "Tests whether existing visual content can generate qualified interest.", {
-      dependsOn:["launch-3-listings"], order:90,
-      metric:{name:"Instagram-to-inquiry evidence", baseline:"No recent cadence", target:"Log reach, profile visits, qualified inquiries, and paid orders", reviewDate:"2026-09-07"}
-    }),
-  task("launch-finance", "Separate finances and log August, including a zero month", "action", "launch", "2026-08-31", 30,
-    "Business transactions use a separate account or ledger and August has a complete Tracker row even if every amount is zero.",
-    "Creates an unbiased actuals history.", {priority:"P1", order:100}),
-  task("launch-8-listings", "Publish five more listings and QA the path", "experiment", "launch", "2026-09-04", 180,
-    "Eight total listings are live; mobile inquiry, personalization, policies, and checkout paths are tested.",
-    "Completes the initial assortment and reduces launch friction.", {dependsOn:["launch-3-listings"], order:110, milestone:"Eight listings live"}),
-  task("launch-review", "Conduct the 30-day evidence review", "gate", "launch", "2026-09-07", 45,
-    "Each key assumption is classified as untested, observed, supported, contradicted, or inconclusive, and the next sprint is selected.",
-    "Prevents premature conclusions from insufficient exposure.", {priority:"P1", dependsOn:["launch-ig","launch-finance","launch-8-listings"], order:120, milestone:"Launch review complete"}),
-
-  task("validate-weekly", "Log four weekly funnel observations", "experiment", "validate", "2026-10-05", 80,
-    "Four observations include listing visits, inquiries, quotes, orders, price accepted, source, time, and margin per hour.",
-    "Separates an acquisition problem from an offer or pricing problem.", {priority:"P1", dependsOn:["launch-review"], order:210}),
-  task("validate-q4", "Set the Q4 capacity and order-cutoff plan", "action", "validate", "2026-09-15", 45,
-    "Holiday offers, weekly capacity, order cutoff, and overflow response are documented.",
-    "Protects delivery quality during the most time-sensitive period.", {seasonal:true, dependsOn:["launch-review"], order:220}),
-  task("validate-market", "Evaluate one local-market test", "experiment", "validate", "2026-09-25", 60,
-    "Three candidate events are compared on fee, audience, inventory requirement, break-even units, and schedule; apply only if feasible.",
-    "Tests an offline acquisition channel without treating attendance as success.", {dependsOn:["launch-review"], order:230}),
-  task("validate-review", "Conduct the 60-day demand review", "gate", "validate", "2026-10-07", 60,
-    "The review identifies whether evidence is sufficient, which offer/channel is best supported, and whether to continue, revise acquisition, revise the offer, or pause.",
-    "Converts observations into an explicit decision.", {priority:"P1", dependsOn:["validate-weekly","validate-q4"], order:240, milestone:"Demand review complete"}),
-
-  task("prove-history", "Complete three consecutive monthly records, including zeros", "milestone", "prove", "2026-11-01", 30,
-    "August, September, and October each contain a complete logged row regardless of revenue.",
-    "Creates the minimum operational history for a 90-day review.", {priority:"P1", dependsOn:["validate-review"], order:310}),
-  task("prove-unit", "Estimate observed unit economics from paid orders", "experiment", "prove", "2026-11-03", 75,
-    "For each offer with paid orders, record median production time, realized price, cost, and contribution per hour; fewer than five orders remains preliminary evidence.",
-    "Tests whether sales are economically worth fulfilling.", {dependsOn:["validate-review"], order:320}),
-  task("prove-review", "Make the 90-day go, revise, pause, or stop decision", "gate", "prove", "2026-11-06", 60,
-    "A documented decision cites demand evidence, unit economics, capacity, and data limitations.",
-    "Prevents an indefinite hobby plan from being mistaken for traction.", {priority:"P1", dependsOn:["prove-history","prove-unit"], order:330, milestone:"90-day decision made"}),
-
-  task("traction-pattern-signal", "Validate demand for a first PDF pattern", "gate", "traction", "", 60,
-    "Repeated customer/content signals or a preorder test support developing a pattern; otherwise the gate remains open.",
-    "Prevents automatic Year-2 revenue from an untested product.", {dependsOn:["prove-review"], order:410}),
-  task("traction-pattern", "Launch and measure the first PDF pattern", "experiment", "traction", "", 240,
-    "The pattern is tested, published, and tracked for sales, support burden, and refunds.",
-    "Tests scalable revenue with explicit evidence.", {
-      dependsOn:["traction-pattern-signal"], order:420, milestone:"First pattern launched",
-      impact:{label:"Pattern monthly-sales sensitivity", scope:"full", streamId:"patterns", field:"u", low:3, base:12, high:18, caveat:"Assumes the pattern launches on the modeled schedule; completion alone does not validate sales."}
-    }),
-  task("scale-kit", "Pass the beginner-kit evidence gate", "gate", "scale", "", 90,
-    "A tested pattern, beginner usability evidence, component costs, and support requirements justify a kit pilot.",
-    "Prevents inventory investment before the instructions work.", {dependsOn:["traction-pattern"], order:510}),
-  task("scale-workshop", "Pass the workshop break-even and interest gate", "gate", "scale", "", 60,
-    "Documented local interest and a seat-level break-even calculation support one pilot.",
-    "Separates event enthusiasm from viable economics.", {dependsOn:["prove-review"], order:520}),
-  task("scale-membership", "Pass the recurring-content demand gate", "gate", "scale", "", 90,
-    "Repeated content demand and an explicit production calendar support a small paid beta; follower count alone does not qualify.",
-    "Avoids an arbitrary audience-size threshold.", {dependsOn:["traction-pattern"], order:530}),
-  task("scale-wholesale", "Pass the wholesale margin and capacity gate", "gate", "scale", "", 75,
-    "Wholesale price, retailer margin, payment terms, batch capacity, and cash needs meet preset thresholds.",
-    "Prevents revenue growth that destroys owner earnings.", {dependsOn:["prove-review"], order:540}),
-  task("fulltime-decision", "Complete the full-time decision review", "gate", "fulltime", "", 120,
-    "Every required readiness gate passes using current data; remaining uncertainties and downside plan are documented.",
-    "Makes leaving employment a gated decision rather than a score threshold.", {dependsOn:["prove-review"], order:610, milestone:"Full-time decision reviewed"})
+const V3_TASKS = [
+  task("launch-measure-template","Create the unit-economics measurement template","action","launch","2026-08-09",20,"A reusable record captures materials, active stitching, finishing, packaging, rework, price, and channel.","Makes measurements comparable.",{priority:"P1",order:10}),
+  task("launch-measure-1","Measure representative piece 1","action","launch","2026-08-10",30,"One complete record is saved with no estimated time fields.","Creates the first direct unit-economics observation.",{priority:"P1",dependsOn:["launch-measure-template"],order:20}),
+  task("launch-measure-2","Measure representative piece 2","action","launch","2026-08-11",30,"A second complete record is saved using the same template.","Tests whether the first piece was atypical.",{priority:"P1",dependsOn:["launch-measure-1"],order:30}),
+  task("launch-measure-3","Measure representative piece 3","action","launch","2026-08-12",30,"A third complete record is saved using the same template.","Provides a range rather than one anecdote.",{priority:"P1",dependsOn:["launch-measure-2"],order:40}),
+  task("launch-measure","Review three measured pieces","milestone","launch","2026-08-12",15,"A dated note reports the median and range for materials, production hours, and contribution/hour.","Converts measurements into pricing evidence.",{priority:"P1",dependsOn:["launch-measure-3"],order:50,milestone:"Three pieces measured"}),
+  task("launch-price","Set channel-specific launch prices","action","launch","2026-08-13",45,"Each offer has direct and Etsy prices that meet the editable contribution/hour floor under explicit fees.","Makes price a transparent hypothesis before testing acceptance.",{priority:"P1",dependsOn:["launch-measure"],order:60,impact:{label:"Custom starting-price sensitivity",scope:"core",streamId:"custom",field:"p",low:100,base:125,high:150,caveat:"Holds demand constant; actual price elasticity is unknown. Anchors follow the researched $100–175 typical range for custom 6-inch pieces."}}),
+  task("launch-offers","Approve three bounded launch offers","gate","launch","2026-08-14",30,"Each offer has a buyer, options, price, turnaround, production time, and exclusions.","Constrains the launch to a learnable assortment.",{priority:"P1",dependsOn:["launch-price"],order:70}),
+  task("launch-limits","Set weekly capacity and order limits","action","launch","2026-08-14",30,"Weekly hours, maximum open orders, turnaround, and holiday cutoff are documented.","Prevents overbooking.",{priority:"P1",dependsOn:["launch-measure"],order:80}),
+  task("launch-compliance","Identify jurisdiction and build the compliance checklist","action","launch","2026-08-15",45,"Official sources are recorded for registration, home-business rules, taxes, recordkeeping, and insurance.","Surfaces prelaunch obligations without treating generic advice as legal guidance.",{priority:"P1",order:90}),
+  task("launch-policies","Draft customer, privacy, photo, and IP policies","action","launch","2026-08-16",45,"Policies cover payment, revisions, returns, turnaround, customer images/names, design rights, and prohibited requests.","Reduces preventable customer and IP risk.",{dependsOn:["launch-compliance"],order:100}),
+  task("launch-intake","Build and test the order-intake system","action","launch","2026-08-17",60,"A test order completes the form, reply, payment, revision, policy acknowledgement, source tracking, and turnaround flow.","Turns interest into consistent inquiries.",{dependsOn:["launch-offers","launch-limits","launch-policies"],order:110}),
+  task("launch-shop-setup","Complete Etsy identity, payment, and shop setup","action","launch","2026-08-18",45,"Verification, bank/tax information, policies, contact details, and current fee assumptions are checked.","Prevents publication blockers.",{dependsOn:["launch-compliance"],order:120}),
+  task("launch-list-plan","Plan eight Etsy listings","action","launch","2026-08-18",60,"The matrix contains offer, search intent, photos, price, personalization, and 13 relevant tags.","Creates a complete production queue.",{dependsOn:["launch-offers"],order:130}),
+  task("launch-photo-plan","Create the three-listing shot list","action","launch","2026-08-19",25,"Every image, crop, prop, lighting setup, and social derivative is named.","Keeps photography bounded.",{dependsOn:["launch-list-plan"],order:140}),
+  task("launch-photo-shoot","Capture the first photography batch","action","launch","2026-08-20",60,"All raw images for three listings are captured and backed up.","Produces publication assets.",{dependsOn:["launch-photo-plan"],order:150}),
+  task("launch-photo","Edit and export the first photography batch","action","launch","2026-08-21",45,"Three complete listing sets and four social crops are exported.","Supplies shop and acquisition tests.",{dependsOn:["launch-photo-shoot"],order:160}),
+  task("launch-fulfillment","Run one end-to-end fulfillment rehearsal","action","launch","2026-08-22",60,"A mock order is packed, weighed, postage-priced, timed, inspected, and communicated.","Tests cost and service promises before taking money.",{priority:"P1",dependsOn:["launch-intake","launch-photo"],order:170}),
+  task("launch-listing-1","Publish and QA Etsy listing 1","action","launch","2026-08-23",30,"Listing 1 is live, proofread, priced, tagged, personalized, and source-trackable on mobile.","Creates one complete acquisition surface.",{priority:"P1",dependsOn:["launch-photo","launch-intake","launch-shop-setup","launch-fulfillment"],order:180}),
+  task("launch-listing-2","Publish and QA Etsy listing 2","action","launch","2026-08-23",30,"Listing 2 passes the same checklist.","Adds a second offer without batching hidden defects.",{priority:"P1",dependsOn:["launch-listing-1"],order:190}),
+  task("launch-listing-3","Publish and QA Etsy listing 3","action","launch","2026-08-24",30,"Listing 3 passes the same checklist.","Completes the minimum launch assortment.",{priority:"P1",dependsOn:["launch-listing-2"],order:200}),
+  task("launch-3-listings","Confirm the first three listings are live","milestone","launch","2026-08-24",15,"Three URLs and the mobile QA record are saved.","Marks exposure start, not demand evidence.",{priority:"P1",dependsOn:["launch-listing-3"],order:210,milestone:"First listings live"}),
+  task("launch-ig","Schedule four trackable Instagram posts","action","launch","2026-08-25",60,"Four posts are scheduled across two weeks with one trackable CTA and review date.","Creates controlled exposure.",{dependsOn:["launch-3-listings"],order:220}),
+  task("launch-finance","Separate finances and log August, including zero results","action","launch","2026-08-31",30,"Transactions use a separate account or ledger and August has a complete Tracker row even if all results are zero.","Creates unbiased actuals history.",{priority:"P1",order:230}),
+  task("launch-listings-4-5","Publish and QA listings 4–5","action","launch","2026-08-29",45,"Listings 4 and 5 pass the publication checklist.","Expands exposure in a controlled batch.",{dependsOn:["launch-3-listings"],order:240}),
+  task("launch-listings-6-7","Publish and QA listings 6–7","action","launch","2026-09-01",45,"Listings 6 and 7 pass the checklist.","Adds assortment while preserving QA.",{dependsOn:["launch-listings-4-5"],order:250}),
+  task("launch-listing-8","Publish listing 8 and retest checkout","action","launch","2026-09-03",45,"Listing 8 is live and the mobile inquiry, personalization, policy, and checkout path pass.","Completes the assortment and catches path friction.",{dependsOn:["launch-listings-6-7"],order:260}),
+  task("launch-8-listings","Confirm eight listings and QA record","milestone","launch","2026-09-04",15,"Eight URLs and a completed path-QA record are saved.","Marks implementation completeness, not validation.",{dependsOn:["launch-listing-8"],order:270,milestone:"Eight listings live"}),
+  task("launch-ig-result","Evaluate the two-week Instagram acquisition test","experiment","launch","2026-09-07",30,"Reach, visits, qualified inquiries, orders, source, spend, and limitations are recorded against the rule.","Tests whether the cadence generated qualified interest.",{dependsOn:["launch-ig"],order:280,metric:{name:"Instagram-to-qualified-inquiry",baseline:"No recent controlled cadence",target:"Record the full funnel, including zero outcomes",exposure:"Four CTA posts over 14 days",decisionRule:"Continue only if attributable qualified inquiries justify another bounded test",reviewDate:"2026-09-07"}}),
+  task("launch-review","Conduct the 30-day evidence review","gate","launch","2026-09-07",45,"Every key assumption is classified and a continue, revise, pause, or stop decision cites evidence and limits.","Prevents activity from being mistaken for traction.",{priority:"P1",dependsOn:["launch-ig-result","launch-finance","launch-8-listings","launch-fulfillment"],order:290,milestone:"Launch review complete"}),
+  task("validate-price","Run a bounded price-acceptance test","experiment","validate","2026-09-14",30,"Quotes, accepted prices, declines, production basis, and contribution/hour are recorded.","Tests buyer acceptance separately from arithmetic floors.",{priority:"P1",dependsOn:["launch-review"],order:310,metric:{name:"Price acceptance with viable contribution/hour",baseline:"Launch prices unvalidated",target:"Five attributable quotes or label the result preliminary",exposure:"Five quotes or 14 days",decisionRule:"Keep, revise, or reject each offer using acceptance and contribution/hour",reviewDate:"2026-09-21"}}),
+  task("validate-q4","Set Q4 capacity and cutoff plan","action","validate","2026-09-15",45,"Holiday offers, capacity, cutoff, deposit rule, and overflow response are documented.","Protects delivery quality.",{seasonal:true,dependsOn:["launch-review"],order:320}),
+  task("validate-market-compare","Compare three candidate local-market tests","action","validate","2026-09-18",45,"Events are compared on fee, audience, inventory, break-even, schedule, and measurement access.","Prevents attendance from being treated as a result.",{dependsOn:["launch-review"],order:330}),
+  task("validate-market","Run or explicitly decline one local-market pilot","experiment","validate","2026-09-25",60,"Attributable visits, conversations, orders, revenue, cost, hours, and leftovers—or documented infeasibility—are recorded.","Tests an offline channel with a predefined economic rule.",{dependsOn:["validate-market-compare"],order:340,metric:{name:"Local-pilot contribution",baseline:"No local evidence",target:"Nonnegative contribution and attributable demand",exposure:"One bounded pilot",decisionRule:"Repeat only if contribution and operational burden are acceptable",reviewDate:"2026-09-26"}}),
+  ...["2026-09-14","2026-09-21","2026-09-28","2026-10-05"].map((reviewDate,i)=>{const week=i+1;return task(`validate-week-${week}`,`Log weekly funnel observation ${week}`,"experiment","validate",reviewDate,25,"The week records visits, inquiries, quotes, orders, price, source, production time, contribution/hour, and limits.","Builds a comparable series.",{priority:"P1",dependsOn:[i?`validate-week-${week-1}`:"launch-review"],order:350+i*10,metric:{name:`Weekly funnel ${week}`,baseline:"Prior week or zero",target:"Complete record including zero outcomes",exposure:"Seven calendar days",decisionRule:"Do not infer trend until four comparable weeks exist",reviewDate}})}),
+  task("validate-weekly","Confirm four comparable weekly observations","milestone","validate","2026-10-05",15,"Four records are complete and their exposure definitions are comparable.","Creates the minimum series for review.",{priority:"P1",dependsOn:["validate-week-4"],order:400}),
+  task("validate-review","Conduct the 60-day demand review","gate","validate","2026-10-07",60,"The decision names the best-supported offer/channel and chooses continue, revise, pause, or stop.","Converts observations into a bounded decision.",{priority:"P1",dependsOn:["validate-weekly","validate-q4","validate-price"],order:410,milestone:"Demand review complete"}),
+  task("prove-history","Complete three consecutive monthly records, including zeros","milestone","prove","2026-11-01",30,"August, September, and October each contain a complete logged row with attribution where available.","Creates minimum operational history, not full-time readiness.",{priority:"P1",dependsOn:["validate-review"],order:510}),
+  task("prove-unit","Estimate observed unit economics by offer","experiment","prove","2026-11-03",60,"Paid offers report median and range for price, cost, production time, and contribution/hour; small samples are labeled.","Tests whether work is economically worth fulfilling.",{dependsOn:["validate-review"],order:520,metric:{name:"Observed contribution/hour",baseline:"Modeled assumptions",target:"Meet the editable floor or identify a revision",exposure:"All paid orders through review",decisionRule:"Do not scale offers below the floor without a documented reason",reviewDate:"2026-11-03"}}),
+  task("prove-review","Make the 90-day go, revise, pause, or stop decision","gate","prove","2026-11-06",60,"The decision cites demand, economics, capacity, cash, service reliability, and limitations.","Prevents an indefinite hobby plan.",{priority:"P1",dependsOn:["prove-history","prove-unit"],order:530,milestone:"90-day decision made"}),
+  task("traction-pattern-signal","Pass the first-pattern demand gate","gate","traction","",45,"Repeated signals or a bounded preorder test support one pattern; otherwise the gate remains open.","Prevents automatic future revenue.",{dependsOn:["prove-review"],order:610}),
+  task("traction-pattern-brief","Write the first-pattern test brief","action","traction","",45,"Learner, outcome, scope, support burden, price, success metric, and stop rule are defined.","Keeps development tied to a testable need.",{dependsOn:["traction-pattern-signal"],order:620}),
+  task("traction-pattern-draft","Draft the first PDF pattern","action","traction","",60,"A complete versioned draft includes materials, transfer, stitch guide, steps, and accessibility notes.","Produces a testable prototype.",{dependsOn:["traction-pattern-brief"],order:630}),
+  task("traction-pattern-test","Run a beginner-usability test","experiment","traction","",60,"Completion, questions, errors, time, and support needs are recorded and prioritized.","Tests usability before promotion.",{dependsOn:["traction-pattern-draft"],order:640,metric:{name:"Pattern usability",baseline:"Untested draft",target:"Resolve critical blockers",exposure:"Three relevant testers or label evidence preliminary",decisionRule:"Revise until no critical blocker remains",reviewDate:""}}),
+  task("traction-pattern-publish","Revise and publish the pattern pilot","action","traction","",45,"The tested version is live with price, support, source tracking, and refund handling.","Starts a measurable pilot.",{dependsOn:["traction-pattern-test"],order:650}),
+  task("traction-pattern","Measure the first pattern pilot","experiment","traction","",30,"Sales, visits, conversion, support minutes, refunds, and contribution/hour are recorded.","Tests scalable revenue.",{dependsOn:["traction-pattern-publish"],order:660,impact:{label:"Pattern monthly-sales sensitivity",scope:"full",streamId:"patterns",field:"u",low:3,base:12,high:18,caveat:"A sensitivity only; completion does not validate sales."},metric:{name:"Pattern pilot economics",baseline:"No sales",target:"Positive contribution after support",exposure:"30 days",decisionRule:"Scale, revise, or stop from observed economics",reviewDate:""}}),
+  task("scale-kit","Pass the beginner-kit evidence gate","gate","scale","",75,"A tested pattern, usability evidence, costs, cash requirement, and support burden justify one pilot.","Prevents premature inventory.",{dependsOn:["traction-pattern"],order:710}),
+  task("scale-workshop","Pass the workshop break-even and interest gate","gate","scale","",60,"Documented interest and seat-level break-even support one pilot.","Separates enthusiasm from economics.",{dependsOn:["prove-review"],order:720}),
+  task("scale-membership","Pass the recurring-content demand gate","gate","scale","",75,"Repeated attributable demand and a sustainable calendar support a small beta.","Avoids follower count as a demand proxy.",{dependsOn:["traction-pattern"],order:730}),
+  task("scale-wholesale","Pass the wholesale margin and capacity gate","gate","scale","",75,"Price, retailer margin, terms, defects, batch capacity, freight, and working capital meet thresholds.","Prevents cash-destructive growth.",{dependsOn:["prove-review"],order:740}),
+  task("fulltime-decision","Complete the full-time decision review","gate","fulltime","",90,"Every computed readiness gate passes using current closed-period data and the downside plan is documented.","Makes leaving employment a derived decision.",{dependsOn:["prove-review"],order:810,milestone:"Full-time decision reviewed"})
 ];
+const DEFAULT_TASKS=V3_TASKS;
 
 const DEFAULT_STREAMS = [
   {id:"custom", name:"Custom commissions", color:"--s1", status:"planned", start:1, u:1.5, ug:28, p:85, pg:25, cogs:8, fees:2.9, hpu:6.5, fh:0, rh:0, on:true, unit:"pieces/mo", priority:2, evidenceLevel:"hypothesis", observations:0,
@@ -538,19 +511,26 @@ const DEFAULT_STREAMS = [
 ];
 
 const DEFAULTS = {
-  meta:{name:"Present Stitch Biz Dashboard", v:APP_VERSION, saved:"", created:APP_START, migratedFrom:null, migrationNotice:false, lastBackup:""},
+  meta:{name:"Present Stitch Biz Dashboard", v:APP_VERSION, saved:"", created:APP_START, migratedFrom:null, migrationNotice:false, lastBackup:"", suggestionStream:"custom"},
   settings:{
     r:25, horizon:5, tv:0, scenario:"base", target:3000, targetBasis:"pretax", readinessPct:75,
     hours:[8,10,14,18,25], maxHpw:40, ohm:45, ohg:25, adminH:96,
     cap:true, capacityMode:"margin", startupCosts:0, workingCapital:0,
-    transferability:false, replacementLaborRate:20, hourlyFloor:20, theme:"auto"
+    workingCapitalRecoveryPct:100, transferability:false, replacementLaborRate:20, hourlyFloor:20, theme:"auto",
+    readinessMonths:12, provisionalMonths:6, readinessMaxHpw:40, repeatRateThreshold:20,
+    onTimeThreshold:90, backlogThreshold:8, depositCoveragePct:25,
+    targetLiving:2000, targetBenefits:300, targetSavings:200, targetTaxRate:20, targetBufferPct:10
   },
   streams:DEFAULT_STREAMS,
   phases:PHASES,
   tasks:DEFAULT_TASKS,
-  tracker:[{m:"2026-08", logged:true, rev:0, cost:0, hrs:0, orders:0, views:0, inquiries:0, quotes:0, fol:0, email:0, repeatOrders:0, completedOrders:0, onTimeOrders:0, backlogWeeks:0, note:""}],
+  tracker:[{m:"2026-08", logged:true, rev:0, cost:0, hrs:0, orders:0, views:0, inquiries:0, quotes:0, fol:0, email:0, repeatOrders:0, completedOrders:0, onTimeOrders:0, backlogWeeks:0, bookedRevenue:0, bookedContribution:0, deposits:0, byStream:{}, note:""}],
   ready:{fund:false, insurance:false, taxBenefits:false},
   momentum:{total:0, weekKey:"", weekPoints:0, weeklyGoal:30, history:[], celebrated:[]},
+  actualApplications:[],
+  evidenceLedger:[],
+  decisionLog:[],
+  wholesale:{cost:12,targetMargin:50,retailerMargin:50,batchHours:8,units:10,paymentDays:30},
   sources:SOURCES
 };
 
@@ -565,9 +545,18 @@ function deepClone(value){ return JSON.parse(JSON.stringify(value)); }
 function esc(value){ return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 function clamp(value,min,max){ const n=Number(value); return Number.isFinite(n)?Math.min(max,Math.max(min,n)):min; }
 function number(value,fallback=0){ const n=Number(value); return Number.isFinite(n)?n:fallback; }
+function effortPoints(minutes){ return minutes<=30?5:minutes<=60?8:10; }
 function todayISO(){
   const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,"0"); const day=String(d.getDate()).padStart(2,"0");
   return `${y}-${m}-${day}`;
+}
+function validDate(value){
+  const s=String(value||""); if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;
+  const d=new Date(`${s}T00:00:00Z`); return !Number.isNaN(d.getTime())&&d.toISOString().slice(0,10)===s;
+}
+function validMonth(value){
+  const s=String(value||""); if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(s))return false;
+  const [y,m]=s.split("-").map(Number); return y>=2000&&y<=2200&&m>=1&&m<=12;
 }
 function weekKey(date=new Date()){
   const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
@@ -619,7 +608,8 @@ function normalizeStream(raw, fallback){
   out.start = clamp(out.start,1,20); out.u = clamp(out.u,0,100000); out.ug = clamp(out.ug,-100,1000);
   out.p = clamp(out.p,0,100000); out.pg = clamp(out.pg,-100,1000); out.cogs = clamp(out.cogs,0,100);
   out.fees = clamp(out.fees,0,100); out.hpu = clamp(out.hpu,0,10000); out.fh = clamp(out.fh,0,100000); out.rh = clamp(out.rh,0,100000);
-  out.priority = clamp(out.priority,1,99); out.observations = Math.round(clamp(out.observations,0,100000));
+  out.priority = Math.round(clamp(out.priority,1,99)); out.observations = Math.round(clamp(out.observations,0,100000));
+  out.manualObservations = Math.round(clamp(out.manualObservations===undefined?out.observations:out.manualObservations,0,100000));
   out.channel = out.channel === "direct" ? "direct" : "etsy";
   ["fixedFee","listingFee","packaging","shipping","rework"].forEach(k=>{ out[k]=clamp(out[k],0,100000); });
   out.offsiteRate = clamp(out.offsiteRate,0,100);
@@ -631,31 +621,52 @@ function normalizeStream(raw, fallback){
 }
 
 function normalizeTrackerRow(raw){
-  const row = Object.assign({m:"",logged:false,rev:0,cost:0,hrs:0,orders:0,views:0,inquiries:0,quotes:0,fol:0,email:0,repeatOrders:0,completedOrders:0,onTimeOrders:0,backlogWeeks:0,note:""}, raw || {});
-  row.m = /^\d{4}-\d{2}$/.test(String(row.m)) ? String(row.m) : "";
-  row.logged = Boolean(row.logged || row.rev || row.cost || row.hrs || row.orders);
-  ["rev","cost","hrs","orders","views","inquiries","quotes","fol","email","repeatOrders","completedOrders","onTimeOrders","backlogWeeks"].forEach(k=>{ row[k]=clamp(row[k],0,100000000); });
+  const source=raw||{}, explicitLogged=Object.prototype.hasOwnProperty.call(source,"logged");
+  const row = Object.assign({m:"",logged:false,rev:0,cost:0,hrs:0,orders:0,views:0,inquiries:0,quotes:0,fol:0,email:0,repeatOrders:0,completedOrders:0,onTimeOrders:0,backlogWeeks:0,bookedRevenue:0,bookedContribution:0,deposits:0,byStream:{},note:""}, source);
+  row.m = validMonth(row.m) ? String(row.m) : "";
+  row.logged = explicitLogged?Boolean(source.logged):Boolean(row.rev||row.cost||row.hrs||row.orders);
+  if(row.logged&&validMonth(row.m)&&monthSerial(row.m)>monthSerial(todayISO().slice(0,7)))row.logged=false;
+  ["rev","cost","hrs","views","inquiries","quotes","fol","email","backlogWeeks","bookedRevenue","bookedContribution","deposits"].forEach(k=>{ row[k]=clamp(row[k],0,100000000); });
+  ["orders","repeatOrders","completedOrders","onTimeOrders"].forEach(k=>{row[k]=Math.round(clamp(row[k],0,100000000));});
+  row.repeatOrders=Math.min(row.repeatOrders,row.orders); row.completedOrders=Math.min(row.completedOrders,row.orders); row.onTimeOrders=Math.min(row.onTimeOrders,row.completedOrders);
+  const rawBy=row.byStream&&typeof row.byStream==="object"&&!Array.isArray(row.byStream)?row.byStream:{}; row.byStream={};
+  Object.entries(rawBy).forEach(([id,v])=>{if(!v||typeof v!=="object")return;row.byStream[String(id)]={rev:clamp(v.rev,0,100000000),cost:clamp(v.cost,0,100000000),hrs:clamp(v.hrs,0,100000000),orders:Math.round(clamp(v.orders,0,100000000))};});
   row.note = String(row.note || "").slice(0,1000);
   return row;
 }
 
-function normalizeTask(raw, fallback){
+function normalizeTask(raw, fallback, phaseIds=PHASES.map(p=>p.id)){
   const b = fallback || task(uid(),"Untitled task","action","launch","",30,"Define what complete means.","Added by the user.");
   const out = Object.assign({},b,raw || {});
   out.id = String(out.id || uid()); out.title = String(out.title || out.t || "Untitled task").slice(0,180);
   out.type = ["action","experiment","gate","milestone"].includes(out.type) ? out.type : "action";
-  out.phaseId = PHASES.some(p=>p.id===out.phaseId) ? out.phaseId : "imported";
-  out.dueDate = /^\d{4}-\d{2}-\d{2}$/.test(String(out.dueDate || "")) ? String(out.dueDate) : "";
-  out.effortMinutes = Math.round(clamp(out.effortMinutes,5,100000));
+  out.phaseId = phaseIds.includes(out.phaseId) ? out.phaseId : "imported";
+  out.dueDate = validDate(out.dueDate) ? String(out.dueDate) : "";
+  out.effortMinutes = Math.round(clamp(out.effortMinutes,5,90));
   out.definitionOfDone = String(out.definitionOfDone || "Define what complete means.").slice(0,1500);
   out.why = String(out.why || "").slice(0,1500); out.priority = out.priority === "P1" ? "P1" : "P2";
   out.dependsOn = Array.isArray(out.dependsOn) ? [...new Set(out.dependsOn.map(String).filter(Boolean))] : [];
   out.status = ["available","active","blocked","waiting","completed","validated"].includes(out.status) ? out.status : (out.done ? "completed" : "available");
-  out.order = number(out.order,0); out.points = [5,10,20].includes(Number(out.points)) ? Number(out.points) : (out.effortMinutes<=30?5:out.effortMinutes<=90?10:20);
-  out.result = String(out.result || "").slice(0,2000); out.completedAt = String(out.completedAt || "");
+  out.order = number(out.order,0); out.points = effortPoints(out.effortMinutes);
+  out.result = String(out.result || "").slice(0,2000);
+  out.resultClassification=["supported","contradicted","inconclusive"].includes(out.resultClassification)?out.resultClassification:"";
+  out.decision=["continue","revise","pause","stop"].includes(out.decision)?out.decision:"";
+  out.evidenceAt=validDate(String(out.evidenceAt||"").slice(0,10))?String(out.evidenceAt).slice(0,10):"";
+  out.completedAt = String(out.completedAt || "");
+  out.metric=out.metric&&typeof out.metric==="object"?Object.assign({name:"",baseline:"",target:"",exposure:"",decisionRule:"",reviewDate:""},out.metric):null;
+  if(out.metric&&out.metric.reviewDate&&!validDate(out.metric.reviewDate))out.metric.reviewDate="";
   out.pointsAwarded = Boolean(out.pointsAwarded); out.evidenceBonusAwarded = Boolean(out.evidenceBonusAwarded);
   out.seasonal = Boolean(out.seasonal); out.milestone = String(out.milestone || "").slice(0,120); out.imported = Boolean(out.imported);
+  if(out.type==="experiment"&&(out.status==="completed"||out.status==="validated")&&!(out.result&&out.resultClassification)){out.status="waiting";out.completedAt="";out.pointsAwarded=false;out.evidenceBonusAwarded=false;}
+  if((out.type==="gate"||out.type==="milestone")&&(out.status==="completed"||out.status==="validated")&&!(out.result&&out.decision)){out.status="waiting";out.completedAt="";out.pointsAwarded=false;out.evidenceBonusAwarded=false;}
   return out;
+}
+
+function normalizePhase(raw,fallback){
+  const out=Object.assign({},fallback||{},raw||{});out.id=String(out.id||"imported");out.name=String(out.name||"Untitled phase").slice(0,100);
+  out.start=validDate(out.start)?out.start:"";out.end=validDate(out.end)?out.end:"";
+  if(out.start&&out.end&&out.start>out.end){const tmp=out.start;out.start=out.end;out.end=tmp;}
+  out.when=String(out.when||(out.start&&out.end?`${dateLabel(out.start)} – ${dateLabel(out.end)}`:"Flexible timing")).slice(0,160);return out;
 }
 
 function normalizeSettings(raw={}){
@@ -667,34 +678,58 @@ function normalizeSettings(raw={}){
   while(st.hours.length<st.horizon) st.hours.push(st.hours[st.hours.length-1]);
   st.ohm=clamp(st.ohm,0,1000000); st.ohg=clamp(st.ohg,-100,1000); st.adminH=clamp(st.adminH,0,100000);
   st.startupCosts=clamp(st.startupCosts,0,100000000); st.workingCapital=clamp(st.workingCapital,0,100000000);
+  st.workingCapitalRecoveryPct=clamp(st.workingCapitalRecoveryPct,0,100);
   st.replacementLaborRate=clamp(st.replacementLaborRate,0,10000); st.hourlyFloor=clamp(st.hourlyFloor,0,10000);
+  st.readinessMonths=Math.round(clamp(st.readinessMonths,6,24));st.provisionalMonths=Math.round(clamp(st.provisionalMonths,3,st.readinessMonths));
+  st.readinessMaxHpw=clamp(st.readinessMaxHpw,1,80);st.repeatRateThreshold=clamp(st.repeatRateThreshold,0,100);st.onTimeThreshold=clamp(st.onTimeThreshold,0,100);
+  st.backlogThreshold=clamp(st.backlogThreshold,0,52);st.depositCoveragePct=clamp(st.depositCoveragePct,0,100);
+  ["targetLiving","targetBenefits","targetSavings"].forEach(k=>{st[k]=clamp(st[k],0,10000000);});st.targetTaxRate=clamp(st.targetTaxRate,0,80);st.targetBufferPct=clamp(st.targetBufferPct,0,200);
   st.cap=true; st.capacityMode=st.capacityMode==="strategic"?"strategic":"margin";
   st.transferability=Boolean(st.transferability); st.theme=["auto","light","dark"].includes(st.theme)?st.theme:"auto";
   return st;
 }
 
-function mergeV2(raw){
+function mergeState(raw={}){
   const out=deepClone(DEFAULTS);
   out.meta=Object.assign(out.meta,raw.meta||{}, {v:APP_VERSION});
   out.settings=normalizeSettings(raw.settings||{});
+  const rawPhases=Array.isArray(raw.phases)?raw.phases:[];
+  const phaseMap=new Map(rawPhases.map(p=>[String(p&&p.id||""),p]));
+  out.phases=PHASES.map(p=>normalizePhase(phaseMap.get(p.id),p));
+  rawPhases.filter(p=>p&&p.id&&!PHASES.some(d=>d.id===String(p.id))).forEach(p=>out.phases.push(normalizePhase(p)));
+  const phaseIds=out.phases.map(p=>p.id);
   const rawStreams=Array.isArray(raw.streams)?raw.streams:[];
   out.streams=rawStreams.length?rawStreams.map((s,i)=>normalizeStream(s,DEFAULT_STREAMS.find(d=>d.id===s.id)||DEFAULT_STREAMS[i])):deepClone(DEFAULT_STREAMS).map(normalizeStream);
   const rawTasks=Array.isArray(raw.tasks)?raw.tasks:[];
   const byId=new Map(rawTasks.map(t=>[String(t.id||""),t]));
-  out.tasks=DEFAULT_TASKS.map(d=>normalizeTask(byId.get(d.id)||d,d));
-  rawTasks.filter(t=>!DEFAULT_TASKS.some(d=>d.id===String(t.id||""))).forEach(t=>out.tasks.push(normalizeTask(t)));
+  const progressKeys=["status","result","resultClassification","decision","evidenceAt","completedAt","pointsAwarded","evidenceBonusAwarded","order"];
+  out.tasks=DEFAULT_TASKS.map(d=>{const saved=byId.get(d.id)||{},progress={};progressKeys.forEach(k=>{if(saved[k]!==undefined)progress[k]=saved[k];});const merged=Object.assign({},d,progress);
+  if((merged.status==="completed"||merged.status==="validated")&&["experiment","gate","milestone"].includes(d.type)){
+    if(!String(merged.result||"").trim())merged.result="Migrated completion; evidence not re-verified.";
+    if(!["supported","contradicted","inconclusive"].includes(merged.resultClassification))merged.resultClassification="inconclusive";
+    if(!["continue","revise","pause","stop"].includes(merged.decision))merged.decision="continue";
+    if(!merged.evidenceAt)merged.evidenceAt=todayISO();
+  }
+  return normalizeTask(merged,d,phaseIds);});
+  rawTasks.filter(t=>!DEFAULT_TASKS.some(d=>d.id===String(t.id||""))).forEach(t=>out.tasks.push(normalizeTask(t,null,phaseIds)));
+  const taskIds=new Set(out.tasks.map(t=>t.id));out.tasks.forEach(t=>{t.dependsOn=t.dependsOn.filter(id=>taskIds.has(id)&&id!==t.id);});
   out.tracker=(Array.isArray(raw.tracker)?raw.tracker:[]).map(normalizeTrackerRow).filter(r=>r.m);
   if(!out.tracker.length) out.tracker=deepClone(DEFAULTS.tracker);
   out.tracker.sort((a,b)=>a.m.localeCompare(b.m));
+  out.tracker=out.tracker.filter((r,i,a)=>i===0||r.m!==a[i-1].m);
   out.ready=Object.assign({},DEFAULTS.ready,raw.ready||{});
   out.ready.fund=Boolean(out.ready.fund); out.ready.insurance=Boolean(out.ready.insurance||out.ready.ins); out.ready.taxBenefits=Boolean(out.ready.taxBenefits);
   out.momentum=Object.assign({},DEFAULTS.momentum,raw.momentum||{});
   out.momentum.total=clamp(out.momentum.total,0,10000000); out.momentum.weekPoints=clamp(out.momentum.weekPoints,0,10000000);
   out.momentum.weeklyGoal=clamp(out.momentum.weeklyGoal,5,1000); out.momentum.history=Array.isArray(out.momentum.history)?out.momentum.history.slice(-500):[];
   out.momentum.celebrated=Array.isArray(out.momentum.celebrated)?out.momentum.celebrated:[];
+  out.actualApplications=Array.isArray(raw.actualApplications)?raw.actualApplications.filter(x=>x&&x.streamId&&Array.isArray(x.months)).slice(-500):[];
+  out.evidenceLedger=Array.isArray(raw.evidenceLedger)?raw.evidenceLedger.filter(x=>x&&x.id&&x.at&&x.kind).slice(-1000):[];
+  out.decisionLog=Array.isArray(raw.decisionLog)?raw.decisionLog.filter(x=>x&&x.at&&x.decision).slice(-500):[];
   out.sources=SOURCES;
-  out.wholesale=Object.assign({cost:12,targetMargin:50,retailerMargin:50},raw.wholesale||{});
-  ["cost","targetMargin","retailerMargin"].forEach(k=>{out.wholesale[k]=clamp(out.wholesale[k],0,k==="cost"?100000:99);});
+  out.wholesale=Object.assign({},DEFAULTS.wholesale,raw.wholesale||{});
+  ["cost","targetMargin","retailerMargin","batchHours","units","paymentDays"].forEach(k=>{out.wholesale[k]=clamp(out.wholesale[k],0,k==="cost"?100000:k.includes("Margin")?99:100000);});
+  out.streams.forEach(s=>{const applied=new Map();out.actualApplications.filter(a=>a.streamId===s.id).forEach(a=>(a.months||[]).forEach(x=>applied.set(x.m,number(x.orders))));const count=number(s.manualObservations)+[...applied.values()].reduce((a,b)=>a+b,0);if(s.status==="validated"&&(!["observed","supported"].includes(s.evidenceLevel)||count<3))s.status="hypothesis";});
   return out;
 }
 
@@ -723,14 +758,22 @@ function migrateV1(raw){
     const match=keywordMap.find(([re])=>re.test(String(x.title||"")));
     if(match){
       const t=out.tasks.find(z=>z.id===match[1]);
-      if(t&&x.done){t.status="completed";t.completedAt="migrated";}
+      if(t&&x.done){
+        t.status="completed";t.completedAt="migrated";
+        if(t.type!=="action"){
+          t.result=t.result||"Completed in the previous dashboard (migrated); evidence not re-verified.";
+          t.resultClassification=t.resultClassification||"inconclusive";
+          t.decision=t.decision||"continue";
+          t.evidenceAt=t.evidenceAt||todayISO();
+        }
+      }
     }else if(x.title){
       imported.push(normalizeTask({id:`imported-${i}-${uid("v1")}`,title:String(x.title),type:"action",phaseId:"imported",dueDate:"",effortMinutes:30,definitionOfDone:"Review the imported v1 item and define its completion evidence.",why:x.phase?`Imported from ${x.phase}.`:"Imported from the v1 task list.",priority:x.priority,status:x.done?"completed":"available",order:700+i,imported:true}));
     }
   });
   out.tasks.push(...imported);
   out.meta=Object.assign(out.meta,{v:APP_VERSION,migratedFrom:1,migrationNotice:true,saved:new Date().toISOString()});
-  return mergeV2(out);
+  return mergeState(out);
 }
 
 function validateSnapshotObject(obj){
@@ -740,11 +783,43 @@ function validateSnapshotObject(obj){
     if(!obj.settings||!Array.isArray(obj.streams)) throw new Error("The v1 snapshot is incomplete.");
     return migrateV1(obj);
   }
-  if(v!==APP_VERSION) throw new Error("This file is not a supported Present Stitch snapshot.");
-  if(!obj.settings||!Array.isArray(obj.streams)||!obj.streams.length||!Array.isArray(obj.tasks)||!Array.isArray(obj.tracker)) throw new Error("The v2 snapshot is incomplete.");
+  if(v!==2&&v!==APP_VERSION) throw new Error("This file is not a supported Present Stitch snapshot.");
+  if(!obj.settings||!Array.isArray(obj.streams)||!obj.streams.length||!Array.isArray(obj.tasks)||!Array.isArray(obj.tracker)) throw new Error(`The v${v} snapshot is incomplete.`);
   if(obj.streams.some(s=>!s||!s.id||!s.name)) throw new Error("One or more revenue streams are invalid.");
   if(obj.tasks.some(t=>!t||!t.id||!(t.title||t.t))) throw new Error("One or more tasks are invalid.");
-  return mergeV2(obj);
+  const duplicate=(items,key)=>{const a=items.map(key);return a.find((x,i)=>a.indexOf(x)!==i);};
+  const dupStream=duplicate(obj.streams,s=>String(s.id));if(dupStream)throw new Error(`Duplicate stream ID: ${dupStream}.`);
+  const dupTask=duplicate(obj.tasks,t=>String(t.id));if(dupTask)throw new Error(`Duplicate task ID: ${dupTask}.`);
+  const dupMonth=duplicate(obj.tracker,r=>String(r.m));if(dupMonth)throw new Error(`Duplicate Tracker month: ${dupMonth}.`);
+  const rawPhases=Array.isArray(obj.phases)&&obj.phases.length?obj.phases:PHASES,dupPhase=duplicate(rawPhases,p=>String(p&&p.id));if(dupPhase)throw new Error(`Duplicate phase ID: ${dupPhase}.`);const phaseIds=new Set(rawPhases.map(p=>String(p&&p.id)));
+  rawPhases.forEach((p,i)=>{if(!p||!p.id||!p.name)throw new Error(`Phase ${i+1} is invalid.`);if((p.start&&!validDate(p.start))||(p.end&&!validDate(p.end)))throw new Error(`Phase ${p.id} has an invalid date.`);if(p.start&&p.end&&p.start>p.end)throw new Error(`Phase ${p.id} ends before it starts.`);});
+  obj.streams.forEach(s=>{["u","p","hpu","fees","cogs","offsiteRate"].forEach(k=>{if(s[k]!==undefined&&!Number.isFinite(Number(s[k])))throw new Error(`Stream ${s.id} has an invalid ${k}.`);});if(number(s.fees)<0||number(s.fees)>100||number(s.cogs)<0||number(s.cogs)>100||number(s.offsiteRate)<0||number(s.offsiteRate)>100)throw new Error(`Stream ${s.id} has an out-of-range percentage.`);});
+  const streamIds=new Set(obj.streams.map(s=>String(s.id)));
+  obj.tracker.forEach((r,i)=>{
+    if(!r||!validMonth(r.m))throw new Error(`Tracker row ${i+1} has an invalid month.`);
+    if(r.logged&&monthSerial(r.m)>monthSerial(todayISO().slice(0,7)))throw new Error(`Logged Tracker month ${r.m} is in the future.`);
+    ["rev","cost","hrs","orders","repeatOrders","completedOrders","onTimeOrders","bookedRevenue","bookedContribution","deposits"].forEach(k=>{if(r[k]!==undefined&&(!Number.isFinite(Number(r[k]))||Number(r[k])<0))throw new Error(`${r.m} has an invalid ${k} value.`);});
+    if(number(r.repeatOrders)>number(r.orders)||number(r.completedOrders)>number(r.orders)||number(r.onTimeOrders)>number(r.completedOrders))throw new Error(`${r.m} has impossible order counts.`);
+    Object.keys(r.byStream||{}).forEach(id=>{if(!streamIds.has(id))throw new Error(`${r.m} allocates actuals to missing stream ${id}.`);});
+  });
+  const ids=new Set(obj.tasks.map(t=>String(t.id)));obj.tasks.forEach(t=>{
+    if(t.dueDate&&!validDate(t.dueDate))throw new Error(`Task ${t.id} has an invalid due date.`);
+    if(v===APP_VERSION&&(!phaseIds.has(String(t.phaseId))||number(t.effortMinutes)<5||number(t.effortMinutes)>90))throw new Error(`Task ${t.id} has an invalid phase or effort range.`);
+    (Array.isArray(t.dependsOn)?t.dependsOn:[]).forEach(d=>{if(!ids.has(String(d)))throw new Error(`Task ${t.id} depends on missing task ${d}.`);});
+    if(v===APP_VERSION&&t.type==="experiment"&&(t.status==="completed"||t.status==="validated")&&!(String(t.result||"").trim()&&["supported","contradicted","inconclusive"].includes(t.resultClassification)))throw new Error(`Experiment ${t.id} is complete without classified evidence.`);
+    if(v===APP_VERSION&&(t.type==="gate"||t.type==="milestone")&&(t.status==="completed"||t.status==="validated")&&!(String(t.result||"").trim()&&["continue","revise","pause","stop"].includes(t.decision)))throw new Error(`Gate ${t.id} is complete without evidence and a decision.`);
+  });
+  const visiting=new Set(),visited=new Set();function walk(id){if(visiting.has(id))throw new Error(`Task dependency cycle includes ${id}.`);if(visited.has(id))return;visiting.add(id);const t=obj.tasks.find(x=>String(x.id)===id);(t&&Array.isArray(t.dependsOn)?t.dependsOn:[]).forEach(d=>walk(String(d)));visiting.delete(id);visited.add(id);}ids.forEach(walk);
+  if(v===2&&Array.isArray(obj.tasks))obj.tasks.forEach(t=>{
+    if(!t)return;
+    const done=t.status==="completed"||t.status==="validated";
+    if(!done||!["experiment","gate","milestone"].includes(t.type))return;
+    if(!String(t.result||"").trim())t.result="Migrated completion from the previous dashboard; evidence not re-verified.";
+    if(!["supported","contradicted","inconclusive"].includes(t.resultClassification))t.resultClassification="inconclusive";
+    if(!["continue","revise","pause","stop"].includes(t.decision))t.decision="continue";
+    if(!t.evidenceAt)t.evidenceAt=todayISO();
+  });
+  const merged=mergeState(obj);if(v===2){merged.meta.migratedFrom=2;merged.meta.migrationNotice=true;}return merged;
 }
 
 function tryStorage(){
@@ -754,28 +829,41 @@ function loadState(){
   tryStorage();
   if(!canStore) return deepClone(DEFAULTS);
   try{
-    const v2=localStorage.getItem(STORE_KEY);
-    if(v2) return validateSnapshotObject(JSON.parse(v2));
-  }catch(e){ console.warn("Could not load v2 state",e); }
+    const v3=localStorage.getItem(STORE_KEY);
+    if(v3){
+      const parsed=JSON.parse(v3);
+      try{ return validateSnapshotObject(parsed); }
+      catch(strictErr){
+        console.warn("Stored v3 state failed strict validation; repairing instead of resetting.",strictErr);
+        return mergeState(parsed);
+      }
+    }
+  }catch(e){ console.warn("Could not load v3 state",e); }
+  try{
+    const v2=localStorage.getItem(LEGACY_V2_KEY);
+    if(v2){const migrated=validateSnapshotObject(JSON.parse(v2));localStorage.setItem(STORE_KEY,JSON.stringify(migrated));return migrated;}
+  }catch(e){ console.warn("Could not migrate v2 state",e); }
   try{
     const v1=localStorage.getItem(LEGACY_KEY);
     if(v1){ const migrated=migrateV1(JSON.parse(v1)); localStorage.setItem(STORE_KEY,JSON.stringify(migrated)); return migrated; }
   }catch(e){ console.warn("Could not migrate v1 state",e); }
-  return mergeV2(DEFAULTS);
+  return mergeState(DEFAULTS);
 }
 function saveNow(){
   if(!canStore) return;
   try{ S.meta.saved=new Date().toISOString(); localStorage.setItem(STORE_KEY,JSON.stringify(S)); }catch(e){ console.warn("Autosave unavailable",e); }
 }
 function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveNow,120); }
-function snapshotForUndo(label){ undoStack.push({label,state:deepClone(S)}); if(undoStack.length>20) undoStack.shift(); }
-function undo(){ const item=undoStack.pop(); if(!item)return; S=item.state; save(); renderCurrent(); showToast(`Undid: ${item.label}`); }
+function updateUndoButton(){const b=document.getElementById("undoBtn");if(!b)return;const item=undoStack.at(-1);b.disabled=!item;b.textContent=item?`↶ Undo ${item.label}`:"↶ Undo";b.setAttribute("aria-label",item?`Undo ${item.label}`:"Nothing to undo");}
+function snapshotForUndo(label){ undoStack.push({label,state:deepClone(S)}); if(undoStack.length>20) undoStack.shift();updateUndoButton(); }
+function undo(){ const item=undoStack.pop(); if(!item)return; S=mergeState(item.state); save(); renderCurrent();updateUndoButton();showToast(`Undid: ${item.label}`); }
 
 function pricingDetails(stream,price=stream.p){
   const pct=clamp(stream.cogs,0,100)+clamp(stream.fees,0,100)+clamp(stream.offsiteRate,0,100);
   const fixed=number(stream.fixedFee)+number(stream.listingFee)+number(stream.packaging)+number(stream.shipping)+number(stream.rework);
   const contribution=price*(1-pct/100)-fixed;
-  return {pct,fixed,contribution,perHour:stream.hpu>0?contribution/stream.hpu:contribution};
+  const feasible=pct<100,denominator=1-pct/100;
+  return {pct,fixed,contribution,perHour:stream.hpu>0?contribution/stream.hpu:contribution,feasible,denominator};
 }
 
 function eligibleStreams(data,scope){
@@ -784,7 +872,7 @@ function eligibleStreams(data,scope){
 
 function runModel(data=S,scenKey=data.settings.scenario,scope="core"){
   const st=data.settings, scen=SCENARIOS[scenKey]||SCENARIOS.base, horizon=st.horizon;
-  const streams=eligibleStreams(data,scope); const years=[]; let npv=0, infeasible=false;
+  const streams=eligibleStreams(data,scope); const years=[]; let npv=0, infeasible=false;const infeasibleFees=new Set();
   const effStart=s=>number(s.start,1)+(number(s.start,1)>1?scen.delay:0);
   for(let yi=0;yi<horizon;yi++){
     const y=yi+1, hpw=Math.min(st.maxHpw,number(st.hours[Math.min(yi,st.hours.length-1)],0));
@@ -797,13 +885,14 @@ function runModel(data=S,scenKey=data.settings.scenario,scope="core"){
       const units=Math.max(0,number(s.u)*12*scen.u*Math.pow(Math.max(0,1+(number(s.ug)*scen.g)/100),age));
       const price=Math.max(0,number(s.p)*scen.p*Math.pow(Math.max(0,1+number(s.pg)/100),age));
       const pd=pricingDetails(s,price);
+      if(!pd.feasible)infeasibleFees.add(s.name);
       return {s,units,price,pd,rank:st.capacityMode==="strategic"?-number(s.priority,99):pd.perHour};
     }).sort((a,b)=>b.rank-a.rank||a.s.id.localeCompare(b.s.id));
     let revenue=0, variableCost=0, variableHours=0, lostRevenue=0, fulfilledUnits=0, demandUnits=0;
     const allocation=[];
     offers.forEach(o=>{
       demandUnits+=o.units;
-      const fulfill=fixedHours>avail||o.pd.contribution<=0?0:(o.s.hpu<=0?o.units:Math.min(o.units,remaining/number(o.s.hpu,1)));
+      const fulfill=fixedHours>avail||!o.pd.feasible||o.pd.contribution<=0?0:(o.s.hpu<=0?o.units:Math.min(o.units,remaining/number(o.s.hpu,1)));
       const hrs=fulfill*number(o.s.hpu); remaining=Math.max(0,remaining-hrs);
       const rev=fulfill*o.price, contrib=fulfill*o.pd.contribution;
       revenue+=rev; variableCost+=rev-contrib; variableHours+=hrs; fulfilledUnits+=fulfill;
@@ -813,16 +902,19 @@ function runModel(data=S,scenKey=data.settings.scenario,scope="core"){
     const overhead=number(st.ohm)*12*Math.pow(Math.max(0,1+number(st.ohg)/100),yi);
     const oneTime=yi===0?number(st.startupCosts)+number(st.workingCapital):0;
     const sde=revenue-variableCost-overhead-oneTime;
+    const recovery=yi===horizon-1?number(st.workingCapital)*number(st.workingCapitalRecoveryPct)/100:0;
+    const cashFlow=sde+recovery;
     const used=fixedHours+variableHours;
-    const df=Math.pow(1+number(st.r)/100,y); npv+=sde/df;
-    years.push({y,hpw,avail,fixedHours,used,util:avail?used/avail:0,revenue,variableCost,overhead,oneTime,sde,wage:used>0?sde/used:0,lostRevenue,fulfilledUnits,demandUnits,allocation,infeasible:fixedHours>avail});
+    const df=Math.pow(1+number(st.r)/100,y); npv+=cashFlow/df;
+    years.push({y,hpw,avail,fixedHours,used,util:avail?used/avail:0,revenue,variableCost,overhead,oneTime,recovery,cashFlow,sde,wage:used>0?sde/used:0,lostRevenue,fulfilledUnits,demandUnits,allocation,infeasible:fixedHours>avail});
   }
   let terminal=0;
   if(st.transferability&&number(st.tv)>0&&years.length){
     const last=years[years.length-1]; const normalized=Math.max(0,last.sde-last.used*number(st.replacementLaborRate));
     terminal=normalized*number(st.tv); npv+=terminal/Math.pow(1+number(st.r)/100,horizon);
   }
-  return {scope,scenario:scenKey,years,npv,terminal,infeasible,warnings:[infeasible?"Fixed/admin hours exceed available capacity in at least one year.":""].filter(Boolean)};
+  const warnings=[infeasible?"Fixed/admin hours exceed available capacity in at least one year.":"",infeasibleFees.size?`Percentage costs reach or exceed 100% for: ${[...infeasibleFees].join(", ")}. No sales are fulfilled for those streams.`:""].filter(Boolean);
+  return {scope,scenario:scenKey,years,npv,terminal,infeasible:infeasible||infeasibleFees.size>0,infeasibleFees:[...infeasibleFees],warnings};
 }
 
 function impactPreview(t){
@@ -840,6 +932,7 @@ function isComplete(t){ return t.status==="completed"||t.status==="validated"; }
 function taskState(t){
   if(isComplete(t)||t.status==="waiting") return t.status;
   const blocked=t.dependsOn.some(id=>{const d=S.tasks.find(x=>x.id===id);return d&&!isComplete(d);});
+  if(t.id==="fulltime-decision"&&!readiness().ready)return "blocked";
   return blocked?"blocked":(t.status==="active"?"active":"available");
 }
 function currentPhaseId(){
@@ -862,46 +955,53 @@ function refreshMomentumWeek(){
 }
 function awardTask(t,evidence=false){
   refreshMomentumWeek(); let awarded=0;
-  if(!t.pointsAwarded){t.pointsAwarded=true;awarded+=t.points;}
-  if(evidence&&!t.evidenceBonusAwarded){t.evidenceBonusAwarded=true;awarded+=5;}
-  if(awarded){S.momentum.total+=awarded;S.momentum.weekPoints+=awarded;S.momentum.history.push({at:new Date().toISOString(),taskId:t.id,points:awarded});}
+  const at=new Date().toISOString();
+  if(!t.pointsAwarded){t.pointsAwarded=true;awarded+=t.points;S.momentum.history.push({at,taskId:t.id,kind:"effort",points:t.points});}
+  if(evidence&&!t.evidenceBonusAwarded){t.evidenceBonusAwarded=true;awarded+=5;S.momentum.history.push({at,taskId:t.id,kind:"evidence",points:5});}
+  if(awarded){S.momentum.total+=awarded;S.momentum.weekPoints+=awarded;}
   return awarded;
 }
 
-function trackerRows(count=Infinity){ return S.tracker.filter(r=>r.logged).sort((a,b)=>a.m.localeCompare(b.m)).slice(-count); }
+function trackerRows(count=Infinity,{closedOnly=false}={}){const max=monthSerial(todayISO().slice(0,7))-(closedOnly?1:0);return S.tracker.filter(r=>r.logged&&validMonth(r.m)&&monthSerial(r.m)<=max).sort((a,b)=>a.m.localeCompare(b.m)).slice(-count); }
 function monthSerial(m){ const [y,mo]=String(m).split("-").map(Number); return y*12+mo; }
 function trackerMetrics(row){
   const earnings=number(row.rev)-number(row.cost), orders=number(row.orders);
   return {earnings,aov:orders?row.rev/orders:0,wage:row.hrs?earnings/row.hrs:0,inquiryConversion:row.inquiries?orders/row.inquiries:0,quoteAcceptance:row.quotes?orders/row.quotes:0};
 }
 function readiness(data=S){
-  const rows=data.tracker.filter(r=>r.logged).sort((a,b)=>a.m.localeCompare(b.m)), last6=rows.slice(-6); const consecutive=last6.length===6&&last6.every((r,i)=>i===0||monthSerial(r.m)===monthSerial(last6[i-1].m)+1);
-  const avgEarnings=last6.length?last6.reduce((a,r)=>a+trackerMetrics(r).earnings,0)/last6.length:0;
-  const avgHpw=last6.length?last6.reduce((a,r)=>a+number(r.hrs),0)/last6.length/4.33:0;
-  const maxObserved=last6.length?Math.max(...last6.map(r=>number(r.hrs)/4.33)):0;
-  const earningsPass=consecutive&&avgEarnings>=data.settings.target*(data.settings.readinessPct/100);
-  const sustainable=consecutive&&maxObserved<=data.settings.maxHpw&&avgHpw<=data.settings.hours[Math.min(data.settings.horizon-1,data.settings.hours.length-1)];
-  const completed=last6.reduce((a,r)=>a+number(r.completedOrders),0), repeat=last6.reduce((a,r)=>a+number(r.repeatOrders),0), orders=last6.reduce((a,r)=>a+number(r.orders),0);
-  const onTime=last6.reduce((a,r)=>a+number(r.onTimeOrders),0); const backlog=rows.length?number(rows[rows.length-1].backlogWeeks):0;
+  const st=data.settings,latestClosed=monthSerial(todayISO().slice(0,7))-1;
+  const rows=data.tracker.filter(r=>r.logged&&validMonth(r.m)&&monthSerial(r.m)<=latestClosed).sort((a,b)=>a.m.localeCompare(b.m));
+  const need=st.readinessMonths,provisionalNeed=Math.min(st.provisionalMonths,need);let run=[];
+  for(let serial=latestClosed;;serial--){const r=rows.find(x=>monthSerial(x.m)===serial);if(!r)break;run.unshift(r);}
+  const full=run.length>=need,provisional=!full&&run.length>=provisionalNeed,windowRows=run.slice(-(full?need:Math.min(run.length,provisionalNeed)));
+  const avgEarnings=windowRows.length?windowRows.reduce((a,r)=>a+trackerMetrics(r).earnings,0)/windowRows.length:0;
+  const avgHpw=windowRows.length?windowRows.reduce((a,r)=>a+number(r.hrs),0)/windowRows.length/4.33:0;
+  const maxObserved=windowRows.length?Math.max(...windowRows.map(r=>number(r.hrs)/4.33)):0;
+  const required=st.target*(st.readinessPct/100),earningsPass=full&&avgEarnings>=required;
+  const sustainable=full&&maxObserved<=st.readinessMaxHpw;
+  const completed=windowRows.reduce((a,r)=>a+number(r.completedOrders),0),repeat=windowRows.reduce((a,r)=>a+number(r.repeatOrders),0),orders=windowRows.reduce((a,r)=>a+number(r.orders),0);
+  const onTime=windowRows.reduce((a,r)=>a+number(r.onTimeOrders),0);const latest=run.at(-1),backlog=latest?number(latest.backlogWeeks):0;
   const repeatRate=orders?repeat/orders:0, onTimeRate=completed?onTime/completed:0;
+  const bookedContribution=latest?number(latest.bookedContribution):0,bookedRevenue=latest?number(latest.bookedRevenue):0,deposits=latest?number(latest.deposits):0;
+  const bookedPass=bookedContribution>=required*(st.depositCoveragePct/100)&&bookedRevenue>0&&deposits/bookedRevenue>=st.depositCoveragePct/100;
   const gates=[
-    {id:"history",name:"Six consecutive logged months",pass:consecutive,detail:`${last6.length}/6 recent months logged; zero months count.`},
-    {id:"earnings",name:"Owner-earnings threshold",pass:earningsPass,detail:`Six-month average ${formatMoney(avgEarnings)}/mo; requires ${formatMoney(data.settings.target*data.settings.readinessPct/100)}/mo (${data.settings.readinessPct}% of target).`},
-    {id:"hours",name:"Sustainable working hours",pass:sustainable,detail:`Average ${avgHpw.toFixed(1)} hrs/week; peak ${maxObserved.toFixed(1)} vs ${data.settings.maxHpw} maximum.`},
+    {id:"history",name:`${need} current consecutive closed months`,pass:full,detail:`${Math.min(run.length,need)}/${need} ending with the latest closed month; zero months count.${provisional?` ${provisionalNeed}-month result is provisional only.`:""}`},
+    {id:"earnings",name:"Owner-earnings threshold",pass:earningsPass,detail:`${windowRows.length}-month average ${formatMoney(avgEarnings)}/mo; requires ${formatMoney(required)}/mo (${st.readinessPct}% of target). Full history is required.`},
+    {id:"hours",name:"Sustainable working hours",pass:sustainable,detail:`Average ${avgHpw.toFixed(1)} hrs/week; peak ${maxObserved.toFixed(1)} vs ${st.readinessMaxHpw} readiness maximum.`},
     {id:"fund",name:"Emergency fund",pass:Boolean(data.ready.fund),detail:"User-confirmed six-month personal emergency fund."},
     {id:"insurance",name:"Health insurance",pass:Boolean(data.ready.insurance),detail:"User-confirmed plan is priced and selected."},
     {id:"tax",name:"Taxes and benefits",pass:Boolean(data.ready.taxBenefits),detail:"User-confirmed taxes, retirement, leave, and lost benefits are budgeted."},
-    {id:"demand",name:"Durable demand",pass:repeatRate>=.20||backlog>=8,detail:`Repeat rate ${formatPct(repeatRate)}; latest backlog ${backlog.toFixed(1)} weeks. Requires either 20% or 8 weeks.`},
-    {id:"delivery",name:"Reliable delivery",pass:completed>0&&onTimeRate>=.90,detail:`${completed?formatPct(onTimeRate):"No completed orders logged"}; requires at least 90%.`}
+    {id:"demand",name:"Durable or booked demand",pass:full&&(repeatRate>=st.repeatRateThreshold/100||backlog>=st.backlogThreshold||bookedPass),detail:`Repeat ${formatPct(repeatRate)}, backlog ${backlog.toFixed(1)} weeks, booked contribution ${formatMoney(bookedContribution)} with ${bookedRevenue?formatPct(deposits/bookedRevenue):"no"} deposit coverage. Requires one editable threshold plus full history.`},
+    {id:"delivery",name:"Reliable delivery",pass:full&&completed>0&&onTimeRate>=st.onTimeThreshold/100,detail:`${completed?formatPct(onTimeRate):"No completed orders logged"}; requires at least ${st.onTimeThreshold}%.`}
   ];
-  return {ready:gates.every(g=>g.pass),gates,avgEarnings,avgHpw,repeatRate,onTimeRate};
+  return {ready:gates.every(g=>g.pass),provisional,gates,avgEarnings,avgHpw,repeatRate,onTimeRate,historyCount:run.length,monthsRemaining:Math.max(0,need-run.length),latestClosed,required};
 }
 
-function actualsSuggestion(streamId){
-  const rows=trackerRows(3), stream=S.streams.find(x=>x.id===streamId); if(!stream||!rows.length)return null;
-  const orders=rows.reduce((a,r)=>a+number(r.orders),0), rev=rows.reduce((a,r)=>a+number(r.rev),0), hrs=rows.reduce((a,r)=>a+number(r.hrs),0);
-  return {stream,months:rows.length,u:orders/rows.length,p:orders?rev/orders:stream.p,hpu:orders?hrs/orders:stream.hpu,orders};
-}
+function actualsSuggestion(streamId){const stream=S.streams.find(x=>x.id===streamId);if(!stream)return null;const rows=trackerRows(3,{closedOnly:true}).map(r=>({m:r.m,...(r.byStream&&r.byStream[streamId]||{})})).filter(r=>number(r.orders)>0);if(!rows.length)return {stream,rows:[],months:0,orders:0};const orders=rows.reduce((a,r)=>a+number(r.orders),0),rev=rows.reduce((a,r)=>a+number(r.rev),0),hrs=rows.reduce((a,r)=>a+number(r.hrs),0);return {stream,rows,months:rows.length,u:orders/rows.length,p:orders?rev/orders:stream.p,hpu:orders?hrs/orders:stream.hpu,orders};}
+function observationCount(streamId){const stream=S.streams.find(s=>s.id===streamId),manual=stream?number(stream.manualObservations):0,map=new Map();S.actualApplications.filter(a=>a.streamId===streamId).forEach(a=>(a.months||[]).forEach(x=>map.set(x.m,number(x.orders))));return Math.round(manual+[...map.values()].reduce((a,b)=>a+b,0));}
+function suggestedTarget(st=S.settings){const pretax=(number(st.targetLiving)+number(st.targetBenefits)+number(st.targetSavings))/Math.max(.2,1-number(st.targetTaxRate)/100);return pretax*(1+number(st.targetBufferPct)/100);}
+function evidenceStreak(){const weeks=[...new Set(S.evidenceLedger.map(x=>x.week||weekKey(new Date(x.at))).filter(Boolean))].sort();if(!weeks.length)return 0;let streak=1;for(let i=weeks.length-1;i>0;i--){const [y,w]=weeks[i].split("-W").map(Number),[py,pw]=weeks[i-1].split("-W").map(Number);if((y===py&&w===pw+1)||(y===py+1&&w===1&&pw>=52))streak++;else break;}return streak;}
+function decisionCockpitInner(rd){const evidenceTasks=S.tasks.filter(t=>["experiment","gate","milestone"].includes(t.type)),verified=evidenceTasks.filter(t=>isComplete(t)&&t.result&&(t.resultClassification||t.decision)).length,supported=S.streams.filter(s=>["observed","supported"].includes(s.evidenceLevel)).length,targetGap=Math.max(0,rd.required-rd.avgEarnings),nextDecision=S.tasks.filter(t=>["gate","experiment"].includes(t.type)&&!isComplete(t)).sort((a,b)=>taskRank(b)-taskRank(a))[0];return `<div class="grid4"><div class="tile"><div class="lbl">Monthly readiness gap</div><div class="val">${formatMoney(targetGap)}</div><div class="dlt">vs ${formatMoney(rd.required)} threshold</div></div><div class="tile"><div class="lbl">Evidence coverage</div><div class="val">${verified} / ${evidenceTasks.length}</div><div class="dlt">classified decision tasks</div></div><div class="tile"><div class="lbl">Supported streams</div><div class="val">${supported} / ${S.streams.length}</div><div class="dlt">observed or supported</div></div><div class="tile"><div class="lbl">Evidence streak</div><div class="val">${evidenceStreak()} wk</div><div class="dlt">weeks with provenance</div></div></div><div class="decision-bar"><span><b>Earliest readiness:</b> ${rd.monthsRemaining?`${rd.monthsRemaining} more consecutive closed month${rd.monthsRemaining===1?"":"s"}`:"history window complete"}</span><span><b>Next decision:</b> ${nextDecision?esc(nextDecision.title):"No open decision"}</span></div>`;}
 
 const TABS=[
   {id:"overview",label:"Overview"},{id:"valuation",label:"Valuation"},{id:"streams",label:"Streams & Pricing"},
@@ -911,23 +1011,26 @@ const TABS=[
 function field(label,value,attrs={}){
   const id=attrs.id||uid("field"), type=attrs.type||"number";
   const extra=Object.entries(attrs).filter(([k])=>!["id","type","help","options"].includes(k)).map(([k,v])=>`${k}="${esc(v)}"`).join(" ");
+  const described=attrs.help?`aria-describedby="${id}-help"`:"";
   let control;
   if(type==="select"){
-    control=`<select id="${id}" ${extra}>${(attrs.options||[]).map(o=>`<option value="${esc(o.value)}" ${String(o.value)===String(value)?"selected":""}>${esc(o.label)}</option>`).join("")}</select>`;
-  }else if(type==="textarea") control=`<textarea id="${id}" ${extra}>${esc(value)}</textarea>`;
-  else control=`<input id="${id}" type="${esc(type)}" value="${esc(value)}" ${extra}>`;
-  return `<div><label class="f" for="${id}">${esc(label)}</label>${control}${attrs.help?`<span class="field-help">${esc(attrs.help)}</span>`:""}</div>`;
+    control=`<select id="${id}" ${described} ${extra}>${(attrs.options||[]).map(o=>`<option value="${esc(o.value)}" ${String(o.value)===String(value)?"selected":""}>${esc(o.label)}</option>`).join("")}</select>`;
+  }else if(type==="textarea") control=`<textarea id="${id}" ${described} ${extra}>${esc(value)}</textarea>`;
+  else control=`<input id="${id}" type="${esc(type)}" value="${esc(value)}" ${described} ${extra}>`;
+  return `<div><label class="f" for="${id}">${esc(label)}</label>${control}${attrs.help?`<span class="field-help" id="${id}-help">${esc(attrs.help)}</span>`:""}</div>`;
 }
 
 function statusLabel(state){ return ({available:"Available",active:"Active",blocked:"Blocked",waiting:"Waiting for result",completed:"Completed",validated:"Validated"})[state]||state; }
 function taskCardHtml(t,compact=false){
   const state=taskState(t), due=t.dueDate?dateLabel(t.dueDate):"No deadline";
   const blockedBy=t.dependsOn.map(id=>S.tasks.find(x=>x.id===id)).filter(x=>x&&!isComplete(x)).map(x=>x.title);
+  if(t.id==="fulltime-decision"&&!readiness().ready)blockedBy.push("all computed readiness gates");
   const impactRows=!compact&&t.impact?impactPreview(t):null;
   const buttons=[];
   if(state==="available") buttons.push(`<button class="ghost" data-action="task-start" data-id="${esc(t.id)}">Start</button>`);
-  if(state==="available"||state==="active") buttons.push(`<button class="primary" data-action="task-done" data-id="${esc(t.id)}">${t.type==="experiment"?"Record result":"Mark complete"}</button>`);
+  if(state==="available"||state==="active") buttons.push(`<button class="primary" data-action="task-done" data-id="${esc(t.id)}">${t.type==="action"?"Mark complete":"Record evidence"}</button>`);
   if(state==="waiting") buttons.push(`<button class="primary" data-action="task-result" data-id="${esc(t.id)}">Add result</button>`);
+  if(isComplete(t)&&!compact) buttons.push(`<button class="ghost" data-action="task-reopen" data-id="${esc(t.id)}">Reopen</button>`);
   if(compact) buttons.push(`<button class="ghost" data-action="open-roadmap">Open roadmap</button>`);
   return `<article class="task-card ${isComplete(t)?"complete":""} ${state==="blocked"?"locked":""}" data-task-id="${esc(t.id)}">
     <div class="flex-between"><div class="task-title">${esc(t.title)}</div>${compact?"":`<div class="task-tools">
@@ -940,29 +1043,27 @@ function taskCardHtml(t,compact=false){
     <div class="task-meta"><span class="status-chip ${state}">${statusLabel(state)}</span><span class="type-chip">${esc(t.type)}</span><span class="pri ${esc(t.priority)}">${esc(t.priority)}</span><span>${t.effortMinutes} min</span><span>${esc(due)}</span><span>${t.points} pts${t.type==="experiment"?" + 5 evidence":""}</span>${t.impact?`<span class="impact-chip">Impact preview</span>`:""}</div>
     ${blockedBy.length?`<div class="task-detail"><b>Blocked by:</b> ${esc(blockedBy.join(", "))}</div>`:""}
     ${!compact?`<div class="task-detail"><b>Done when:</b> ${esc(t.definitionOfDone)}</div><div class="task-detail"><b>Why:</b> ${esc(t.why)}</div>`:""}
-    ${!compact&&t.metric?`<div class="task-detail"><b>SMART measure:</b> ${esc(t.metric.name)} · ${esc(t.metric.baseline)} → ${esc(t.metric.target)} · review ${dateLabel(t.metric.reviewDate)}</div>`:""}
+    ${!compact&&t.metric?`<div class="task-detail"><b>SMART measure:</b> ${esc(t.metric.name)} · baseline ${esc(t.metric.baseline)} → target ${esc(t.metric.target)}.<br><b>Exposure:</b> ${esc(t.metric.exposure||"Not set")} · <b>Decision rule:</b> ${esc(t.metric.decisionRule||"Not set")} · <b>Review:</b> ${dateLabel(t.metric.reviewDate)}</div>`:""}
     ${impactRows?`<div class="notice" style="margin-top:8px"><b>Planning sensitivity—not earned value:</b> ${impactRows.map(r=>`${r.case} ${formatMoney(r.delta,false)}`).join(" · ")}. ${esc(t.impact.caveat)}</div>`:""}
-    ${t.result?`<div class="notice good" style="margin-top:8px"><b>Evidence:</b> ${esc(t.result)}</div>`:""}
-    ${!isComplete(t)&&state!=="blocked"?`<div class="task-actions">${buttons.join("")}</div>`:""}
+    ${t.result?`<div class="notice good" style="margin-top:8px"><b>Evidence:</b> ${esc(t.result)}${t.resultClassification?` · ${esc(t.resultClassification)}`:""}${t.decision?` · decision: ${esc(t.decision)}`:""}${t.evidenceAt?` · ${dateLabel(t.evidenceAt)}`:""}</div>`:""}
+    ${(isComplete(t)||state!=="blocked")&&buttons.length?`<div class="task-actions">${buttons.join("")}</div>`:""}
   </article>`;
 }
 
-function chartTicks(max,n=4){
-  if(max<=0) return [0,1];
-  const raw=max/n, mag=Math.pow(10,Math.floor(Math.log10(raw)));
-  const step=[1,1.5,2,2.5,3,4,5,7.5,10].map(m=>m*mag).find(s=>Math.ceil(max/s)<=n)||10*mag;
-  const top=Math.ceil(max/step-0.001)*step, ticks=[];
-  for(let v=0;v<=top+step*0.001;v+=step) ticks.push(v);
-  return ticks;
+function chartTicks(min,max,maxTicks=7){
+  if(!Number.isFinite(min)||!Number.isFinite(max))return {ticks:[0,1],lo:0,hi:1};
+  min=Math.min(min,0);max=Math.max(max,0);if(min===max){min-=1;max+=1;}
+  const range=max-min,raw=range/Math.max(2,maxTicks-1),mag=Math.pow(10,Math.floor(Math.log10(raw))),fraction=raw/mag;
+  const nice=fraction<=1?1:fraction<=2?2:fraction<=2.5?2.5:fraction<=5?5:10;let step=nice*mag;
+  let lo=Math.floor(min/step)*step,hi=Math.ceil(max/step)*step;
+  while(Math.round((hi-lo)/step)+1>maxTicks){step*=2;lo=Math.floor(min/step)*step;hi=Math.ceil(max/step)*step;}
+  const count=Math.round((hi-lo)/step),ticks=Array.from({length:count+1},(_,i)=>Math.abs(lo+i*step)<step*1e-9?0:lo+i*step);
+  return {ticks,lo,hi};
 }
 function valuationChart(model,id){
-  const vals=model.years.map(y=>y.sde), maxV=Math.max(1,...vals), minV=Math.min(0,...vals);
-  const ticks=chartTicks(maxV,4), step=ticks[1]||ticks[ticks.length-1];
-  let lo=0;
-  if(minV<0){ lo=-Math.ceil(-minV/step)*step; for(let v=-step;v>=lo-step*0.001;v-=step) ticks.unshift(Math.round(v*100)/100); }
-  const top=ticks[ticks.length-1];
+  const vals=model.years.map(y=>y.sde),domain=chartTicks(Math.min(...vals,0),Math.max(...vals,0),7),{ticks,lo}=domain,top=domain.hi;
   const w=640,h=248,padL=66,padR=14,padT=12,padB=26,iw=w-padL-padR,ih=h-padT-padB;
-  const yPos=v=>padT+ih*(1-(v-lo)/(top-lo));
+  const yPos=v=>padT+ih*(1-(v-lo)/(top-lo||1));
   const grid=ticks.map(t=>`<line x1="${padL}" y1="${yPos(t).toFixed(1)}" x2="${w-padR}" y2="${yPos(t).toFixed(1)}" stroke="var(--grid)" stroke-width="1"/><text x="${padL-7}" y="${(yPos(t)+4).toFixed(1)}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">${formatMoney(t)}</text>`).join("");
   const bw=Math.min(26,iw/model.years.length*.55);
   const bars=model.years.map((y,i)=>{
@@ -975,34 +1076,33 @@ function valuationChart(model,id){
 }
 
 function modelTable(model){
-  return `<div class="tscroll"><table class="data"><caption class="sr-only">Year-by-year model results</caption><thead><tr><th>Year</th><th>Hours/wk</th><th>Revenue</th><th>Owner earnings</th><th>Effective $/hr</th><th>Capacity used</th><th>Unserved demand</th></tr></thead><tbody>${model.years.map(y=>`<tr><td>${y.y}</td><td>${y.hpw.toFixed(1)}</td><td>${formatMoney(y.revenue,false)}</td><td>${formatMoney(y.sde,false)}</td><td>${y.used?`$${y.wage.toFixed(0)}`:"—"}</td><td>${formatPct(y.util)}</td><td>${formatMoney(y.lostRevenue,false)}</td></tr>`).join("")}</tbody></table></div>`;
+  return `<div class="tscroll"><table class="data"><caption class="sr-only">Year-by-year model results</caption><thead><tr><th>Year</th><th>Hours/wk</th><th>Revenue</th><th>Owner earnings</th><th>Working-capital recovery</th><th>Cash flow</th><th>Effective $/hr</th><th>Capacity used</th><th>Unserved demand</th></tr></thead><tbody>${model.years.map(y=>`<tr><td>${y.y}</td><td>${y.hpw.toFixed(1)}</td><td>${formatMoney(y.revenue,false)}</td><td>${formatMoney(y.sde,false)}</td><td>${formatMoney(y.recovery,false)}</td><td>${formatMoney(y.cashFlow,false)}</td><td>${y.used?`$${y.wage.toFixed(0)}`:"—"}</td><td>${formatPct(y.util)}</td><td>${formatMoney(y.lostRevenue,false)}</td></tr>`).join("")}</tbody></table></div>`;
 }
 
 function ovSummaryInner(){
   const core=runModel(S), full=runModel(S,S.settings.scenario,"full");
-  return `<div class="lbl">Primary planning measure</div><div class="hero">${formatMoney(core.npv)}</div><div class="hero-sub">${S.settings.horizon}-year discounted owner earnings · ${SCENARIOS[S.settings.scenario].label} scenario · core streams only. This is a planning estimate, not a market appraisal.</div>
+  return `<div class="lbl">Planned operating value</div><div class="hero">${formatMoney(core.npv)}</div><div class="hero-sub">${S.settings.horizon}-year discounted owner cash flow · ${SCENARIOS[S.settings.scenario].label} scenario · core streams only. Actual sale value is unestablished; this is not a market appraisal.</div>
       <div class="grid4" style="margin-top:12px">
         <div class="tile"><div class="lbl">Conservative core</div><div class="val">${formatMoney(runModel(S,"cons").npv)}</div></div>
         <div class="tile"><div class="lbl">Base core</div><div class="val">${formatMoney(runModel(S,"base").npv)}</div></div>
         <div class="tile"><div class="lbl">Stretch core</div><div class="val">${formatMoney(runModel(S,"stretch").npv)}</div></div>
         <div class="tile"><div class="lbl">Hypothesis upside</div><div class="val">${formatMoney(full.npv-core.npv)}</div><div class="dlt">kept separate until validated</div></div>
-      </div>${core.infeasible?`<div class="notice warn" style="margin-top:10px"><b>Capacity is infeasible.</b> Fixed and admin hours exceed available hours in at least one year; the model does not hide the shortfall.</div>`:""}`;
+      </div>${core.warnings.map(w=>`<div class="notice warn" style="margin-top:10px"><b>Model warning:</b> ${esc(w)}</div>`).join("")}`;
 }
 function gatesGridInner(rd){
   return rd.gates.map(g=>`<div class="gate ${g.pass?"pass":"fail"}"><div class="gate-name">${g.pass?"✓":"○"} ${esc(g.name)}</div><div class="gate-detail">${esc(g.detail)}</div></div>`).join("");
 }
 function valSummaryInner(){
   const core=runModel(S), full=runModel(S,S.settings.scenario,"full"), fullDelta=full.npv-core.npv;
-  return `<div class="grid3"><div class="tile"><div class="lbl">Core case</div><div class="val">${formatMoney(core.npv)}</div></div><div class="tile"><div class="lbl">Full case</div><div class="val">${formatMoney(full.npv)}</div></div><div class="tile"><div class="lbl">Hypothesis upside</div><div class="val">${formatMoney(fullDelta)}</div><div class="dlt">${fullDelta>=0?"not yet evidenced":"hypotheses reduce value"}</div></div><div class="tile"><div class="lbl">Terminal value</div><div class="val">${formatMoney(core.terminal)}</div><div class="dlt">replacement labor deducted</div></div></div>
-      ${valuationChart(core,"owner-earnings-chart")}${modelTable(core)}`;
+  return `<div class="grid3"><div class="tile"><div class="lbl">Planned core case</div><div class="val">${formatMoney(core.npv)}</div></div><div class="tile"><div class="lbl">Full scenario</div><div class="val">${formatMoney(full.npv)}</div></div><div class="tile"><div class="lbl">Hypothesis sensitivity</div><div class="val">${formatMoney(fullDelta)}</div><div class="dlt">${fullDelta>=0?"not yet evidenced":"hypotheses reduce value"}</div></div><div class="tile"><div class="lbl">Actual business value</div><div class="val" style="font-size:18px">Unestablished</div><div class="dlt">no market appraisal</div></div><div class="tile"><div class="lbl">Terminal value</div><div class="val">${formatMoney(core.terminal)}</div><div class="dlt">replacement labor deducted</div></div></div>${core.warnings.map(w=>`<div class="notice warn"><b>Model warning:</b> ${esc(w)}</div>`).join("")}${valuationChart(core,"owner-earnings-chart")}${modelTable(core)}`;
 }
 function streamKpisInner(s){
-  const pd=pricingDetails(s), minimum=s.hpu?((S.settings.hourlyFloor*s.hpu+pd.fixed)/(1-pd.pct/100)):0;
-  return `<div class="tile"><div class="lbl">Contribution/unit</div><div class="val">${formatMoney(pd.contribution,false)}</div></div><div class="tile"><div class="lbl">Contribution/hour</div><div class="val">${s.hpu?`$${pd.perHour.toFixed(0)}/hr`:"N/A"}</div></div><div class="tile"><div class="lbl">Price for $${S.settings.hourlyFloor}/hr floor</div><div class="val">${minimum>0?formatMoney(minimum,false):"N/A"}</div></div><div class="tile"><div class="lbl">Evidence</div><div class="val" style="font-size:18px">${s.observations} obs.</div></div>`;
+  const pd=pricingDetails(s), minimum=pd.feasible&&s.hpu?((S.settings.hourlyFloor*s.hpu+pd.fixed)/pd.denominator):null;
+  return `<div class="tile"><div class="lbl">Contribution/unit</div><div class="val">${formatMoney(pd.contribution,false)}</div></div><div class="tile"><div class="lbl">Contribution/hour</div><div class="val">${s.hpu?`$${pd.perHour.toFixed(0)}/hr`:"N/A"}</div></div><div class="tile"><div class="lbl">Price for $${S.settings.hourlyFloor}/hr floor</div><div class="val">${minimum!==null&&minimum>=0?formatMoney(minimum,false):"Infeasible"}</div></div><div class="tile"><div class="lbl">Evidence</div><div class="val" style="font-size:18px">${observationCount(s.id)} obs.</div></div>`;
 }
 function streamMathInner(s){
   const pd=pricingDetails(s);
-  return `<b>Current math:</b> ${formatMoney(s.p,false)} price − ${pd.pct.toFixed(1)}% percentage costs − ${formatMoney(pd.fixed,false)} fixed sale costs = ${formatMoney(pd.contribution,false)} contribution before overhead.`;
+  return `${pd.feasible?"":`<span class="warn-text"><b>Infeasible percentage costs:</b> ${pd.pct.toFixed(1)}% leaves no valid price-floor denominator. Correct the fee/COGS assumptions.</span><br>`}<b>Current math:</b> ${formatMoney(s.p,false)} price − ${pd.pct.toFixed(1)}% percentage costs − ${formatMoney(pd.fixed,false)} fixed sale costs = ${formatMoney(pd.contribution,false)} contribution before overhead.`;
 }
 function trackKpisInner(r){
   const m=trackerMetrics(r);
@@ -1010,7 +1110,7 @@ function trackKpisInner(r){
 }
 function wholesaleVals(){
   const ws=S.wholesale, wholesale=ws.cost/(1-ws.targetMargin/100), retail=wholesale/(1-ws.retailerMargin/100);
-  return {wholesale,retail,cash:ws.cost*10};
+  return {wholesale,retail,cash:ws.cost*ws.units};
 }
 let liveTimer=null, lastInputEl=null;
 function refreshLive(){
@@ -1020,7 +1120,7 @@ function refreshLive(){
     patch("ov-summary-live",ovSummaryInner());
     patch("ov-gates-grid",gatesGridInner(rd));
     const mc=document.getElementById("momentum-count");if(mc)mc.textContent=`${S.momentum.weekPoints} / ${S.momentum.weeklyGoal}`;
-    const mf=document.getElementById("momentum-fill");if(mf)mf.style.width=`${Math.min(100,S.momentum.weekPoints/S.momentum.weeklyGoal*100)}%`;
+    const meter=document.getElementById("momentum-meter"),goal=Math.max(1,number(S.momentum.weeklyGoal,1)),pct=Math.min(100,S.momentum.weekPoints/goal*100);const mf=document.getElementById("momentum-fill");if(mf)mf.style.width=`${pct}%`;if(meter){meter.setAttribute("aria-valuenow",String(Math.min(S.momentum.weekPoints,goal)));meter.setAttribute("aria-valuemax",String(goal));}
   }else if(currentTab==="valuation"){
     patch("val-summary-live",valSummaryInner());
   }else if(currentTab==="streams"){
@@ -1039,15 +1139,16 @@ function handleMainInput(e){
   if(x.closest("#quick-add-form")||x.closest("#add-month-form")||x.closest("#quick-log-form")||x.closest("#shift-dates-form")||x.id==="import-json"||x.id==="new-month") return;
   if(x.value==="") return;
   if(lastInputEl!==x){ snapshotForUndo(`edit ${x.dataset.setting||x.dataset.streamField||x.dataset.trackerField||"value"}`); lastInputEl=x; }
-  if(x.dataset.setting){ setPath(S,x.dataset.setting,inputValue(x)); S.settings=normalizeSettings(S.settings); }
+  if(x.dataset.setting){ setPath(S,x.dataset.setting,inputValue(x));normalizeEditedPath(x.dataset.setting); }
   else if(x.dataset.hoursIndex!==undefined){ const i=Number(x.dataset.hoursIndex); while(S.settings.hours.length<=i)S.settings.hours.push(S.settings.hours.at(-1)||0); S.settings.hours[i]=clamp(x.value,0,S.settings.maxHpw); }
   else if(x.dataset.streamId&&x.dataset.streamField){ const s=S.streams.find(v=>v.id===x.dataset.streamId); if(!s)return; s[x.dataset.streamField]=inputValue(x); Object.assign(s,normalizeStream(s,s)); }
   else if(x.dataset.trackerIndex!==undefined&&x.dataset.trackerField){ const i=Number(x.dataset.trackerIndex); if(!S.tracker[i])return; S.tracker[i][x.dataset.trackerField]=inputValue(x); S.tracker[i]=normalizeTrackerRow(S.tracker[i]); }
+  else if(x.dataset.trackerIndex!==undefined&&x.dataset.trackerStreamId&&x.dataset.trackerStreamField){const i=Number(x.dataset.trackerIndex),r=S.tracker[i];if(!r)return;r.byStream=r.byStream||{};r.byStream[x.dataset.trackerStreamId]=r.byStream[x.dataset.trackerStreamId]||{};r.byStream[x.dataset.trackerStreamId][x.dataset.trackerStreamField]=inputValue(x);S.tracker[i]=normalizeTrackerRow(r);}
   else { lastInputEl=null; return; }
   save(); clearTimeout(liveTimer); liveTimer=setTimeout(refreshLive,220);
 }
 function backupNudgeHtml(){
-  if(!canStore)return "";
+  if(!canStore)return `<div class="notice warn"><b>Autosave unavailable.</b> This viewer cannot persist browser storage. Keep this tab open and export a JSON snapshot from Data before closing.</div>`;
   const hasData=S.momentum.total>0||S.tracker.some(r=>r.logged&&(r.rev>0||r.hrs>0||r.orders>0));
   if(!hasData)return "";
   const days=S.meta.lastBackup?Math.round((new Date(`${todayISO()}T12:00:00`)-new Date(`${S.meta.lastBackup}T12:00:00`))/86400000):null;
@@ -1064,13 +1165,14 @@ function renderOverview(el){
     <div class="card"><div id="ov-summary-live">${ovSummaryInner()}</div></div>
     <div class="grid2">
       <div class="card today-card"><div class="flex-between"><h2>Today</h2><span class="badge">Recommended next</span></div>${next?taskCardHtml(next,true):`<p class="note">No available tasks. Review waiting experiments or add the next task.</p>`}</div>
-      <div class="card"><div class="flex-between"><h2>Momentum</h2><span class="badge">${S.momentum.total} total pts</span></div><div class="hero" style="font-size:34px" id="momentum-count">${S.momentum.weekPoints} / ${S.momentum.weeklyGoal}</div><div class="meter" aria-label="Weekly Momentum progress"><i id="momentum-fill" style="width:${Math.min(100,S.momentum.weekPoints/S.momentum.weeklyGoal*100)}%"></i></div><div class="note" style="margin-top:8px">Points reward completed work. Experiments earn the evidence bonus only after a result is recorded.</div>${field("Weekly goal",S.momentum.weeklyGoal,{id:"momentum-goal",type:"number",min:5,max:1000,"data-setting":"momentum.weeklyGoal"})}</div>
+      <div class="card"><div class="flex-between"><h2>Evidence momentum</h2><span class="badge">${S.momentum.total} total pts</span></div><div class="hero" style="font-size:34px" id="momentum-count">${S.momentum.weekPoints} / ${S.momentum.weeklyGoal}</div><div class="meter" id="momentum-meter" role="progressbar" aria-label="Weekly evidence momentum" aria-valuemin="0" aria-valuemax="${Math.max(1,S.momentum.weeklyGoal)}" aria-valuenow="${Math.min(S.momentum.weekPoints,Math.max(1,S.momentum.weeklyGoal))}"><i id="momentum-fill" style="width:${Math.min(100,S.momentum.weekPoints/Math.max(1,S.momentum.weeklyGoal)*100)}%"></i></div><div class="note" style="margin-top:8px">Effort points acknowledge bounded work; a separate evidence bonus requires a classified result. Points never alter valuation or readiness.</div>${field("Weekly goal",S.momentum.weeklyGoal,{id:"momentum-goal",type:"number",min:5,max:1000,"data-setting":"momentum.weeklyGoal"})}</div>
     </div>
     <div class="grid2">
       <div class="card"><h2>This week</h2><div class="note">Ranked by deadlines, phase, critical-path unlocks, priority, impact, and effort.</div>${week.length?week.map(t=>taskCardHtml(t,true)).join(""):`<p class="muted">No additional available tasks.</p>`}</div>
       <div class="card"><h2>Waiting for evidence</h2><div class="note">These experiments do not count as complete until the result is recorded.</div>${waiting.length?waiting.map(t=>taskCardHtml(t,true)).join(""):`<p class="muted">Nothing is waiting.</p>`}</div>
     </div>
-    <div class="card"><div class="flex-between"><h2>Full-time readiness</h2><span class="badge">${rd.ready?"READY":"NOT READY"}</span></div><div class="note">Every gate must pass; strong performance in one area cannot compensate for a missing safety or evidence gate.</div><div class="grid2" id="ov-gates-grid">${gatesGridInner(rd)}</div><button class="ghost" data-action="open-tracker" style="margin-top:10px">Open readiness inputs</button></div>
+    <div class="card"><div class="flex-between"><h2>Decision cockpit</h2><span class="badge">${rd.ready?"READY":rd.provisional?"PROVISIONAL":"NOT READY"}</span></div>${decisionCockpitInner(rd)}</div>
+    <div class="card"><div class="flex-between"><h2>Full-time readiness</h2><span class="badge">${rd.ready?"READY":rd.provisional?"PROVISIONAL":"NOT READY"}</span></div><div class="note">Every gate must pass; strong performance in one area cannot compensate for a missing safety or evidence gate. Current and future months are excluded.</div><div class="grid2" id="ov-gates-grid">${gatesGridInner(rd)}</div><button class="ghost" data-action="open-tracker" style="margin-top:10px">Open readiness inputs</button></div>
     <div class="grid4" id="ov-latest">
       <div class="tile"><div class="lbl">Latest logged revenue</div><div class="val">${last?formatMoney(last.rev):"—"}</div><div class="dlt">${last?esc(last.m):"Add a Tracker month"}</div></div>
       <div class="tile"><div class="lbl">Latest owner earnings</div><div class="val">${lm?formatMoney(lm.earnings):"—"}</div></div>
@@ -1082,11 +1184,12 @@ function renderOverview(el){
 function renderValuation(el){
   const st=S.settings, core=runModel(S), full=runModel(S,st.scenario,"full"), fullDelta=full.npv-core.npv;
   el.innerHTML=`
-    <div class="card"><h2>${st.horizon}-year discounted owner earnings</h2><div class="note">Core planning value includes planned and validated streams. Hypothesis streams are shown as separate upside. Task checkboxes never change these numbers.</div>
+    <div class="card"><h2>Planned operating value — not an appraisal</h2><div class="note">This is the present value of modeled owner cash flows. Core includes planned and validated streams; hypothesis streams remain separate. Completing tasks never increases these numbers automatically, and actual sale value is unestablished.</div>
       <div id="val-summary-live">${valSummaryInner()}</div>
     </div>
     <div class="card"><h2>Scenario and horizon</h2><div class="note">Conservative, Base, and Stretch alter units, growth, price, and launch timing; the exact assumptions remain editable in Streams.</div>
       <label class="f" id="scenario-label">Scenario</label><div class="seg" role="group" aria-labelledby="scenario-label">${Object.entries(SCENARIOS).map(([k,v])=>`<button data-action="set-scenario" data-value="${k}" aria-pressed="${st.scenario===k}">${v.label}</button>`).join("")}</div>
+      <div class="tscroll"><table class="data"><caption>Exact scenario multipliers</caption><thead><tr><th>Scenario</th><th>Starting units</th><th>Unit growth</th><th>Starting price</th><th>Launch delay</th></tr></thead><tbody>${Object.values(SCENARIOS).map(v=>`<tr><td>${esc(v.label)}</td><td>×${v.u.toFixed(2)}</td><td>×${v.g.toFixed(2)}</td><td>×${v.p.toFixed(2)}</td><td>${v.delay} year${v.delay===1?"":"s"}</td></tr>`).join("")}</tbody></table></div>
       <div class="grid2">${field("Horizon (years)",st.horizon,{id:"setting-horizon",type:"number",min:1,max:20,"data-setting":"settings.horizon"})}${field("Discount rate (%)",st.r,{id:"setting-rate",type:"number",min:0,max:100,step:.5,"data-setting":"settings.r"})}</div>
     </div>
     <div class="card"><h2>Capacity and owner time</h2><div class="note">Annual capacity uses an explicit weekly schedule, capped at the editable maximum. Admin, one-time launch, and recurring production hours are reserved before demand is allocated.</div>
@@ -1100,9 +1203,10 @@ function renderValuation(el){
       ${field("Annual overhead growth (%)",st.ohg,{id:"setting-ohg",type:"number",min:-100,max:1000,step:.5,"data-setting":"settings.ohg"})}
       ${field("Startup costs",st.startupCosts,{id:"setting-startup",type:"number",min:0,step:1,"data-setting":"settings.startupCosts"})}
       ${field("Working capital",st.workingCapital,{id:"setting-wc",type:"number",min:0,step:1,"data-setting":"settings.workingCapital"})}
+      ${field("Working capital recovered at horizon (%)",st.workingCapitalRecoveryPct,{id:"setting-wc-recovery",type:"number",min:0,max:100,step:1,"data-setting":"settings.workingCapitalRecoveryPct",help:"Recovery is a separate final-year cash flow, not operating earnings."})}
       ${field("Terminal multiple",st.tv,{id:"setting-tv",type:"number",min:0,max:10,step:.1,"data-setting":"settings.tv",help:"Defaults to zero."})}
       ${field("Replacement labor $/hour",st.replacementLaborRate,{id:"setting-labor",type:"number",min:0,step:1,"data-setting":"settings.replacementLaborRate"})}
-      </div><label class="f"><input type="checkbox" data-setting="settings.transferability" ${st.transferability?"checked":""}> The business is demonstrably transferable without the owner</label><div class="callout"><b>Terminal-value rule:</b> it remains zero unless transferability is confirmed. When enabled, the model subtracts replacement labor from final-year earnings before applying the multiple.</div>
+      </div><label class="f"><input type="checkbox" data-setting="settings.transferability" ${st.transferability?"checked":""}> The business is demonstrably transferable without the owner</label><div class="callout"><b>Cash-flow rules:</b> working capital is invested in Year 1 and its editable recovery is shown separately in the final year. Terminal value remains zero unless transferability is confirmed; replacement labor is deducted before a multiple.</div>
     </div>
     <div class="card"><h2>Task impact previews</h2><div class="note">These are isolated low/base/high sensitivities—not promised value, causal claims, or rewards. Nothing applies automatically.</div>${S.tasks.filter(t=>t.impact).map(t=>{const rows=impactPreview(t);return `<details><summary>${esc(t.impact.label)}</summary><p class="task-detail">${esc(t.impact.caveat)}</p><div class="tscroll"><table class="data impact-table"><thead><tr><th>Case</th><th>Assumption</th><th>Modeled value</th><th>Change vs current</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.case}</td><td>${esc(r.assumption)}</td><td>${formatMoney(r.value,false)}</td><td>${formatMoney(r.delta,false)}</td></tr>`).join("")}</tbody></table></div></details>`;}).join("")}</div>`;
 }
@@ -1117,9 +1221,10 @@ function renderStreams(el){
   el.innerHTML=`
     <div class="card"><h2>Streams and channel economics</h2><div class="note">Core valuation includes planned and validated streams. Hypothesis streams stay in the separate upside case until their evidence gate passes.</div><div class="legend">${S.streams.map(s=>`<span class="k"><span class="sw" style="background:var(${esc(s.color)})"></span>${esc(s.name)} · ${esc(s.status)}</span>`).join("")}</div></div>
     ${S.streams.map(s=>{
-      const pd=pricingDetails(s), minimum=s.hpu?((S.settings.hourlyFloor*s.hpu+pd.fixed)/(1-pd.pct/100)):0;
+      const pd=pricingDetails(s), minimum=pd.feasible&&s.hpu?((S.settings.hourlyFloor*s.hpu+pd.fixed)/pd.denominator):null;
       return `<div class="stream-card"><div class="sh"><span class="sw" style="background:var(${esc(s.color)})"></span><div class="nm">${esc(s.name)}</div><span class="status-chip ${s.status==="validated"?"validated":""}">${esc(s.status)}</span><label><span class="sr-only">Include ${esc(s.name)}</span><input type="checkbox" data-stream-id="${esc(s.id)}" data-stream-field="on" ${s.on?"checked":""}></label></div>
         <div class="grid4" style="margin-top:9px" id="stream-kpis-${esc(s.id)}">${streamKpisInner(s)}</div>
+        ${!pd.feasible?`<div class="notice warn"><b>Infeasible costs:</b> percentage costs total ${pd.pct.toFixed(1)}%; this stream is excluded from fulfilled sales until corrected.</div>`:pd.perHour<S.settings.hourlyFloor?`<div class="notice warn"><b>Below contribution/hour floor:</b> current ${formatMoney(pd.perHour,false)}/hr vs ${formatMoney(S.settings.hourlyFloor,false)}/hr. Required price: ${minimum===null?"infeasible":formatMoney(minimum,false)}.</div>`:""}
         <details><summary>Edit assumptions and evidence</summary>
           <div class="grid2">
             ${streamField(s,"Stream name","name",{type:"text"})}
@@ -1136,13 +1241,13 @@ function renderStreams(el){
             ${streamField(s,"Materials / COGS (%)","cogs",{min:0,max:100,step:.1})}${streamField(s,"Platform + processing (%)","fees",{min:0,max:100,step:.1})}${streamField(s,"Offsite ads (%)","offsiteRate",{min:0,max:100,step:.1})}${streamField(s,"Payment fixed fee","fixedFee",{min:0,step:.01})}
             ${streamField(s,"Listing fee","listingFee",{min:0,step:.01})}${streamField(s,"Packaging / sale","packaging",{min:0,step:.01})}${streamField(s,"Shipping subsidy / sale","shipping",{min:0,step:.01})}${streamField(s,"Expected rework / sale","rework",{min:0,step:.01})}
           </div>
-          <div class="grid2">${streamField(s,"Observed samples","observations",{min:0,step:1})}${streamField(s,"Evidence / rationale","why",{type:"textarea",rows:4})}</div>
+          <div class="grid2">${streamField(s,"Manual observed samples","manualObservations",{min:0,step:1,help:"Accepted Tracker observations are added once by month."})}${streamField(s,"Evidence / rationale","why",{type:"textarea",rows:4})}</div>
           <div class="callout" id="stream-math-${esc(s.id)}">${streamMathInner(s)}</div>
         </details>
       </div>`;
     }).join("")}
-    <div class="card"><h2>Wholesale viability calculator</h2><div class="note">Wholesale price comes from cost and your target maker margin. Suggested retail then protects the retailer’s margin; it is not direct price × 2.</div>
-      <div class="grid3">${field("Fully loaded unit cost",ws.cost,{id:"wholesale-cost",type:"number",min:0,step:.01,"data-setting":"wholesale.cost"})}${field("Target maker margin (%)",ws.targetMargin,{id:"wholesale-maker",type:"number",min:0,max:99,step:.5,"data-setting":"wholesale.targetMargin"})}${field("Retailer margin (%)",ws.retailerMargin,{id:"wholesale-retailer",type:"number",min:0,max:99,step:.5,"data-setting":"wholesale.retailerMargin"})}<div class="tile"><div class="lbl">Minimum wholesale</div><div class="val" id="wholesale-min">${formatMoney(wholesale,false)}</div></div><div class="tile"><div class="lbl">Suggested retail</div><div class="val" id="wholesale-retail">${formatMoney(retail,false)}</div></div><div class="tile"><div class="lbl">Cash before 10 units</div><div class="val" id="wholesale-cash">${formatMoney(ws.cost*10,false)}</div></div></div>
+    <div class="card"><h2>Wholesale viability calculator</h2><div class="note">Wholesale price comes from fully loaded cost and target maker margin. Suggested retail protects retailer margin; it is not direct price × 2.</div>
+      <div class="grid3">${field("Fully loaded unit cost",ws.cost,{id:"wholesale-cost",type:"number",min:0,step:.01,"data-setting":"wholesale.cost"})}${field("Target maker margin (%)",ws.targetMargin,{id:"wholesale-maker",type:"number",min:0,max:99,step:.5,"data-setting":"wholesale.targetMargin"})}${field("Retailer margin (%)",ws.retailerMargin,{id:"wholesale-retailer",type:"number",min:0,max:99,step:.5,"data-setting":"wholesale.retailerMargin"})}${field("Pilot units",ws.units,{id:"wholesale-units",type:"number",min:1,step:1,"data-setting":"wholesale.units"})}${field("Batch owner hours",ws.batchHours,{id:"wholesale-hours",type:"number",min:0,step:.25,"data-setting":"wholesale.batchHours"})}${field("Payment terms (days)",ws.paymentDays,{id:"wholesale-days",type:"number",min:0,step:1,"data-setting":"wholesale.paymentDays"})}<div class="tile"><div class="lbl">Minimum wholesale</div><div class="val" id="wholesale-min">${formatMoney(wholesale,false)}</div></div><div class="tile"><div class="lbl">Suggested retail</div><div class="val" id="wholesale-retail">${formatMoney(retail,false)}</div></div><div class="tile"><div class="lbl">Cash before pilot</div><div class="val" id="wholesale-cash">${formatMoney(ws.cost*ws.units,false)}</div></div></div>
       <div class="callout"><b>Before accepting an order:</b> include payment terms, minimum order quantity, defects/returns, packaging, shipping, batch capacity, and working-capital timing.</div>
     </div>`;
 }
@@ -1162,74 +1267,116 @@ function renderRoadmap(el){
 function trackerField(row,index,label,key,opts={}){
   return field(label,row[key],Object.assign({id:`track-${index}-${key}`,type:"number",min:0,step:key==="m"?undefined:.01,"data-tracker-index":index,"data-tracker-field":key},opts));
 }
+function trackerStreamField(row,index,stream,label,key,opts={}){const values=row.byStream&&row.byStream[stream.id]||{};return field(label,values[key]||0,Object.assign({id:`track-${index}-${stream.id}-${key}`,type:"number",min:0,step:key==="orders"?1:.01,"data-tracker-index":index,"data-tracker-stream-id":stream.id,"data-tracker-stream-field":key},opts));}
+function quickLogRow(month){return deepClone(S.tracker.find(r=>r.m===month)||normalizeTrackerRow({m:month,logged:false}));}
 
 function renderTracker(el){
   const rd=readiness(), rows=S.tracker, logged=trackerRows(), zeros=logged.filter(r=>r.rev===0&&r.cost===0&&r.hrs===0&&r.orders===0).length;
   const selected=S.meta.suggestionStream&&S.streams.some(s=>s.id===S.meta.suggestionStream)?S.meta.suggestionStream:S.streams[0].id;
-  const sug=actualsSuggestion(selected);
+  const sug=actualsSuggestion(selected),q=quickLogRow(nextLogMonth()),suggested=suggestedTarget();
   el.innerHTML=`
-    <div class="card"><h2>Quick log — about 60 seconds</h2><div class="note">The six numbers that matter, once a month. Saving marks the month as logged (zeros count); everything else can stay 0 and be refined later in the detailed editor below.</div>
+    <div class="card"><h2>Quick log — about 60 seconds</h2><div class="note">Selecting an existing month prefills its saved values. Saving asks before replacing quick fields, so a partial update cannot silently zero prior data.</div>
       <form id="quick-log-form"><div class="grid3">
-        ${field("Month",nextLogMonth(),{id:"ql-m",type:"month",name:"m",required:"required"})}
-        ${field("Revenue ($)",0,{id:"ql-rev",name:"rev",min:0,step:.01})}
-        ${field("Cash costs ($)",0,{id:"ql-cost",name:"cost",min:0,step:.01})}
-        ${field("Owner hours",0,{id:"ql-hrs",name:"hrs",min:0,step:.5})}
-        ${field("Orders",0,{id:"ql-orders",name:"orders",min:0,step:1})}
-        ${field("IG followers",0,{id:"ql-fol",name:"fol",min:0,step:1})}
-        ${field("Email subscribers",0,{id:"ql-email",name:"email",min:0,step:1})}
-      </div><button class="primary" type="submit" style="margin-top:10px">Save month</button></form>
+        ${field("Month",q.m,{id:"ql-m",type:"month",name:"m",required:"required"})}${field("Revenue ($)",q.rev,{id:"ql-rev",name:"rev",min:0,step:.01})}${field("Cash costs ($)",q.cost,{id:"ql-cost",name:"cost",min:0,step:.01})}${field("Owner hours",q.hrs,{id:"ql-hrs",name:"hrs",min:0,step:.5})}${field("Orders",q.orders,{id:"ql-orders",name:"orders",min:0,step:1})}${field("IG followers",q.fol,{id:"ql-fol",name:"fol",min:0,step:1})}${field("Email subscribers",q.email,{id:"ql-email",name:"email",min:0,step:1})}
+      </div><button class="primary" type="submit" style="margin-top:10px">Save month</button><span id="ql-status" class="field-help" role="status">${S.tracker.some(r=>r.m===q.m)?"Existing month loaded.":"New month."}</span></form>
     </div>
     <div class="card"><div class="flex-between"><div><h2>Monthly actuals</h2><div class="note">Logged zero months count. This prevents missing periods from silently inflating readiness or trends.</div></div><span class="badge">${logged.length} logged · ${zeros} zero</span></div>
       <form id="add-month-form" class="addrow"><label class="sr-only" for="new-month">Month</label><input id="new-month" type="month" name="month" required><button class="primary" type="submit">Add month</button></form>
     </div>
-    ${rows.map((r,i)=>{const m=trackerMetrics(r);return `<div class="card"><div class="flex-between"><div><h2>${esc(r.m)}</h2><div class="note">${r.logged?"Included in readiness history":"Draft—not counted until logged"}</div></div><button class="ghost" data-action="delete-month" data-index="${i}" aria-label="Delete ${esc(r.m)}">Delete month</button></div>
+    ${rows.map((r,i)=>{const m=trackerMetrics(r),alloc=Object.values(r.byStream||{}).reduce((a,v)=>({rev:a.rev+number(v.rev),hrs:a.hrs+number(v.hrs),orders:a.orders+number(v.orders)}),{rev:0,hrs:0,orders:0});return `<div class="card"><div class="flex-between"><div><h2>${esc(r.m)}</h2><div class="note">${r.logged?(monthSerial(r.m)<monthSerial(todayISO().slice(0,7))?"Closed logged month; eligible for readiness":"Current/future month; excluded from readiness"):"Draft—not counted until explicitly logged"}</div></div><button class="ghost" data-action="delete-month" data-index="${i}" aria-label="Delete ${esc(r.m)}">Delete month</button></div>
       <div class="grid4" id="track-kpis-${i}">${trackKpisInner(r)}</div>
       <details><summary>Edit ${esc(r.m)} inputs</summary><label class="f"><input type="checkbox" data-tracker-index="${i}" data-tracker-field="logged" ${r.logged?"checked":""}> This month is complete and logged (including if zero)</label>
-        <div class="grid4">${trackerField(r,i,"Revenue","rev")}${trackerField(r,i,"Cash costs","cost")}${trackerField(r,i,"Owner hours","hrs")}${trackerField(r,i,"Orders","orders",{step:1})}${trackerField(r,i,"Views / visits","views",{step:1})}${trackerField(r,i,"Qualified inquiries","inquiries",{step:1})}${trackerField(r,i,"Quotes sent","quotes",{step:1})}${trackerField(r,i,"Followers","fol",{step:1})}${trackerField(r,i,"Email subscribers","email",{step:1})}${trackerField(r,i,"Repeat orders","repeatOrders",{step:1})}${trackerField(r,i,"Completed orders","completedOrders",{step:1})}${trackerField(r,i,"On-time orders","onTimeOrders",{step:1})}${trackerField(r,i,"Backlog (weeks)","backlogWeeks",{step:.1})}</div>${trackerField(r,i,"Notes","note",{type:"textarea",rows:3})}</details>
+        <div class="grid4">${trackerField(r,i,"Revenue","rev")}${trackerField(r,i,"Cash costs","cost")}${trackerField(r,i,"Owner hours","hrs")}${trackerField(r,i,"Orders","orders",{step:1})}${trackerField(r,i,"Views / visits","views",{step:1})}${trackerField(r,i,"Qualified inquiries","inquiries",{step:1})}${trackerField(r,i,"Quotes sent","quotes",{step:1})}${trackerField(r,i,"Followers","fol",{step:1})}${trackerField(r,i,"Email subscribers","email",{step:1})}${trackerField(r,i,"Repeat orders","repeatOrders",{step:1,max:r.orders})}${trackerField(r,i,"Completed orders","completedOrders",{step:1,max:r.orders})}${trackerField(r,i,"On-time orders","onTimeOrders",{step:1,max:r.completedOrders})}${trackerField(r,i,"Backlog (weeks)","backlogWeeks",{step:.1})}${trackerField(r,i,"Confirmed booked revenue","bookedRevenue")}${trackerField(r,i,"Booked contribution","bookedContribution")}${trackerField(r,i,"Deposits collected","deposits")}</div><h3>Stream attribution</h3><div class="note">These allocations power actual-to-plan suggestions; totals remain separate so unallocated activity is visible.</div><div class="allocation-grid">${S.streams.map(s=>`<fieldset><legend><span class="sw" style="background:var(${esc(s.color)})"></span> ${esc(s.name)}</legend>${trackerStreamField(r,i,s,"Revenue","rev")}${trackerStreamField(r,i,s,"Cash costs","cost")}${trackerStreamField(r,i,s,"Owner hours","hrs")}${trackerStreamField(r,i,s,"Orders","orders")}</fieldset>`).join("")}</div><div class="callout"><b>Allocated:</b> ${formatMoney(alloc.rev,false)} of ${formatMoney(r.rev,false)} revenue · ${alloc.orders} of ${r.orders} orders · ${alloc.hrs.toFixed(1)} of ${r.hrs.toFixed(1)} hours.${alloc.rev>r.rev||alloc.orders>r.orders||alloc.hrs>r.hrs?` <span class="warn-text">Allocated amounts exceed totals.</span>`:""}</div>${trackerField(r,i,"Notes","note",{type:"textarea",rows:3})}</details>
     </div>`;}).join("")}
-    <div class="card"><h2>Actual-to-plan suggestion</h2><div class="note">Uses the most recent three logged months. Preview first; accepting updates only the selected stream’s starting units, price, and hours/unit.</div>
+    <div class="card"><h2>Actual-to-plan suggestion</h2><div class="note">Uses only the selected stream’s attribution in the three most recent closed logged months. Accepting is idempotent: each stream/month observation counts once.</div>
       ${field("Target stream",selected,{id:"suggestion-stream",type:"select","data-suggestion-stream":"true",options:S.streams.map(s=>({value:s.id,label:s.name}))})}
-      ${sug&&sug.orders?`<div class="tscroll"><table class="data"><thead><tr><th>Assumption</th><th>Current</th><th>Recent actuals</th></tr></thead><tbody><tr><td>Units/month</td><td>${sug.stream.u.toFixed(1)}</td><td>${sug.u.toFixed(1)}</td></tr><tr><td>Price</td><td>${formatMoney(sug.stream.p,false)}</td><td>${formatMoney(sug.p,false)}</td></tr><tr><td>Hours/unit</td><td>${sug.stream.hpu.toFixed(2)}</td><td>${sug.hpu.toFixed(2)}</td></tr></tbody></table></div><button class="primary" style="margin-top:10px" data-action="accept-suggestion" data-id="${esc(selected)}">Accept these assumptions</button>`:`<div class="notice warn">At least one paid order is needed across the recent logged months before the app can estimate unit economics.</div>`}
+      ${sug&&sug.orders?`<div class="tscroll"><table class="data"><thead><tr><th>Assumption</th><th>Current</th><th>Attributed actuals</th></tr></thead><tbody><tr><td>Units/month</td><td>${sug.stream.u.toFixed(1)}</td><td>${sug.u.toFixed(1)}</td></tr><tr><td>Price</td><td>${formatMoney(sug.stream.p,false)}</td><td>${formatMoney(sug.p,false)}</td></tr><tr><td>Hours/unit</td><td>${sug.stream.hpu.toFixed(2)}</td><td>${sug.hpu.toFixed(2)}</td></tr><tr><td>Window</td><td>—</td><td>${sug.rows.map(r=>esc(r.m)).join(", ")} · ${sug.orders} orders</td></tr></tbody></table></div><button class="primary" style="margin-top:10px" data-action="accept-suggestion" data-id="${esc(selected)}">Accept attributed assumptions</button>`:`<div class="notice warn">Add at least one paid order to this stream’s allocation in a recent closed logged month.</div>`}
     </div>
-    <div class="card"><div class="flex-between"><h2>Full-time readiness gates</h2><span class="badge">${rd.ready?"READY":"NOT READY"}</span></div><div class="grid2" id="trk-gates-grid">${gatesGridInner(rd)}</div>
+    <div class="card"><div class="flex-between"><h2>Full-time readiness gates</h2><span class="badge">${rd.ready?"READY":rd.provisional?"PROVISIONAL":"NOT READY"}</span></div><div class="grid2" id="trk-gates-grid">${gatesGridInner(rd)}</div>
       <h3>Manual safety confirmations</h3><ul class="check"><li><label><input type="checkbox" data-ready="fund" ${S.ready.fund?"checked":""}> Six-month personal emergency fund</label></li><li><label><input type="checkbox" data-ready="insurance" ${S.ready.insurance?"checked":""}> Health-insurance plan priced and selected</label></li><li><label><input type="checkbox" data-ready="taxBenefits" ${S.ready.taxBenefits?"checked":""}> Taxes, retirement, leave, and lost benefits budgeted</label></li></ul>
-      <div class="grid2">${field("Pre-tax owner-earnings target / month",S.settings.target,{id:"readiness-target",type:"number",min:0,step:100,"data-setting":"settings.target"})}${field("Required share of target (%)",S.settings.readinessPct,{id:"readiness-pct",type:"number",min:1,max:100,step:1,"data-setting":"settings.readinessPct"})}</div>
+      <h3>Target worksheet</h3><div class="grid4">${field("Monthly living costs",S.settings.targetLiving,{id:"target-living",min:0,step:50,"data-setting":"settings.targetLiving"})}${field("Benefits replacement",S.settings.targetBenefits,{id:"target-benefits",min:0,step:50,"data-setting":"settings.targetBenefits"})}${field("Retirement / leave",S.settings.targetSavings,{id:"target-savings",min:0,step:50,"data-setting":"settings.targetSavings"})}${field("Effective tax reserve (%)",S.settings.targetTaxRate,{id:"target-tax",min:0,max:80,step:1,"data-setting":"settings.targetTaxRate"})}${field("Safety buffer (%)",S.settings.targetBufferPct,{id:"target-buffer",min:0,max:200,step:1,"data-setting":"settings.targetBufferPct"})}<div class="tile"><div class="lbl">Worksheet target</div><div class="val">${formatMoney(suggested,false)}</div><button class="ghost" data-action="use-suggested-target">Use target</button></div></div><h3>Editable policy thresholds</h3><div class="grid4">${field("Pre-tax owner-earnings target / month",S.settings.target,{id:"readiness-target",min:0,step:100,"data-setting":"settings.target"})}${field("Required share of target (%)",S.settings.readinessPct,{id:"readiness-pct",min:1,max:100,step:1,"data-setting":"settings.readinessPct"})}${field("Consecutive closed months",S.settings.readinessMonths,{id:"readiness-months",min:6,max:24,step:1,"data-setting":"settings.readinessMonths"})}${field("Provisional preview months",S.settings.provisionalMonths,{id:"provisional-months",min:3,max:12,step:1,"data-setting":"settings.provisionalMonths"})}${field("Readiness max hours/week",S.settings.readinessMaxHpw,{id:"readiness-hours",min:1,max:80,step:.5,"data-setting":"settings.readinessMaxHpw"})}${field("Repeat-order threshold (%)",S.settings.repeatRateThreshold,{id:"repeat-threshold",min:0,max:100,step:1,"data-setting":"settings.repeatRateThreshold"})}${field("On-time threshold (%)",S.settings.onTimeThreshold,{id:"ontime-threshold",min:0,max:100,step:1,"data-setting":"settings.onTimeThreshold"})}${field("Backlog threshold (weeks)",S.settings.backlogThreshold,{id:"backlog-threshold",min:0,max:52,step:.5,"data-setting":"settings.backlogThreshold"})}${field("Booked/deposit coverage threshold (%)",S.settings.depositCoveragePct,{id:"deposit-threshold",min:0,max:100,step:1,"data-setting":"settings.depositCoveragePct"})}</div>
     </div>`;
 }
 
-function renderEvidence(el){
-  el.innerHTML=`
-    <div class="card"><h2>Evidence standard</h2><div class="note">The app distinguishes facts, observations, assumptions, and sensitivities so a plausible story is not mistaken for proof.</div>
-      <div class="evidence-row"><b>Primary source</b><span>Platform policy, company filing, or first-party reporting. Good for rules and context; not proof of this business’s results.</span></div>
-      <div class="evidence-row"><b>Direct observation</b><span>A dated view, inquiry, quote, order, price acceptance, production time, or cost from Present Stitch.</span></div>
-      <div class="evidence-row"><b>Supported assumption</b><span>Multiple relevant observations support the assumption; sample size and limits remain visible.</span></div>
-      <div class="evidence-row"><b>Hypothesis</b><span>Untested or weakly tested. Excluded from the core case when it represents an entire future stream.</span></div>
-      <div class="evidence-row"><b>Sensitivity</b><span>A transparent “what if” holding other inputs fixed. It is not a forecast of causal lift.</span></div>
-    </div>
-    <div class="card"><h2>Model methodology and limits</h2><ul class="warning-list">
-      <li>The primary label is <b>${S.settings.horizon}-year discounted owner earnings</b>, not company valuation.</li>
-      <li>Core streams are separated from hypothesis streams; task completion never changes financial assumptions.</li>
-      <li>Capacity reserves admin, one-time launch, and recurring production hours, then allocates variable work by contribution/hour or the selected strategic priority.</li>
-      <li>Fees, price, demand, growth, production time, and costs are editable assumptions. Actuals can update them only after explicit acceptance.</li>
-      <li>Terminal value defaults to zero and requires transferability; replacement labor is deducted before a multiple is applied.</li>
-      <li>Taxes, uncertainty distributions, financing, owner benefits, and market-sale discounts are not comprehensively modeled.</li>
-    </ul></div>
-    <div class="card"><h2>Source registry</h2><div class="note">Access dates and limitations are shown next to every contextual claim. Open links in a new tab to review the original source.</div><div class="source-list">${SOURCES.map(src=>`<article class="bench-card"><div class="nm">${esc(src.claim)}</div><div class="meta">${esc(src.publisher)} · ${esc(src.date)} · ${esc(src.quality)}</div><div class="les"><b>Use with care:</b> ${esc(src.note)}</div><a href="${esc(src.url)}" target="_blank" rel="noopener noreferrer">Open source<span class="sr-only">: ${esc(src.claim)}</span></a></article>`).join("")}</div></div>
-    <div class="card"><h2>Where Present Stitch started (Aug 2026)</h2><div class="task-detail">Publicly visible then: ~12 posts of personalized name and gift pieces, engagement of 1–6 likes per post, and no posts in roughly six months. No Etsy shop, website, or link-in-bio found. Translation: pre-audience and pre-revenue — the asset is the craft skill and a genuinely good niche (gifting ≈ 27% of Etsy sales; see the source registry). The first 90 days are about consistency, not perfection.</div></div>
-    <div class="card"><h2>Artist comparables</h2><div class="note">How established hand-embroidery artists actually monetize. Every full-timer follows the same arc: handwork → audience → products (patterns/kits) → teaching or membership. Context for planning — not evidence about Present Stitch.</div>${BENCH.map(b=>`<article class="bench-card"><div class="nm">${b.n}</div><div class="meta">${b.f} · ${b.m}</div><div class="les">${b.l}</div></article>`).join("")}<div class="src">Follower counts via third-party mirrors (imginn, socialcounts), accessed 2026-08-08; approximate. Prices from the artists' own shops and pricing pages. No profiled artist publishes revenue; Etsy sale counts and price lists are the hardest public proxies.</div></div>
-    <div class="card"><h2>Benchmark price sheet (2025–26)</h2><div class="tscroll"><table class="data"><caption class="sr-only">Typical and premium price points by product type</caption><thead><tr><th>Item</th><th>Typical</th><th>Premium</th></tr></thead><tbody>${PRICE_SHEET.map(r=>`<tr><td style="text-align:left">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody></table></div><div class="src">Sources: Etsy fee schedule (2026); The Creative's Hour pricing guide (Apr 2026); stitchingsabbatical.com price list; ClassBento US listings; artist shops (cleverpoppy.com, jessicalongembroidery.com, cozybluehandmade.com); creator-rate guides (2026).</div></div>
-    <div class="card"><h2>Seasonality planner</h2><div class="tscroll"><table class="data"><caption class="sr-only">Seasonal windows and preparation deadlines</caption><thead><tr><th>Window</th><th>What</th><th>Do by</th></tr></thead><tbody>${SEASONS.map(r=>`<tr><td style="text-align:left">${r[0]}</td><td style="text-align:left">${r[1]}</td><td style="text-align:left">${r[2]}</td></tr>`).join("")}</tbody></table></div><div class="src">Q4 share computed from Etsy SEC filings 2021–2025; occasions from Etsy quarterly reporting; weddings from The Knot Real Weddings Study.</div></div>
-    <div class="card"><h2>Decision rules</h2><div class="grid2"><div class="gate"><div class="gate-name">Continue</div><div class="gate-detail">The relevant metric has enough exposure, observed economics clear the floor, and capacity is sustainable.</div></div><div class="gate"><div class="gate-name">Revise</div><div class="gate-detail">Evidence locates a specific acquisition, offer, price, or fulfillment constraint worth another bounded test.</div></div><div class="gate"><div class="gate-name">Pause</div><div class="gate-detail">Exposure or operational capacity is insufficient; collect the missing evidence before expansion.</div></div><div class="gate"><div class="gate-name">Stop</div><div class="gate-detail">Repeated tests contradict the economics or demand assumption and a predefined limit has been reached.</div></div></div></div>`;
+function selfTests(){
+  const out=[];const push=(name,pass,detail)=>out.push({name,pass:Boolean(pass),detail});
+  try{
+    let capOk=true,sumOk=true,lostOk=true,npvOk=true,finOk=true;
+    ["core","full"].forEach(scope=>["cons","base","stretch"].forEach(k=>{
+      const m=runModel(S,k,scope);
+      if(!Number.isFinite(m.npv))finOk=false;
+      m.years.forEach(y=>{
+        if(y.used>y.avail+1e-6)capOk=false;
+        if(Math.abs(y.revenue-y.allocation.reduce((a,x)=>a+x.revenue,0))>0.01)sumOk=false;
+        if(y.lostRevenue<-1e-6)lostOk=false;
+      });
+      const r=S.settings.r/100;
+      const npv2=m.years.reduce((a,y)=>a+y.cashFlow/Math.pow(1+r,y.y),0)+(m.terminal?m.terminal/Math.pow(1+r,S.settings.horizon):0);
+      if(Math.abs(npv2-m.npv)>0.01)npvOk=false;
+    }));
+    push("Fulfilled hours never exceed available capacity",capOk,"Checked every year of all six scenario/scope runs.");
+    push("Revenue equals the sum of stream allocations",sumOk,"Cross-footed each modeled year.");
+    push("Unserved demand is never negative",lostOk,"Allocation cannot fulfill more than demand.");
+    push("NPV re-derives from the year table",npvOk,"Discounted cash flows plus terminal value reproduce the headline.");
+    push("All model outputs are finite numbers",finOk,"No NaN or Infinity in any scenario.");
+    const a=mergeState(deepClone(S)),b=mergeState(deepClone(a));
+    push("State normalization is stable",JSON.stringify(a.settings)===JSON.stringify(b.settings)&&a.streams.length===b.streams.length&&a.tasks.length===b.tasks.length&&a.tracker.length===b.tracker.length,"Normalizing twice changes nothing — guards schema drift after edits.");
+    const nowSerial=monthSerial(todayISO().slice(0,7));
+    push("No future month is marked as logged actuals",S.tracker.every(r2=>!r2.logged||!validMonth(r2.m)||monthSerial(r2.m)<=nowSerial),"The condition that once wiped saved data can no longer persist.");
+    let acyclic=true;
+    try{const seen=new Set(),visiting=new Set();const walk=id=>{if(visiting.has(id)){acyclic=false;return;}if(seen.has(id))return;visiting.add(id);const t=S.tasks.find(x=>x.id===id);(t?t.dependsOn:[]).forEach(walk);visiting.delete(id);seen.add(id);};S.tasks.forEach(t=>walk(t.id));}catch(e){acyclic=false;}
+    push("Task dependency graph has no cycles",acyclic,"Every task remains completable.");
+    const d=chartTicks(-500,12345,7);
+    push("Chart axis always covers the data range",d.lo<=-500&&d.hi>=12345,"Bars can never overflow the plot.");
+  }catch(e){push("Self-test runner",false,String(e&&e.message||e));}
+  return out;
 }
+function renderEvidence(el){
+  const ledger=[...S.evidenceLedger].sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+  const comparables=[
+    {n:"Sarah K. Benning",offer:"Official shop: $20 sampled digital pattern and a monthly-pattern recurring model.",lesson:"Reusable products may decouple some revenue from one-to-one stitching time.",url:"https://sarahkbenning.com/skbdiy-pattern-archive/advanced-book-club",scope:"First-party offer; not revenue evidence."},
+    {n:"Jessica Long Embroidery",offer:"Current Etsy shop shows kits and digital patterns with video support.",lesson:"A catalog plus tutorials is one possible offer mechanism.",url:"https://www.etsy.com/shop/JessLongEmbroidery",scope:"Marketplace listings; profit and sales mix are unknown."},
+    {n:"Clever Poppy",offer:"Official shop lists beginner kits and a Maker's Academy membership.",lesson:"Kits, education, and membership can form a ladder; conversion is not public.",url:"https://cleverpoppy.com/pages/makers-academy",scope:"First-party offers; no public revenue."},
+    {n:"Stitching Sabbatical",offer:"Current commission list: outlined pet portraits $85–100 singles ($160–190 doubles); detailed portraits $600–900 singles ($1,100–1,300 doubles).",lesson:"Specialization and scarcity may support premium prices, with very high labor.",url:"https://www.stitchingsabbatical.com/pricing/",scope:"First-party price list re-verified 2026-08-09; not a typical-market range."},
+    {n:"MCreativeJ",offer:"Official site documents kits, workshops, wholesale, and books.",lesson:"Multiple channels diversify demand but add inventory and teaching constraints.",url:"https://www.mcreativej.com/about",scope:"First-party offer evidence; no public profit."},
+    {n:"Cozyblue",offer:"Stitch Club moved from monthly shipments to a seasonal cadence in 2026.",lesson:"Recurring products still require a sustainable solo production rhythm.",url:"https://cozybluehandmade.com/pages/stitch-club",scope:"First-party cadence; economics unknown."}
+  ];
+  const prices=[
+    ["Jessica Long beginner kits","$30–40 sampled listings","One current seller","https://www.etsy.com/shop/JessLongEmbroidery"],
+    ["Clever Poppy beginner kits","$40 sampled shop price","One brand","https://cleverpoppy.com/"],
+    ["Stitching Sabbatical outlined portraits","$85–100 ($160–190 doubles)","Specialist first-party list, re-verified 2026-08-09","https://www.stitchingsabbatical.com/pricing/"],
+    ["Stitching Sabbatical detailed portraits","$600–900 ($1,100–1,300 doubles)","Many-hour thread-painted pieces; re-verified 2026-08-09","https://www.stitchingsabbatical.com/pricing/"],
+    ["Trish Burr PDF lessons/classes","$9.99–45.99","Current listings across lesson depth","https://trishbembroidery.com/collections/classes-lessons"],
+    ["Etsy US base selling fees","6.5% + 3% + $0.25 + $0.20 listing","Optional ads/taxes may add cost","https://www.etsy.com/legal/etsy-payments/"]
+  ];
+  const seasons=[
+    ["Q4 (Oct–Dec)","About 31% of 2025 Etsy marketplace GMS occurred in Q4; not a Present Stitch forecast.","Set listing/cutoff dates from measured lead time.","https://investors.etsy.com/news-events/press-releases/detail/218/etsy-inc-reports-fourth-quarter-and-full-year-2025-results"],
+    ["Mother's Day (Feb–May planning)","Etsy identifies gifting and personalization themes.","Test early enough to observe conversion.","https://www.etsy.com/seller-handbook/article/1352959809255"],
+    ["Graduation (May–Jun)","Etsy identifies graduation gifting; no embroidery-specific lift is established.","List only after a bounded demand/capacity test.","https://www.etsy.com/seller-handbook/article/1352959809255"],
+    ["Business-specific calendar","Timing varies materially by category and shop.","Replace generic claims after one year of actuals.","https://www.etsy.com/seller-handbook/article/45451604718"]
+  ];
+  el.innerHTML=`<div class="card"><h2>Evidence standard</h2><div class="evidence-row"><b>Primary source</b><span>Rules and context, not proof of this business.</span></div><div class="evidence-row"><b>Direct observation</b><span>A dated Present Stitch view, inquiry, quote, order, price, time, or cost.</span></div><div class="evidence-row"><b>Supported assumption</b><span>Multiple relevant observations with sample size and limits visible.</span></div><div class="evidence-row"><b>Hypothesis</b><span>Untested or weakly tested; future streams stay outside the core case.</span></div><div class="evidence-row"><b>Sensitivity</b><span>A transparent what-if, not a forecast or task reward.</span></div></div>
+  <div class="card"><h2>Model methodology and limits</h2><ul class="warning-list"><li>The primary measure is planned discounted owner cash flow, not company valuation.</li><li>Task completion never changes financial assumptions.</li><li>Working capital is a Year-1 outflow with separately editable recovery.</li><li>Terminal value defaults to zero and requires transferability and replacement labor.</li><li>Taxes, financing, owner benefits, uncertainty distributions, and sale discounts are not comprehensively modeled.</li></ul></div>
+  <div class="card"><div class="flex-between"><div><h2>Built-in self-tests</h2><div class="note">Nine invariants of the model, schema, and data run on every visit to this tab. If any test fails after a future edit — by any person or any AI — do not trust the numbers; restore the previous file.</div></div><button class="ghost" data-action="rerun-tests">Re-run</button></div>${selfTests().map(t=>`<div class="gate ${t.pass?"pass":"fail"}"><div class="gate-name">${t.pass?"✓":"✗"} ${esc(t.name)}</div><div class="gate-detail">${esc(t.detail)}</div></div>`).join("")}</div>
+  <div class="card"><div class="flex-between"><div><h2>Present Stitch evidence ledger</h2><div class="note">Classified results and accepted actual-to-plan updates record provenance.</div></div><span class="badge">${ledger.length} entries</span></div>${ledger.length?ledger.map(x=>`<article class="ledger-item"><div class="flex-between"><b>${esc(x.title||x.kind)}</b><span class="source-meta">${dateLabel(String(x.at).slice(0,10))} · ${esc(x.kind)}</span></div><div class="task-detail">${esc(x.summary||"")}</div>${x.classification?`<div class="source-meta">Classification: ${esc(x.classification)}${x.decision?` · Decision: ${esc(x.decision)}`:""}</div>`:""}</article>`).join(""):`<div class="notice">No provenance entries yet. Complete an evidence task or accept attributed actuals.</div>`}</div>
+  <div class="card"><h2>Source registry</h2><div class="note">Direct source, date/quality, and limitation accompany each contextual claim.</div><div class="source-list">${SOURCES.filter(s=>s.id!=="pinterest").map(src=>`<article class="bench-card"><div class="nm"><span class="source-dot" aria-hidden="true"></span>${esc(src.claim)}</div><div class="source-meta">${esc(src.publisher)} · ${esc(src.date)} · ${esc(src.quality)}</div><div class="les"><b>Scope:</b> ${esc(src.note)}</div><a href="${esc(src.url)}" target="_blank" rel="noopener noreferrer">Open source</a></article>`).join("")}</div></div>
+  <div class="card"><h2>Original baseline (observed 2026-08-08) — verify before relying on it</h2><div class="task-detail">Publicly visible then: ~12 posts of personalized name and gift pieces, engagement of 1–6 likes per post, and no posts in roughly six months. No Etsy shop, website, or link-in-bio was found. Interpretation: pre-audience and pre-revenue — the durable assets were the craft skill and a well-chosen personalized-gift niche. This is a dated snapshot, not a live description; replace it with first-party records as they accumulate.</div></div>
+  <div class="card"><h2>Comparable offer mechanisms</h2><div class="note">First-party pages show possible offer structures—not a universal path to full-time income.</div>${comparables.map(b=>`<article class="bench-card"><div class="nm">${esc(b.n)}</div><div class="meta">${esc(b.offer)}</div><div class="les">${esc(b.lesson)}</div><div class="source-meta">Accessed 2026-08-08 · ${esc(b.scope)}</div><a href="${esc(b.url)}" target="_blank" rel="noopener noreferrer">Open source</a></article>`).join("")}</div>
+  <div class="card"><h2>Artist library — research anchors (Aug 2026)</h2><div class="note">Twelve monetization arcs from established hand-embroidery artists. Broader and less strictly sourced than the offer-mechanism cards above: follower counts are third-party mirror readings and lessons are interpretations. Use for orientation, not as evidence about Present Stitch.</div>${BENCH.map(b=>`<article class="bench-card"><div class="nm">${b.n}</div><div class="meta">${b.f} · ${b.m}</div><div class="les">${b.l}</div></article>`).join("")}<div class="src">Counts via imginn/socialcounts mirrors, accessed 2026-08-08; approximate. Prices from artists' own shops and pricing pages at that date. No profiled artist publishes revenue.</div></div>
+  <div class="card"><h2>Benchmark price sheet — research anchors (2025–26)</h2><div class="note">Typical and premium anchors compiled from shops, guides, and listings during the August 2026 research pass. Broader than the verified item-level examples below; treat as starting lines to overwrite with her own accepted prices.</div><div class="tscroll"><table class="data"><caption class="sr-only">Typical and premium price anchors by product type</caption><thead><tr><th>Item</th><th>Typical</th><th>Premium</th></tr></thead><tbody>${PRICE_SHEET.map(r=>`<tr><td style="text-align:left">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody></table></div><div class="src">Sources: Etsy fee schedule (2026); The Creative's Hour pricing guide (Apr 2026); stitchingsabbatical.com; ClassBento US listings; artist shops (cleverpoppy.com, jessicalongembroidery.com, cozybluehandmade.com); creator-rate guides (2026).</div></div>
+  <div class="card"><h2>Item-level price examples</h2><div class="tscroll"><table class="data"><thead><tr><th>Item</th><th>Observed range</th><th>Scope</th><th>Source</th></tr></thead><tbody>${prices.map(r=>`<tr><td style="text-align:left">${esc(r[0])}</td><td>${esc(r[1])}</td><td style="text-align:left">${esc(r[2])}</td><td><a href="${esc(r[3])}" target="_blank" rel="noopener noreferrer">Open</a></td></tr>`).join("")}</tbody></table></div></div>
+  <div class="card"><h2>Seasonality planner</h2><div class="tscroll"><table class="data"><thead><tr><th>Window</th><th>Evidence-scoped context</th><th>Action</th><th>Source</th></tr></thead><tbody>${seasons.map(r=>`<tr><td style="text-align:left">${esc(r[0])}</td><td style="text-align:left">${esc(r[1])}</td><td style="text-align:left">${esc(r[2])}</td><td><a href="${esc(r[3])}" target="_blank" rel="noopener noreferrer">Open</a></td></tr>`).join("")}</tbody></table></div></div>
+  <div class="card"><h2>Decision rules</h2><div class="grid2">${[["Continue","Enough exposure; economics clear the floor; capacity is sustainable."],["Revise","Evidence locates a specific constraint worth another bounded test."],["Pause","Exposure or capacity is insufficient; collect missing evidence."],["Stop","Repeated tests contradict the assumption and the predefined limit is reached."]].map(r=>`<div class="gate"><div class="gate-name">${r[0]}</div><div class="gate-detail">${r[1]}</div></div>`).join("")}</div></div>`;
+};
 
 function renderData(el){
   const snapshot=JSON.stringify(S,null,2);
   el.innerHTML=`
-    <div class="card"><h2>Autosave and backup</h2><div class="notice ${canStore?"good":"warn"}">${canStore?"Changes autosave in this browser under the v2 key. If v1 data was migrated, its original record remains untouched.":"This viewer does not expose browser storage. Export a snapshot before closing."}</div>
-      <div class="seg"><button class="primary" data-action="copy-json">Copy JSON</button><button class="ghost" data-action="download-json">Download .json</button><button class="ghost" data-action="reset-data">Reset v2 defaults</button></div>
-      ${field("Current v2 snapshot",snapshot,{id:"export-json",type:"textarea",rows:12,spellcheck:"false",readonly:"readonly"})}
+    <div class="card"><h2>Autosave and backup</h2><div class="notice ${canStore?"good":"warn"}">${canStore?"Changes autosave under the v3 key. Older v1/v2 records remain untouched after migration.":"Persistent storage is unavailable. Export a snapshot before closing."}</div>
+      <div class="seg"><button class="primary" data-action="copy-json">Copy JSON</button><button class="ghost" data-action="download-json">Download .json</button><button class="ghost" data-action="reset-data">Reset v3 defaults</button></div>
+      ${field("Current v3 snapshot",snapshot,{id:"export-json",type:"textarea",rows:12,spellcheck:"false",readonly:"readonly"})}
     </div>
-    <div class="card"><h2>Restore a snapshot</h2><div class="note">Paste a complete v1 or v2 snapshot. Validation happens before the current state changes; incomplete or malformed data is rejected safely.</div>
+    <div class="card"><h2>Restore a snapshot</h2><div class="note">Paste a complete v1, v2, or v3 snapshot. Validation rejects duplicate IDs/months, missing dependencies, cycles, invalid dates/ranges, impossible order counts, and unsupported completion states before changing data.</div>
       ${field("Snapshot JSON","",{id:"import-json",type:"textarea",rows:8,spellcheck:"false",placeholder:"Paste a complete snapshot…"})}
       <button class="primary" data-action="import-json">Validate and restore</button><div id="import-message" role="status" aria-live="polite" class="muted" style="margin-top:7px"></div>
     </div>
@@ -1263,8 +1410,9 @@ function openModal(title,body){
 function taskEditorHtml(t){
   const fresh=!t, x=t||normalizeTask({id:uid(),title:"",phaseId:currentPhaseId(),order:Date.now(),definitionOfDone:"",why:""});
   return `<form id="task-editor-form" data-id="${esc(x.id)}" data-new="${fresh}">
-    <div class="grid2">${field("Task title",x.title,{id:"edit-title",type:"text",required:"required",maxlength:180})}${field("Type",x.type,{id:"edit-type",type:"select",options:["action","experiment","gate","milestone"].map(v=>({value:v,label:v[0].toUpperCase()+v.slice(1)}))})}${field("Phase",x.phaseId,{id:"edit-phase",type:"select",options:S.phases.map(p=>({value:p.id,label:p.name}))})}${field("Priority",x.priority,{id:"edit-priority",type:"select",options:[{value:"P1",label:"P1 — critical"},{value:"P2",label:"P2 — supporting"}]})}${field("Due date",x.dueDate,{id:"edit-due",type:"date"})}${field("Effort (minutes)",x.effortMinutes,{id:"edit-effort",type:"number",min:5,step:5})}${field("Status",x.status,{id:"edit-status",type:"select",options:["available","active","waiting","completed","validated"].map(v=>({value:v,label:statusLabel(v)}))})}${field("Momentum points",x.points,{id:"edit-points",type:"select",options:[5,10,20].map(v=>({value:v,label:`${v} points`}))})}</div>
+    <div class="grid2">${field("Task title",x.title,{id:"edit-title",type:"text",required:"required",maxlength:180})}${field("Type",x.type,{id:"edit-type",type:"select",options:["action","experiment","gate","milestone"].map(v=>({value:v,label:v[0].toUpperCase()+v.slice(1)}))})}${field("Phase",x.phaseId,{id:"edit-phase",type:"select",options:S.phases.map(p=>({value:p.id,label:p.name}))})}${field("Priority",x.priority,{id:"edit-priority",type:"select",options:[{value:"P1",label:"P1 — critical"},{value:"P2",label:"P2 — supporting"}]})}${field("Due date",x.dueDate,{id:"edit-due",type:"date"})}${field("Effort (minutes)",x.effortMinutes,{id:"edit-effort",type:"number",min:5,max:90,step:5,help:"Tasks are capped at 90 minutes; split larger work into dependencies."})}</div>
     ${field("Definition of done",x.definitionOfDone,{id:"edit-dod",type:"textarea",rows:3,required:"required"})}${field("Why this task matters",x.why,{id:"edit-why",type:"textarea",rows:3})}
+    <details><summary>SMART measure (recommended for experiments)</summary><div class="grid2">${field("Measure name",x.metric&&x.metric.name||"",{id:"edit-metric-name",type:"text",maxlength:180})}${field("Baseline",x.metric&&x.metric.baseline||"",{id:"edit-metric-baseline",type:"text",maxlength:300})}${field("Target",x.metric&&x.metric.target||"",{id:"edit-metric-target",type:"text",maxlength:300})}${field("Required exposure / sample",x.metric&&x.metric.exposure||"",{id:"edit-metric-exposure",type:"text",maxlength:300})}${field("Predeclared decision rule",x.metric&&x.metric.decisionRule||"",{id:"edit-metric-rule",type:"textarea",rows:3})}${field("Review date",x.metric&&x.metric.reviewDate||"",{id:"edit-metric-date",type:"date"})}</div></details>
     <fieldset style="border:0;margin-top:10px"><legend class="f">Dependencies</legend><div class="grid2">${S.tasks.filter(o=>o.id!==x.id).map(o=>`<label class="task-detail"><input type="checkbox" name="dependency" value="${esc(o.id)}" ${x.dependsOn.includes(o.id)?"checked":""}> ${esc(o.title)}</label>`).join("")||`<span class="muted">No other tasks yet.</span>`}</div></fieldset>
     <label class="f"><input id="edit-seasonal" type="checkbox" ${x.seasonal?"checked":""}> Deadline is seasonal / time-sensitive</label>
     <div class="task-actions"><button class="primary" type="submit">${fresh?"Add task":"Save changes"}</button><button class="ghost" type="button" data-action="close-modal">Cancel</button></div>
@@ -1272,15 +1420,17 @@ function taskEditorHtml(t){
 }
 function openTaskEditor(t){ openModal(t?"Edit task":"Add task",taskEditorHtml(t)); }
 function openResultEditor(t){
-  openModal(`Record result: ${t.title}`,`<form id="task-result-form" data-id="${esc(t.id)}"><p class="task-detail">Record what happened, including the metric and limitation. Leaving this blank moves the experiment to <b>Waiting for result</b> and awards no points.</p>${field("Observed result",t.result,{id:"result-text",type:"textarea",rows:6,placeholder:"Example: 248 listing visits → 7 inquiries → 2 paid orders; $118 average price; small sample."})}<div class="task-actions"><button class="primary" type="submit">Save result status</button><button class="ghost" type="button" data-action="close-modal">Cancel</button></div></form>`);
+  openModal(`Record evidence: ${t.title}`,`<form id="task-result-form" data-id="${esc(t.id)}"><p class="task-detail">Completion requires a dated observation, explicit classification, and decision. Negative or inconclusive results still earn the evidence bonus; incomplete evidence stays waiting.</p>${field("Observed result and limitations",t.result,{id:"result-text",type:"textarea",rows:6,required:"required"})}<div class="grid2">${field("Evidence date",t.evidenceAt||todayISO(),{id:"result-date",type:"date",required:"required"})}${field("Classification",t.resultClassification||"",{id:"result-classification",type:"select",required:"required",options:[{value:"",label:"Select…"},{value:"supported",label:"Supported"},{value:"contradicted",label:"Contradicted"},{value:"inconclusive",label:"Inconclusive"}]})}${field("Decision",t.decision||"",{id:"result-decision",type:"select",required:"required",options:[{value:"",label:"Select…"},{value:"continue",label:"Continue"},{value:"revise",label:"Revise"},{value:"pause",label:"Pause"},{value:"stop",label:"Stop"}]})}</div><div class="task-actions"><button class="primary" type="submit">Validate and save</button><button class="ghost" type="button" data-action="close-modal">Cancel</button></div></form>`);
 }
 
-function completeTask(t,result){
+function addEvidenceEntry(t){S.evidenceLedger.push({id:uid("evidence"),at:new Date().toISOString(),week:weekKey(),kind:t.type,title:t.title,taskId:t.id,summary:t.result,classification:t.resultClassification,decision:t.decision});S.evidenceLedger=S.evidenceLedger.slice(-1000);S.decisionLog.push({at:new Date().toISOString(),taskId:t.id,decision:t.decision,classification:t.resultClassification});S.decisionLog=S.decisionLog.slice(-500);}
+function completeTask(t,evidence={}){
+  if(taskState(t)==="blocked"){showToast(t.id==="fulltime-decision"?"Full-time review is locked until every computed readiness gate passes":"Complete the dependencies first");return;}
   snapshotForUndo(`status of ${t.title}`);
-  if(t.type==="experiment"){
-    t.result=String(result||"").trim();
-    if(!t.result){t.status="waiting";t.completedAt="";save();renderCurrent();showToast("Experiment is waiting for a result",true);return;}
-    t.status="validated";t.completedAt=new Date().toISOString(); const pts=awardTask(t,true); closeModal();save();renderCurrent();showToast(`Evidence recorded · +${pts} Momentum`,true);
+  if(t.type!=="action"){
+    t.result=String(evidence.result||"").trim();t.resultClassification=String(evidence.classification||"");t.decision=String(evidence.decision||"");t.evidenceAt=validDate(evidence.date)?evidence.date:"";
+    if(!t.result||!["supported","contradicted","inconclusive"].includes(t.resultClassification)||!["continue","revise","pause","stop"].includes(t.decision)||!t.evidenceAt){t.status="waiting";t.completedAt="";save();renderCurrent();showToast("Evidence is incomplete; task remains waiting",true);return;}
+    t.status=t.type==="experiment"?"validated":"completed";t.completedAt=new Date().toISOString();addEvidenceEntry(t);const pts=awardTask(t,true);closeModal();save();renderCurrent();showToast(`Classified evidence recorded · +${pts} Momentum`,true);
   }else{
     t.status="completed";t.completedAt=new Date().toISOString(); const pts=awardTask(t,false);
     const celebrate=t.milestone&&!S.momentum.celebrated.includes(t.id); if(celebrate)S.momentum.celebrated.push(t.id);
@@ -1288,21 +1438,26 @@ function completeTask(t,result){
   }
 }
 
+function normalizeEditedPath(path){if(path.startsWith("settings."))S.settings=normalizeSettings(S.settings);else if(path==="momentum.weeklyGoal")S.momentum.weeklyGoal=clamp(S.momentum.weeklyGoal,5,1000);else if(path.startsWith("wholesale.")){const key=path.split(".")[1],max=key.includes("Margin")?99:key==="paymentDays"?365:100000,min=key==="units"?1:0;S.wholesale[key]=clamp(S.wholesale[key],min,max);}}
+function populateQuickLog(month){if(!validMonth(month))return;const row=quickLogRow(month),map={"ql-rev":row.rev,"ql-cost":row.cost,"ql-hrs":row.hrs,"ql-orders":row.orders,"ql-fol":row.fol,"ql-email":row.email};Object.entries(map).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v;});const status=document.getElementById("ql-status");if(status)status.textContent=S.tracker.some(r=>r.m===month)?"Existing month loaded; saving will ask before replacing quick fields.":"New month.";}
+
 function handleMainChange(e){
   const x=e.target;
   const skipSnap=(x===lastInputEl); lastInputEl=null;
+  if(x.id==="ql-m"){populateQuickLog(x.value);return;}
   if(x.dataset.setting){
-    if(!skipSnap)snapshotForUndo(`change ${x.dataset.setting}`); setPath(S,x.dataset.setting,inputValue(x)); S.settings=normalizeSettings(S.settings); save();renderCurrent();return;
+    if(!skipSnap)snapshotForUndo(`change ${x.dataset.setting}`); setPath(S,x.dataset.setting,inputValue(x));normalizeEditedPath(x.dataset.setting);save();renderCurrent();return;
   }
   if(x.dataset.hoursIndex!==undefined){
     if(!skipSnap)snapshotForUndo("change capacity schedule"); const i=Number(x.dataset.hoursIndex); while(S.settings.hours.length<=i)S.settings.hours.push(S.settings.hours.at(-1)||0);S.settings.hours[i]=clamp(x.value,0,S.settings.maxHpw);save();renderCurrent();return;
   }
   if(x.dataset.streamId&&x.dataset.streamField){
-    const s=S.streams.find(v=>v.id===x.dataset.streamId);if(!s)return;if(!skipSnap)snapshotForUndo(`edit ${s.name}`);s[x.dataset.streamField]=inputValue(x);Object.assign(s,normalizeStream(s,s));save();renderCurrent();return;
+    const s=S.streams.find(v=>v.id===x.dataset.streamId);if(!s)return;if(!skipSnap)snapshotForUndo(`edit ${s.name}`);s[x.dataset.streamField]=inputValue(x);Object.assign(s,normalizeStream(s,s));if(s.status==="validated"&&(!["observed","supported"].includes(s.evidenceLevel)||observationCount(s.id)<3)){s.status="hypothesis";showToast("Validation needs observed/supported evidence and at least 3 samples");}save();renderCurrent();return;
   }
   if(x.dataset.trackerIndex!==undefined&&x.dataset.trackerField){
-    const i=Number(x.dataset.trackerIndex);if(!S.tracker[i])return;if(!skipSnap)snapshotForUndo(`edit ${S.tracker[i].m}`);S.tracker[i][x.dataset.trackerField]=inputValue(x);S.tracker[i]=normalizeTrackerRow(S.tracker[i]);save();renderCurrent();return;
+    const i=Number(x.dataset.trackerIndex);if(!S.tracker[i])return;if(!skipSnap)snapshotForUndo(`edit ${S.tracker[i].m}`);S.tracker[i][x.dataset.trackerField]=inputValue(x);S.tracker[i]=normalizeTrackerRow(S.tracker[i]);if(x.dataset.trackerField==="logged"&&x.checked&&!S.tracker[i].logged)showToast("A future month cannot be logged as actuals yet");save();renderCurrent();return;
   }
+  if(x.dataset.trackerIndex!==undefined&&x.dataset.trackerStreamId&&x.dataset.trackerStreamField){const i=Number(x.dataset.trackerIndex),r=S.tracker[i];if(!r)return;if(!skipSnap)snapshotForUndo(`edit ${r.m} stream allocation`);r.byStream=r.byStream||{};r.byStream[x.dataset.trackerStreamId]=r.byStream[x.dataset.trackerStreamId]||{};r.byStream[x.dataset.trackerStreamId][x.dataset.trackerStreamField]=inputValue(x);S.tracker[i]=normalizeTrackerRow(r);save();renderCurrent();return;}
   if(x.dataset.ready){snapshotForUndo("change readiness confirmation");S.ready[x.dataset.ready]=x.checked;save();renderCurrent();return;}
   if(x.dataset.suggestionStream){S.meta.suggestionStream=x.value;save();renderCurrent();}
 }
@@ -1327,10 +1482,9 @@ function handleMainSubmit(e){
   }
   if(e.target.id==="quick-log-form"){
     e.preventDefault();const fd=new FormData(e.target),m=String(fd.get("m")||"");
-    if(!/^\d{4}-\d{2}$/.test(m)){showToast("Pick a month first");return;}
-    snapshotForUndo(`quick log ${m}`);
+    if(!validMonth(m)){showToast("Pick a valid month first");return;}if(monthSerial(m)>monthSerial(todayISO().slice(0,7))){showToast("A future month cannot be logged as actuals");return;}
+    const i=S.tracker.findIndex(r=>r.m===m);if(i>=0&&!confirm(`Replace the seven quick-log fields for ${m}? Detailed funnel, readiness, notes, and stream allocations will be preserved.`))return;snapshotForUndo(`quick log ${m}`);
     const vals={m,logged:true,rev:number(fd.get("rev"),0),cost:number(fd.get("cost"),0),hrs:number(fd.get("hrs"),0),orders:number(fd.get("orders"),0),fol:number(fd.get("fol"),0),email:number(fd.get("email"),0)};
-    const i=S.tracker.findIndex(r=>r.m===m);
     if(i>=0)S.tracker[i]=normalizeTrackerRow(Object.assign({},S.tracker[i],vals));
     else S.tracker.push(normalizeTrackerRow(vals));
     S.tracker.sort((a,b)=>a.m.localeCompare(b.m));
@@ -1353,7 +1507,7 @@ function handleMainSubmit(e){
     save();renderCurrent();showToast(`Open dates shifted ${days>0?"+":""}${days} days`,true);return;
   }
   if(e.target.id==="add-month-form"){
-    e.preventDefault();const m=String(new FormData(e.target).get("month")||"");if(!m)return;
+    e.preventDefault();const m=String(new FormData(e.target).get("month")||"");if(!validMonth(m)){showToast("Choose a valid month");return;}
     if(S.tracker.some(r=>r.m===m)){showToast("That month already exists");return;}
     snapshotForUndo("add tracker month");S.tracker.push(normalizeTrackerRow({m,logged:false}));S.tracker.sort((a,b)=>a.m.localeCompare(b.m));save();renderCurrent();showToast("Month added",true);
   }
@@ -1370,6 +1524,7 @@ function renderCurrent(){
 }
 function findTask(id){return S.tasks.find(t=>t.id===id);}
 function removeTask(id){S.tasks.forEach(t=>{t.dependsOn=t.dependsOn.filter(d=>d!==id);});S.tasks=S.tasks.filter(t=>t.id!==id);}
+function revokeTaskAward(t){const removed=S.momentum.history.filter(x=>x.taskId===t.id),points=removed.reduce((a,x)=>a+number(x.points),0),thisWeek=removed.filter(x=>weekKey(new Date(x.at))===S.momentum.weekKey).reduce((a,x)=>a+number(x.points),0);S.momentum.history=S.momentum.history.filter(x=>x.taskId!==t.id);S.momentum.total=Math.max(0,S.momentum.total-points);S.momentum.weekPoints=Math.max(0,S.momentum.weekPoints-thisWeek);t.pointsAwarded=false;t.evidenceBonusAwarded=false;}
 function hasDependencyCycle(id,deps){
   const seen=new Set();function walk(x){if(x===id)return true;if(seen.has(x))return false;seen.add(x);const t=findTask(x);return t?t.dependsOn.some(walk):false;}
   return deps.some(walk);
@@ -1387,22 +1542,24 @@ function handleAction(e){
   if(action==="open-roadmap"){switchTab("roadmap");return;}
   if(action==="open-tracker"){switchTab("tracker");return;}
   if(action==="open-data"){switchTab("data");return;}
+  if(action==="rerun-tests"){renderCurrent();showToast("Self-tests re-run");return;}
   if(action==="dismiss-migration"){S.meta.migrationNotice=false;save();renderCurrent();return;}
   if(action==="set-scenario"){snapshotForUndo("change scenario");S.settings.scenario=b.dataset.value;save();renderCurrent();showToast(`Scenario: ${SCENARIOS[S.settings.scenario].label}`,true);return;}
   if(action==="capacity-mode"){snapshotForUndo("change capacity allocation");S.settings.capacityMode=b.dataset.value;save();renderCurrent();showToast("Capacity allocation updated",true);return;}
-  if(action==="task-start"){const t=findTask(id);if(!t)return;snapshotForUndo(`start ${t.title}`);t.status="active";save();renderCurrent();showToast("Task started",true);return;}
-  if(action==="task-done"){const t=findTask(id);if(!t)return;if(t.type==="experiment")openResultEditor(t);else completeTask(t);return;}
+  if(action==="task-start"){const t=findTask(id);if(!t)return;if(taskState(t)==="blocked"){showToast("Complete the dependencies first");return;}snapshotForUndo(`start ${t.title}`);t.status="active";save();renderCurrent();showToast("Task started",true);return;}
+  if(action==="task-done"){const t=findTask(id);if(!t)return;if(t.type!=="action")openResultEditor(t);else completeTask(t);return;}
   if(action==="task-result"){const t=findTask(id);if(t)openResultEditor(t);return;}
+  if(action==="task-reopen"){const t=findTask(id);if(!t)return;snapshotForUndo(`reopen ${t.title}`);revokeTaskAward(t);t.status="active";t.completedAt="";save();renderCurrent();showToast("Task reopened; its points were reversed",true);return;}
   if(action==="task-edit"){const t=findTask(id);if(t)openTaskEditor(t);return;}
   if(action==="task-duplicate"){
-    const t=findTask(id);if(!t)return;snapshotForUndo(`duplicate ${t.title}`);const copy=deepClone(t);copy.id=uid();copy.title=`${t.title} (copy)`;copy.status="available";copy.completedAt="";copy.result="";copy.pointsAwarded=false;copy.evidenceBonusAwarded=false;copy.order=t.order+1;copy.milestone="";S.tasks.push(normalizeTask(copy));save();renderCurrent();showToast("Task duplicated",true);return;
+    const t=findTask(id);if(!t)return;snapshotForUndo(`duplicate ${t.title}`);const copy=deepClone(t);copy.id=uid();copy.title=`${t.title} (copy)`;copy.status="available";copy.completedAt="";copy.result="";copy.resultClassification="";copy.decision="";copy.evidenceAt="";copy.pointsAwarded=false;copy.evidenceBonusAwarded=false;copy.order=t.order+1;copy.milestone="";S.tasks.push(normalizeTask(copy,null,S.phases.map(p=>p.id)));save();renderCurrent();showToast("Task duplicated",true);return;
   }
   if(action==="task-move"){
     const t=findTask(id);if(!t)return;const list=S.tasks.filter(x=>x.phaseId===t.phaseId).sort((a,c)=>a.order-c.order);const i=list.indexOf(t),j=i+Number(b.dataset.dir);if(j<0||j>=list.length)return;
     snapshotForUndo(`reorder ${t.title}`);list.forEach((x,n)=>x.order=(n+1)*10);const old=t.order;t.order=list[j].order;list[j].order=old;save();renderCurrent();showToast("Task reordered",true);return;
   }
   if(action==="task-delete"){
-    const t=findTask(id);if(!t||!confirm(`Delete “${t.title}”?`))return;snapshotForUndo(`delete ${t.title}`);removeTask(id);save();renderCurrent();showToast("Task deleted",true);return;
+    const t=findTask(id);if(!t)return;const dependents=S.tasks.filter(x=>x.dependsOn.includes(id));if(dependents.length){showToast(`Cannot delete: used by ${dependents.map(x=>x.title).join(", ")}`);return;}if(!confirm(`Delete “${t.title}”?`))return;snapshotForUndo(`delete ${t.title}`);removeTask(id);save();renderCurrent();showToast("Task deleted",true);return;
   }
   if(action==="apply-fee-profile"){
     const s=S.streams.find(x=>x.id===id);if(!s)return;snapshotForUndo(`apply ${s.channel} fee profile`);
@@ -1413,18 +1570,19 @@ function handleAction(e){
     const i=Number(b.dataset.index),r=S.tracker[i];if(!r||!confirm(`Delete tracker month ${r.m}?`))return;snapshotForUndo(`delete ${r.m}`);S.tracker.splice(i,1);save();renderCurrent();showToast("Month deleted",true);return;
   }
   if(action==="accept-suggestion"){
-    const sug=actualsSuggestion(id);if(!sug||!sug.orders)return;snapshotForUndo(`update ${sug.stream.name} from actuals`);sug.stream.u=Math.round(sug.u*10)/10;sug.stream.p=Math.round(sug.p*100)/100;sug.stream.hpu=Math.round(sug.hpu*100)/100;sug.stream.observations+=sug.orders;sug.stream.evidenceLevel=sug.orders>=5?"observed":"hypothesis";save();renderCurrent();showToast("Accepted recent actuals into plan",true);return;
+    const sug=actualsSuggestion(id);if(!sug||!sug.orders)return;snapshotForUndo(`update ${sug.stream.name} from actuals`);sug.stream.u=Math.round(sug.u*10)/10;sug.stream.p=Math.round(sug.p*100)/100;sug.stream.hpu=Math.round(sug.hpu*100)/100;const byMonth=new Map();S.actualApplications.filter(a=>a.streamId===id).forEach(a=>(a.months||[]).forEach(x=>byMonth.set(x.m,{m:x.m,orders:number(x.orders)})));sug.rows.forEach(r=>byMonth.set(r.m,{m:r.m,orders:number(r.orders)}));S.actualApplications=S.actualApplications.filter(a=>a.streamId!==id);S.actualApplications.push({id:uid("actual"),streamId:id,months:[...byMonth.values()].sort((a,b)=>a.m.localeCompare(b.m)),at:new Date().toISOString()});sug.stream.evidenceLevel=observationCount(id)>=5?"observed":"hypothesis";S.evidenceLedger.push({id:uid("evidence"),at:new Date().toISOString(),week:weekKey(),kind:"actual-to-plan",title:`Updated ${sug.stream.name} assumptions`,summary:`Accepted ${sug.orders} attributed orders from ${sug.rows.map(r=>r.m).join(", ")}.`,classification:sug.orders>=5?"observed":"preliminary"});save();renderCurrent();showToast("Accepted once by stream and month",true);return;
   }
+  if(action==="use-suggested-target"){snapshotForUndo("use target worksheet");S.settings.target=Math.round(suggestedTarget());save();renderCurrent();showToast("Worksheet target applied",true);return;}
   if(action==="copy-json"){
     S.meta.lastBackup=todayISO();save();
     const text=JSON.stringify(S,null,2);copyText(text).then(ok=>showToast(ok?"Snapshot copied":"Could not copy; select the snapshot manually"));return;
   }
   if(action==="download-json"){
     S.meta.lastBackup=todayISO();save();
-    const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`present-stitch-v2-${todayISO()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);showToast("Snapshot downloaded");return;
+    const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`present-stitch-v3-${todayISO()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);showToast("Snapshot downloaded");return;
   }
   if(action==="reset-data"){
-    if(!confirm("Reset the v2 dashboard to built-in defaults? Your older v1 browser record, if any, will not be deleted."))return;snapshotForUndo("reset v2 data");S=mergeV2(DEFAULTS);saveNow();applyTheme();renderCurrent();showToast("v2 defaults restored",true);return;
+    if(!confirm("Reset the v3 dashboard to built-in defaults? Older v1/v2 records will not be deleted."))return;snapshotForUndo("reset v3 data");S=mergeState(DEFAULTS);saveNow();applyTheme();renderCurrent();showToast("v3 defaults restored",true);return;
   }
   if(action==="import-json"){
     const msg=document.getElementById("import-message"),ta=document.getElementById("import-json");
@@ -1438,13 +1596,13 @@ function handleDocumentSubmit(e){
     if(hasDependencyCycle(id,deps)){let err=f.querySelector(".error-text");if(!err){err=document.createElement("div");err.className="error-text";err.setAttribute("role","alert");f.appendChild(err);}err.textContent="Those dependencies create a cycle. Remove the circular link.";return;}
     snapshotForUndo(existing?`edit ${existing.title}`:"add task");
     const base=existing||normalizeTask({id,title:"",phaseId:currentPhaseId(),order:Math.max(0,...S.tasks.map(t=>t.order))+10});const wasComplete=isComplete(base);
-    Object.assign(base,{title:f.querySelector("#edit-title").value.trim(),type:f.querySelector("#edit-type").value,phaseId:f.querySelector("#edit-phase").value,priority:f.querySelector("#edit-priority").value,dueDate:f.querySelector("#edit-due").value,effortMinutes:number(f.querySelector("#edit-effort").value,30),status:f.querySelector("#edit-status").value,points:number(f.querySelector("#edit-points").value,10),definitionOfDone:f.querySelector("#edit-dod").value.trim(),why:f.querySelector("#edit-why").value.trim(),dependsOn:deps,seasonal:f.querySelector("#edit-seasonal").checked});
-    const cleaned=normalizeTask(base,base);if(existing)Object.assign(existing,cleaned);else S.tasks.push(cleaned);
-    if(!wasComplete&&isComplete(cleaned))awardTask(existing||cleaned,cleaned.status==="validated");
+    const metricName=f.querySelector("#edit-metric-name").value.trim(),metric=metricName?{name:metricName,baseline:f.querySelector("#edit-metric-baseline").value.trim(),target:f.querySelector("#edit-metric-target").value.trim(),exposure:f.querySelector("#edit-metric-exposure").value.trim(),decisionRule:f.querySelector("#edit-metric-rule").value.trim(),reviewDate:f.querySelector("#edit-metric-date").value}:null;
+    Object.assign(base,{title:f.querySelector("#edit-title").value.trim(),type:f.querySelector("#edit-type").value,phaseId:f.querySelector("#edit-phase").value,priority:f.querySelector("#edit-priority").value,dueDate:f.querySelector("#edit-due").value,effortMinutes:number(f.querySelector("#edit-effort").value,30),definitionOfDone:f.querySelector("#edit-dod").value.trim(),why:f.querySelector("#edit-why").value.trim(),dependsOn:deps,seasonal:f.querySelector("#edit-seasonal").checked,metric});
+    if(!wasComplete&&base.status==="waiting"&&base.type==="action")base.status="available";const cleaned=normalizeTask(base,base,S.phases.map(p=>p.id));if(existing)Object.assign(existing,cleaned);else S.tasks.push(cleaned);
     closeModal();save();renderCurrent();showToast(existing?"Task updated":"Task added",true);return;
   }
   if(e.target.id==="task-result-form"){
-    e.preventDefault();const t=findTask(e.target.dataset.id);if(t){const result=e.target.querySelector("#result-text").value;closeModal();completeTask(t,result);}return;
+    e.preventDefault();const t=findTask(e.target.dataset.id);if(t){completeTask(t,{result:e.target.querySelector("#result-text").value,classification:e.target.querySelector("#result-classification").value,decision:e.target.querySelector("#result-decision").value,date:e.target.querySelector("#result-date").value});}return;
   }
 }
 
@@ -1457,7 +1615,7 @@ function applyTheme(){
 function cycleTheme(){const order=["auto","light","dark"],i=order.indexOf(S.settings.theme);snapshotForUndo("change theme");S.settings.theme=order[(i+1)%order.length];applyTheme();save();showToast(`Theme: ${S.settings.theme}`,true);}
 
 function init(){
-  S=loadState();S=mergeV2(S);refreshMomentumWeek();applyTheme();
+  S=loadState();S=mergeState(S);refreshMomentumWeek();applyTheme();
   const nav=document.getElementById("tabs"),main=document.getElementById("main");
   nav.setAttribute("role","tablist");nav.setAttribute("aria-label","Dashboard sections");
   nav.innerHTML=TABS.map(t=>`<button id="tab-${t.id}" role="tab" aria-controls="panel-${t.id}" aria-selected="${t.id===currentTab}" tabindex="${t.id===currentTab?0:-1}" data-tab="${t.id}" class="${t.id===currentTab?"active":""}">${esc(t.label)}</button>`).join("");
@@ -1475,7 +1633,7 @@ function init(){
   });
   if(window.matchMedia)window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{if(S.settings.theme==="auto")applyTheme();});
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")saveNow();});window.addEventListener("pagehide",saveNow);
-  renderCurrent();
+  updateUndoButton();renderCurrent();
 }
 
 
