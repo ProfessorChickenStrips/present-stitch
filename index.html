@@ -445,8 +445,11 @@ function task(id, title, type, phaseId, dueDate, effortMinutes, definitionOfDone
 }
 
 const V3_TASKS = [
+  task("launch-design-system","Build the original design system","action","launch","2026-08-09",90,
+    "Two commercial-licensed fonts, three accent motifs drawn from her own hand, and 3-4 named color palettes are saved as a reusable design kit.",
+    "Original designs make every piece legally hers to sell; a fixed kit turns each order into assembly instead of fresh design.",{priority:"P1",order:5}),
   task("launch-measure-template","Create the unit-economics measurement template","action","launch","2026-08-09",20,"A reusable record captures materials, active stitching, finishing, packaging, rework, price, and channel.","Makes measurements comparable.",{priority:"P1",order:10}),
-  task("launch-measure-1","Measure representative piece 1","action","launch","2026-08-10",30,"One complete record is saved with no estimated time fields.","Creates the first direct unit-economics observation.",{priority:"P1",dependsOn:["launch-measure-template"],order:20}),
+  task("launch-measure-1","Measure representative piece 1","action","launch","2026-08-10",30,"One complete record is saved with no estimated time fields.","Creates the first direct unit-economics observation.",{priority:"P1",dependsOn:["launch-measure-template","launch-design-system"],order:20}),
   task("launch-measure-2","Measure representative piece 2","action","launch","2026-08-11",30,"A second complete record is saved using the same template.","Tests whether the first piece was atypical.",{priority:"P1",dependsOn:["launch-measure-1"],order:30}),
   task("launch-measure-3","Measure representative piece 3","action","launch","2026-08-12",30,"A third complete record is saved using the same template.","Provides a range rather than one anecdote.",{priority:"P1",dependsOn:["launch-measure-2"],order:40}),
   task("launch-measure","Review three measured pieces","milestone","launch","2026-08-12",15,"A dated note reports the median and range for materials, production hours, and contribution/hour.","Converts measurements into pricing evidence.",{priority:"P1",dependsOn:["launch-measure-3"],order:50,milestone:"Three pieces measured"}),
@@ -502,23 +505,34 @@ const LNK={
   fees:["Etsy fee schedule","https://help.etsy.com/hc/en-us/articles/115014483627-What-are-the-Fees-and-Taxes-for-Selling-on-Etsy"],
   tags:["Etsy shop-optimization checklist","https://www.etsy.com/seller-handbook/article/checklist-optimize-your-shop-for-etsy/366470356778"],
   irs:["IRS: sole proprietorships","https://www.irs.gov/businesses/small-businesses-self-employed/sole-proprietorships"],
-  usps:["USPS Ground Advantage","https://www.usps.com/ship/ground-advantage.htm"]
+  usps:["USPS Ground Advantage","https://www.usps.com/ship/ground-advantage.htm"],
+  fonts:["Google Fonts FAQ (licensing)","https://fonts.google.com/faq"]
 };
 const GUIDES={
+"launch-design-system":{s:[
+ "Understand the one rule first: purchased patterns are licensed for personal use — pieces sold in the shop must be her own designs. Nobody owns the <b>idea</b> of a daisy or a vine; what is off-limits is copying another artist's specific rendering, and trademarked characters.",
+ "Pick two fonts on Google Fonts (all free for commercial use, including on physical products): one script for names, one clean style for dates and short words. Download both and type a few sample names at stitching size.",
+ "Design three accent motifs from her own hand: sketch a simple flower cluster, a sprig, and a greenery arc on paper, freehand, iterating until she likes them. Drawing from memory or from real flowers is original; tracing another embroiderer's chart is not.",
+ "Define 3-4 palettes of about five floss colors each and write down the DMC numbers, with a name for each palette (Blush, Meadow, Autumn...).",
+ "Assemble the kit: one page (photo or note titled <b>Design kit</b>) showing both fonts, the three motifs, and the palettes. Every future order becomes name + motif + palette — assembly, not fresh design.",
+ "Test the pipeline once: type a name, print it, transfer to scrap fabric (window-tracing with a water-soluble pen, or printable Sulky Sticky Fabri-Solvy), and stitch a few letters with one motif."],
+t:["Years of stitching other artists' patterns taught the genuinely hard half — stitch quality, tension, finishing. This task is the learnable half, and the kit she builds here becomes the brand's look.",
+ "Time spent designing here is a one-time cost. Do not count it in per-piece hours later — the measurement tasks track recurring labor only."],
+l:["fonts"]},
 "launch-measure-template":{s:[
  "Open the Notes app and create a note called <b>Piece log</b>.",
- "Paste this block once, then copy it for each piece: <b>Piece / Channel (direct or Etsy) / Price $ / Materials $ (floss, hoop, fabric, backing, packaging) / Active stitching hrs / Finishing hrs / Packaging hrs / Rework</b>.",
+ "Paste this block once, then copy it for each piece: <b>Piece / Channel (direct or Etsy) / Price $ / Materials $ (floss, hoop, fabric, backing, packaging) / Design hrs (one-time — kit work, not per-piece) / Active stitching hrs / Finishing hrs / Packaging hrs / Rework</b>.",
  "Decide the timing rule now: use the phone stopwatch, start it when the needle moves, and pause it for every interruption. Elapsed days are not labor.",
  "Decide the materials rule: count what the piece actually consumed — used floss is typically $0.50–1.50 per piece, hoops $1.50–3, plus fabric, backing, and the mailer.",
  "Save the note. Done means the template exists and both rules are written down."],
 t:["Twenty minutes, one sitting. The template is the tool; the measuring happens in the next three tasks."]},
 "launch-measure-1":{s:[
- "Pick a piece she would genuinely sell — a typical name hoop, not her fanciest showpiece.",
+ "Pick the first piece from her own design kit — a typical name hoop using her fonts and motifs, not a purchased pattern and not her fanciest showpiece.",
  "Copy the template block in the Piece log note and fill in the piece name and intended channel.",
  "Start the stopwatch when stitching starts; pause for every interruption; write the total in <b>Active stitching hrs</b> when finished.",
  "Time finishing (backing, ironing, framing in the hoop) and packaging separately.",
  "Tally materials at what they cost her and write the price she would charge."],
-t:["If the piece is already finished, reconstruct honestly from memory but mark it 'estimated' — then measure the next two live."]},
+t:["If the piece is already finished, reconstruct honestly from memory but mark it 'estimated' — then measure the next two live.","Log any design tweaking in <b>Design hrs</b>, not stitching hours: design is a one-time template cost, and mixing it in would overstate per-piece labor forever."]},
 "launch-measure-2":{s:[
  "Pick a piece of different complexity than piece 1 — simpler or fancier — so the range means something.",
  "Repeat the exact same procedure: copy the template block, stopwatch active stitching, time finishing and packaging, tally materials, note the intended price and channel."],
