@@ -183,6 +183,105 @@
   .mini-grid label.f{margin:0 0 3px;}
   .muted{color:var(--ink-3); font-size:12px;}
   .flex-between{display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap;}
+
+  /* v2 accessibility, execution, and responsive overrides */
+  :root{
+    --ink-3:#686762; --good:#087807; --accent:#2469b8;
+    --focus:#8a4fff; --overlay:rgba(0,0,0,.50);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:where(:not([data-theme="light"])){
+      --ink-3:#aaa9a2; --good:#49c749; --accent:#76aceb;
+      --wash:rgba(118,172,235,.16);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink-3:#aaa9a2; --good:#49c749; --accent:#76aceb;
+    --wash:rgba(118,172,235,.16);
+  }
+  button, input, select, textarea, summary{font:inherit;}
+  button{min-height:40px;}
+  button:focus-visible, input:focus-visible, select:focus-visible,
+  textarea:focus-visible, summary:focus-visible, [tabindex]:focus-visible{
+    outline:3px solid var(--focus); outline-offset:2px;
+  }
+  nav.tabs button.active{color:#fff;background:#155da8;border-color:#155da8;}
+  :root[data-theme="dark"] nav.tabs button.active{color:#0b0b0b;background:#8bc0fa;border-color:#8bc0fa;}
+  .theme-btn{min-height:40px;}
+  .hero{overflow-wrap:anywhere;}
+  .grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+  @media(min-width:760px){.grid3{grid-template-columns:repeat(3,1fr)}.grid4{grid-template-columns:repeat(4,1fr);}}
+  .today-card{border-left:4px solid var(--accent);}
+  .task-title{font-size:15px;font-weight:650;line-height:1.35;}
+  .task-meta{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0;color:var(--ink-2);font-size:12px;}
+  .task-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .task-actions button{padding:6px 10px;font-size:12px;}
+  .task-detail{font-size:12.5px;color:var(--ink-2);line-height:1.5;margin-top:6px;}
+  .status-chip,.type-chip,.impact-chip{
+    display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;
+    font-size:11px;font-weight:650;border:1px solid var(--ring);background:var(--surface-1);
+  }
+  .status-chip.complete,.status-chip.validated{color:var(--good);}
+  .status-chip.blocked{color:var(--ink-3);}
+  .status-chip.waiting{color:#8a5500;}
+  :root[data-theme="dark"] .status-chip.waiting{color:#ffd27d;}
+  .impact-chip{color:var(--accent);background:var(--wash);}
+  .locked{opacity:.70;}
+  .task-card{border:1px solid var(--ring);border-radius:11px;padding:11px 12px;margin-top:8px;}
+  .task-card.complete .task-title{text-decoration:line-through;color:var(--ink-3);}
+  .task-tools{display:flex;gap:3px;flex-wrap:wrap;margin-left:auto;}
+  .task-tools button{min-width:40px;padding:5px 8px;border:1px solid var(--ring);background:none;color:var(--ink-2);border-radius:8px;}
+  .phase-grid{display:grid;gap:12px;}
+  .progress-label{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink-2);margin-top:5px;}
+  .evidence-row{display:grid;grid-template-columns:minmax(130px,1fr) 2fr;gap:8px;padding:6px 0;border-bottom:1px solid var(--grid);font-size:12.5px;}
+  .gate{border:1px solid var(--ring);border-radius:10px;padding:10px;margin-top:8px;}
+  .gate.pass{border-left:4px solid var(--good);}
+  .gate.fail{border-left:4px solid var(--axis);}
+  .gate .gate-name{font-weight:650;}
+  .gate .gate-detail{font-size:12px;color:var(--ink-2);margin-top:2px;}
+  .impact-table td,.impact-table th{text-align:right;}
+  .impact-table td:first-child,.impact-table th:first-child{text-align:left;}
+  .notice{border:1px solid var(--ring);border-left:4px solid var(--accent);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--ink-2);}
+  .notice.warn{border-left-color:var(--warn);}
+  .notice.good{border-left-color:var(--good);}
+  .bar-row{margin:9px 0;}
+  .bar-label{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink-2);}
+  .bar-track{height:12px;border-radius:7px;background:var(--seq-100);overflow:hidden;margin-top:3px;}
+  .bar-track i{display:block;height:100%;background:var(--accent);border-radius:7px;}
+  .modal-backdrop{position:fixed;inset:0;z-index:100;background:var(--overlay);display:flex;align-items:center;justify-content:center;padding:16px;}
+  .modal-backdrop[hidden]{display:none;}
+  .modal-panel{width:min(720px,100%);max-height:92vh;overflow:auto;background:var(--surface-1);border:1px solid var(--ring);border-radius:16px;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.28);}
+  .modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+  .modal-head h2{font-size:18px;}
+  .modal-close{border:1px solid var(--ring);background:none;color:var(--ink-1);border-radius:8px;min-width:42px;}
+  .field-help{display:block;font-size:11px;color:var(--ink-3);margin-top:2px;}
+  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:110;background:var(--ink-1);color:var(--page);border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 5px 18px rgba(0,0,0,.25);font-size:13px;}
+  .toast[hidden]{display:none;}
+  .toast button{min-height:32px;background:none;color:inherit;border:1px solid currentColor;border-radius:7px;padding:3px 8px;}
+  .source-list a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px;}
+  .source-list li{display:block!important;}
+  .error-text{color:var(--crit);font-size:12px;margin-top:5px;}
+  .good-text{color:var(--good);}
+  .chart-svg{width:100%;height:auto;display:block;}
+  .icon-button{min-width:44px;min-height:44px;}
+  .seg button[aria-pressed="true"]{background:var(--accent);color:var(--page);border-color:var(--accent);font-weight:650;}
+  .quick-add{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;gap:8px;margin-top:10px;}
+  .warning-list{margin:7px 0 0 18px;color:var(--ink-2);font-size:12.5px;}
+  .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;}
+  @media(max-width:520px){
+    main{padding-left:8px;padding-right:8px;}
+    .card{padding:12px;}
+    .grid2,.grid3,.grid4,.mini-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .grid2 > div:has(textarea),.grid4 > div:has(textarea){grid-column:1/-1;}
+    .hero{font-size:38px;}
+    .quick-add{grid-template-columns:1fr 88px;}
+    .quick-add button{grid-column:1/-1;}
+    .addrow{flex-wrap:wrap;}
+    .addrow input{flex-basis:100%;}
+    .task-tools{width:100%;margin-top:6px;}
+    .evidence-row{grid-template-columns:1fr;}
+    table.data{font-size:12px;}
+  }
 </style>
 </head>
 <body>
@@ -190,7 +289,7 @@
   <div class="hdr-row">
     <div>
       <h1>Present Stitch Biz Dashboard</h1>
-      <div class="sub">Maggie&rsquo;s embroidery business &mdash; plan &middot; launch &middot; grow</div>
+      <div class="sub">Maggie&rsquo;s embroidery business &mdash; evidence &middot; execute &middot; decide</div>
     </div>
     <button class="theme-btn" id="themeBtn">◐ Theme</button>
   </div>
@@ -198,947 +297,1189 @@
 <nav class="tabs" id="tabs"></nav>
 <main id="main"><noscript><div class="card" style="margin:14px">This dashboard needs JavaScript. Open the file in a regular browser (Safari, Chrome, Edge) and it will load fully.</div></noscript></main>
 <div id="tip"></div>
+
 <script>
 "use strict";
-/* ============ Present Stitch Biz Dashboard ============
-   All data lives in memory. Use the Data tab to export/import
-   a JSON snapshot (this page cannot save by itself).            */
 
-var DEFAULTS = {
-  meta: {name:"Present Stitch Biz Dashboard", v:1, saved:""},
-  settings: {r:25, horizon:5, tv:0, scenario:"base", target:3000, hpw:8, hg:34, ohm:45, ohg:25, adminH:96, cap:true},
-  streams: [
-    {id:"custom",   name:"Custom commissions",     c:"--s1", start:1, u:1.5, ug:28, p:85, pg:25, cogs:8,  fees:8,  hpu:6.5,  fh:0,  on:true, unit:"pieces/mo",
-     why:"Personalized name & gift hoops, made to order. Typical 6″ custom runs $100–175; premium artists charge $250–900."},
-    {id:"finished", name:"Finished goods & fairs", c:"--s2", start:1, u:4.5, ug:15, p:44, pg:8,  cogs:20, fees:11, hpu:3.2,  fh:0,  on:true, unit:"pieces/mo",
-     why:"Ready-made hoops on Etsy + local craft fairs. Etsy finished hoops cluster $18–40; artist one-offs $40–90."},
-    {id:"patterns", name:"PDF patterns",           c:"--s3", start:2, u:12,  ug:65, p:9,  pg:3,  cogs:2,  fees:13, hpu:0.15, fh:80, on:true, unit:"sales/mo",
-     why:"Digital downloads — near-zero marginal cost. Etsy patterns $3–8 single, bundles $17–29. This is how most full-timers scaled."},
-    {id:"kits",     name:"Kits",                   c:"--s4", start:3, u:8,   ug:55, p:34, pg:3,  cogs:23, fees:12, hpu:0.5,  fh:36, on:true, unit:"kits/mo",
-     why:"Beginner kits (pattern + materials). Brand kits sell $30–50; component cost ≈ $5–8. Jessica Long: 90k+ Etsy kit-era sales."},
-    {id:"workshops",name:"Workshops",              c:"--s5", start:3, u:2.3, ug:70, p:60, pg:6,  cogs:15, fees:3,  hpu:0.9,  fh:0,  on:true, unit:"seats/mo",
-     why:"In-person beginner classes. US tickets cluster $50–100/seat. Also feeds custom + kit sales."},
-    {id:"member",   name:"Membership & content",   c:"--s6", start:3, u:25,  ug:95, p:7,  pg:4,  cogs:4,  fees:11, hpu:0,    fh:90, on:true, unit:"avg members",
-     why:"Patreon-style club ($3–10/mo typical; Cozyblue ran $15–18/mo for 11 yrs) + occasional nano sponsorships ($10–200/post)."}
-  ],
-  tasks: [
-    {t:"Post 3× this week on IG (1 reel, 1 carousel, 1 story set) — restart the cadence", pri:"P1", done:false},
-    {t:"Write price list from the Streams tab calculator (stop guessing per piece)", pri:"P1", done:false},
-    {t:"Open Etsy shop with first 8–10 listings (mix: 5 ready-made, 3 made-to-order)", pri:"P2", done:false}
-  ],
-  roadmap: [
-    {ph:"Phase 0 · Foundation", when:"Now → ~1 mo", items:[
-      {t:"Pick the niche wedge: personalized gift embroidery (names, pets, milestones) — gifting ≈ 27% of Etsy sales and growing", done:false},
-      {t:"Set up cost + hours tracking (use the Tracker tab monthly)", done:false},
-      {t:"Price list: floor = materials + hours × $20/hr + 15% fees (Streams tab)", done:false},
-      {t:"Restart IG: 3 posts/wk minimum for 8 weeks (account has been quiet ~6 months — consistency beats polish)", done:false},
-      {t:"Simple order form (Google Form) + DM auto-reply with prices & turnaround", done:false},
-      {t:"Open a separate bank account; log every expense", done:false}
-    ]},
-    {ph:"Phase 1 · Launch", when:"Months 1–3", items:[
-      {t:"Etsy shop live with 10–15 listings (personalized = search traffic; use all 13 tags)", done:false},
-      {t:"Book 2 local craft fairs / markets (booths $25–300 local)", done:false},
-      {t:"Ask every buyer for a review + photo; reviews are the Etsy flywheel", done:false},
-      {t:"Email capture: free mini-pattern for signups (email is the anti-algorithm asset)", done:false},
-      {t:"Log first full month in Tracker; set baseline", done:false}
-    ]},
-    {ph:"Phase 2 · Traction", when:"Months 3–9", items:[
-      {t:"First $500 month", done:false},
-      {t:"Raise custom prices 15–25% once backlog > 2 weeks", done:false},
-      {t:"Launch first PDF pattern (test digital — it’s the scalability lever)", done:false},
-      {t:"1,000 IG followers & 250 email subs", done:false},
-      {t:"Q4 plan ready by September (Q4 ≈ 31% of handmade annual sales)", done:false}
-    ]},
-    {ph:"Phase 3 · Scale", when:"Months 9–24", items:[
-      {t:"Launch beginner kit line (COGS $5–8, price $32–40)", done:false},
-      {t:"Teach first local workshop (aim 6–8 seats × $50–70)", done:false},
-      {t:"Open membership/club beta at ~5k engaged followers", done:false},
-      {t:"Test wholesale via Faire or 2 local shops (wholesale = 50% of retail)", done:false},
-      {t:"$1,500/mo average over 3 consecutive months", done:false}
-    ]},
-    {ph:"Phase 4 · Full-time gate", when:"Month 24+", items:[
-      {t:"6 consecutive months of SDE ≥ 60–75% of target income (most people wait for ≥75%)", done:false},
-      {t:"6-month personal emergency fund saved", done:false},
-      {t:"Health insurance plan priced and chosen", done:false},
-      {t:"Order backlog or recurring revenue ≥ 8 weeks forward", done:false},
-      {t:"Decision review: readiness score ≥ 80 on Overview tab", done:false}
-    ]}
-  ],
-  tracker: [
-    {m:"2026-08", rev:0, cost:0, hrs:0, orders:0, fol:0, email:0}
-  ],
-  ready: {fund:false, ins:false, backlog:false, email:false, repeat:false}
+/* Present Stitch Biz Dashboard v2
+   Evidence-led execution, transparent planning value, and backward-compatible data. */
+
+const APP_VERSION = 2;
+const STORE_KEY = "psbd-v2";
+const LEGACY_KEY = "psbd-v1";
+const APP_START = "2026-08-08";
+const SCENARIOS = {
+  cons: {u:0.45, g:0.70, p:0.90, delay:1, label:"Conservative"},
+  base: {u:1.00, g:1.00, p:1.00, delay:0, label:"Base"},
+  stretch: {u:1.70, g:1.15, p:1.15, delay:0, label:"Stretch"}
 };
 
-var S = JSON.parse(JSON.stringify(DEFAULTS));
+const PHASES = [
+  {id:"launch", name:"Launch foundation", when:"Aug 8–Sep 7, 2026", start:"2026-08-08", end:"2026-09-07"},
+  {id:"validate", name:"Validate demand", when:"Sep 8–Oct 7, 2026", start:"2026-09-08", end:"2026-10-07"},
+  {id:"prove", name:"Prove operations", when:"Oct 8–Nov 6, 2026", start:"2026-10-08", end:"2026-11-06"},
+  {id:"traction", name:"Traction", when:"After the 90-day review", start:"2026-11-07", end:""},
+  {id:"scale", name:"Scale", when:"Only after evidence gates", start:"", end:""},
+  {id:"fulltime", name:"Full-time decision", when:"Only after every readiness gate passes", start:"", end:""},
+  {id:"imported", name:"Imported v1 items", when:"Preserved from the earlier dashboard", start:"", end:""}
+];
 
-/* ---------- device autosave (works when hosted or opened in a browser;
-   silently disabled in sandboxed previews) ---------- */
-var STORE_KEY = "psbd-v1";
-var canStore = false;
-try {
-  window.localStorage.setItem("psbd-test","1");
-  window.localStorage.removeItem("psbd-test");
-  canStore = true;
-} catch(e){ canStore = false; }
-function normalize(obj){
-  if (obj.settings.cap === undefined) obj.settings.cap = true;
-  return obj;
-}
-function loadSaved(){
-  if (!canStore) return;
-  try {
-    var raw = window.localStorage.getItem(STORE_KEY);
-    if (!raw) return;
-    var obj = JSON.parse(raw);
-    if (obj && obj.streams && obj.settings && obj.roadmap) S = normalize(obj);
-  } catch(e){}
-}
-var saveT;
-function saveNow(){
-  if (!canStore) return;
-  try { window.localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch(e){}
-}
-function save(){
-  if (!canStore) return;
-  clearTimeout(saveT); saveT = setTimeout(saveNow, 300);
-}
-loadSaved();
+const SOURCES = [
+  {
+    id:"etsy-2025", claim:"2025 Etsy marketplace scale: about $10.5B GMS and 5.6M active sellers",
+    publisher:"Etsy, Inc.", date:"2026-02-19", quality:"Primary company reporting",
+    url:"https://investors.etsy.com/company-information",
+    note:"The quotient of GMS divided by active sellers is not typical shop revenue or a median."
+  },
+  {
+    id:"etsy-fees", claim:"Etsy listing, transaction, payment-processing, and optional advertising fees",
+    publisher:"Etsy Help", date:"Current; verified 2026-08-08", quality:"Primary platform policy",
+    url:"https://help.etsy.com/hc/en-us/articles/115014483627-What-are-the-Fees-and-Taxes-for-Selling-on-Etsy",
+    note:"Fees vary by country and channel; the calculator uses editable US defaults."
+  },
+  {
+    id:"etsy-tags", claim:"Use up to all 13 relevant, varied tags; results are not guaranteed",
+    publisher:"Etsy Seller Handbook", date:"Updated 2025-08", quality:"Primary platform guidance",
+    url:"https://www.etsy.com/seller-handbook/article/checklist-optimize-your-shop-for-etsy/366470356778",
+    note:"Search changes; review shop statistics and revise tags."
+  },
+  {
+    id:"etsy-gifting", claim:"Gifting represented about 27% of Etsy GMS in Q2 2024 and grew 4.1% year over year",
+    publisher:"Etsy, Inc.", date:"2024-07-31", quality:"Primary quarterly reporting",
+    url:"https://investors.etsy.com/news-events/press-releases/detail/22/etsy-inc-reports-second-quarter-2024-results",
+    note:"Dated context, not an evergreen 2026 market-share estimate."
+  },
+  {
+    id:"bankrate-side", claim:"2025 US side-hustle median income was $200/month",
+    publisher:"Bankrate / YouGov", date:"2025-07-09", quality:"Broad nonprobability survey",
+    url:"https://www.bankrate.com/loans/small-business/side-hustles-survey/",
+    note:"Useful as broad context, not an embroidery-business benchmark."
+  },
+  {
+    id:"flexjobs", claim:"57% of surveyed workers wanted at least 75% salary replacement before leaving a job",
+    publisher:"FlexJobs", date:"2025", quality:"Respondent preference survey",
+    url:"https://www.flexjobs.com/blog/post/flexjobs-report-workers-consider-quitting-full-time-jobs-for-side-hustles",
+    note:"Context only; the app uses user-specific noncompensatory readiness gates."
+  },
+  {
+    id:"bizbuysell", claim:"2025 sold small businesses averaged about 2.61× earnings",
+    publisher:"BizBuySell", date:"2025 full year", quality:"Reported operating-business transactions",
+    url:"https://www.bizbuysell.com/learning-center/guide/value-business/",
+    note:"Not applicable to a pre-revenue, owner-dependent venture; terminal value defaults to zero."
+  },
+  {
+    id:"pinterest", claim:"Pinterest reports more than 600M monthly users",
+    publisher:"Pinterest, Inc.", date:"2026-06-04", quality:"Primary company reporting",
+    url:"https://investor.pinterestinc.com/news-and-events/press-releases/press-releases-details/2026/Pinterest-Works-with-AWS-to-Power-Next-Chapter-of-AI-Driven-Visual-Search-Discovery/default.aspx",
+    note:"Platform size does not establish channel conversion for Present Stitch."
+  }
+];
 
-var SCEN = {
-  cons:    {u:0.45, g:0.7,  p:0.9,  d:1, label:"Conservative"},
-  base:    {u:1,    g:1,    p:1,    d:0, label:"Base"},
-  stretch: {u:1.7,  g:1.15, p:1.15, d:0, label:"Stretch"}
+const BENCH=[
+  {n:"Sarah K. Benning",f:"438k IG",m:"Monthly pattern drops ($20), originals, kits, book",l:"Went full-time after ~18 months of nights and weekends. <b>Recurring pattern drops = recurring revenue.</b>"},
+  {n:"Jessica Long Embroidery",f:"308k IG · 92k YT",m:"Kits $30–62 with video tutorials, patterns, 2 books — 90,937 lifetime Etsy sales",l:"<b>Kits + free YouTube tutorials</b> built the biggest Etsy engine in the niche."},
+  {n:"Clever Poppy (Julie)",f:"710k IG",m:"Beginner kits $40–50 → $37 course → Maker's Academy membership",l:"Started on maternity leave; husband is now CEO. <b>Kit → course → membership funnel, email-first.</b>"},
+  {n:"Charles & Elin",f:"203k IG",m:"Online academy: courses $27–99, $399 bundle; YouTube as free funnel",l:"YouTube ad revenue ≈ $20–56/mo — trivial. <b>The courses are the money; content is the funnel.</b>"},
+  {n:"Michelle Staub · Stitching Sabbatical",f:"184k IG",m:"Pet portraits $600–900, 12+ week waitlist; Domestika course (14k students); book",l:"<b>The ceiling for personalized embroidery</b> — premium pricing via an emotional niche plus scarcity."},
+  {n:"Emillie Ferris",f:"202k IG",m:"Was commission-heavy → now patterns $14–21, books, pins",l:"Deliberately <b>pivoted from 18-hour commissions to products</b> once the audience existed."},
+  {n:"MCreativeJ (Melissa Galbraith)",f:"52k IG",m:"Kits, 3 books, guild workshops, wholesale, Domestika",l:"Mid-tier proof: <b>teaching + wholesale beats the algorithm</b> — no virality required."},
+  {n:"Trish Burr",f:"35k IG",m:"Books, PDF lessons $10–13, online classes $38–46",l:"A <b>35k-follower account can support a global niche education business</b> via authority."},
+  {n:"Cozyblue (Liz)",f:"38k IG",m:"Stitch Club subscription $15–18/mo — ran monthly for 11 years",l:"Recurring-club longevity — and a caution: <b>solo capacity caps growth</b> (she scaled back in 2026)."},
+  {n:"And Other Adventures",f:"124k IG",m:"Kits $30–44, Faire wholesale, studio",l:"Candid 2021 post: growth plateaued post-Covid. <b>Kits are a business, not a lottery ticket.</b>"},
+  {n:"Sarah Homfray",f:"273k YT",m:"Video kits (7+ hrs HD + materials), distance classes, goldwork supplies",l:"<b>Long-form YouTube converts</b> to premium kits; credentials compound."},
+  {n:"Abbode (adjacent — machine)",f:"—",m:"Personalized embroidery events/retail: $719k (2023) → $1.6M (2024)",l:"Machine-based, so not her economics — but <b>proof of demand for personalized embroidered gifts</b>."}
+];
+const PRICE_SHEET=[
+  ["Custom 6\u2033 hoop (hand)","$100–175","$250+"],
+  ["Pet/family portrait (thread-painted)","$85–190 outline","$600–900 (Staub)"],
+  ["Ready-made hoop, Etsy","$18–40","$40–90 artist one-off"],
+  ["PDF pattern","$3–8","$17–29 bundle"],
+  ["Beginner kit (brand shops)","$30–44","$50 (Clever Poppy)"],
+  ["Workshop seat (US)","$50–70","$100"],
+  ["Membership / club","$3–10 /mo","$15–18 /mo with materials"],
+  ["Nano sponsorship (1–10k followers)","$10–100 /post","$200"],
+  ["Wholesale","use the wholesale calculator","—"],
+  ["Etsy all-in fees","≈12–13% + $0.20 listing","+12–15% offsite-ad orders"]
+];
+const SEASONS=[
+  ["Q4 (Oct–Dec)","≈ 30–31.5% of annual handmade sales; personalized gifts peak","Listings live mid-Sept; custom cutoff ~Dec 1"],
+  ["Mother's Day (May)","Names, family, and pet pieces bump","Promote from late March"],
+  ["Grad season (May–Jun)","Etsy reports double-digit graduation-gift growth","List in April"],
+  ["Weddings (Sep–Oct peak)","Bouquet and heirloom commissions booked 2–6 months ahead","Market in spring–summer"],
+  ["Jan–Feb","Slowest retail — build patterns, kits, and course content","Use the quiet quarter"]
+];
+function task(id, title, type, phaseId, dueDate, effortMinutes, definitionOfDone, why, options={}) {
+  return {
+    id, title, type, phaseId, dueDate, effortMinutes, definitionOfDone, why,
+    priority: options.priority || "P2",
+    dependsOn: options.dependsOn || [],
+    status: options.status || "available",
+    order: options.order || 0,
+    points: options.points || (effortMinutes <= 30 ? 5 : effortMinutes <= 90 ? 10 : 20),
+    result: options.result || "",
+    metric: options.metric || null,
+    impact: options.impact || null,
+    evidenceLevel: options.evidenceLevel || "hypothesis",
+    completedAt: options.completedAt || "",
+    pointsAwarded: Boolean(options.pointsAwarded),
+    evidenceBonusAwarded: Boolean(options.evidenceBonusAwarded),
+    seasonal: Boolean(options.seasonal),
+    milestone: options.milestone || "",
+    imported: Boolean(options.imported)
+  };
+}
+
+const DEFAULT_TASKS = [
+  task("launch-measure", "Measure three representative pieces", "action", "launch", "2026-08-10", 60,
+    "Three records contain materials, active stitching time, finishing time, and packaging.",
+    "Replaces guessed unit economics with direct evidence.", {priority:"P1", order:10}),
+  task("launch-price", "Set channel-specific prices for three launch offers", "experiment", "launch", "2026-08-12", 60,
+    "Direct and Etsy prices meet the editable contribution-per-hour floor under explicit fees.",
+    "Makes price a transparent business hypothesis rather than a guess.", {
+      priority:"P1", dependsOn:["launch-measure"], order:20,
+      impact:{label:"Custom starting-price sensitivity", scope:"core", streamId:"custom", field:"p", low:100, base:125, high:150, caveat:"Holds unit demand constant; this is sensitivity, not a causal forecast."}
+    }),
+  task("launch-offers", "Select three launch offers", "gate", "launch", "2026-08-13", 45,
+    "Each offer has a buyer/occasion, options, price, turnaround, and expected production time.",
+    "Constrains the launch to a learnable assortment.", {priority:"P1", dependsOn:["launch-price"], order:30}),
+  task("launch-limits", "Set weekly capacity and order limits", "action", "launch", "2026-08-14", 30,
+    "Weekly hours, maximum open orders, turnaround, and provisional holiday cutoff are documented.",
+    "Prevents overbooking and makes delivery promises credible.", {priority:"P1", dependsOn:["launch-measure"], order:40}),
+  task("launch-intake", "Build and test the order-intake system", "action", "launch", "2026-08-16", 75,
+    "Order form, reply template, payment rule, revision policy, and turnaround are testable end to end.",
+    "Turns interest into consistent, trackable inquiries.", {dependsOn:["launch-offers","launch-limits"], order:50}),
+  task("launch-list-plan", "Plan eight Etsy listings", "action", "launch", "2026-08-18", 90,
+    "The listing matrix contains offer, search intent, photos, price, personalization, and 13 relevant nonduplicative tags.",
+    "Creates a complete production queue before opening the shop.", {dependsOn:["launch-offers"], order:60}),
+  task("launch-photo", "Produce the first photography and content batch", "action", "launch", "2026-08-21", 150,
+    "Complete image sets exist for three listings plus reusable social assets.",
+    "Supplies both the shop and the first acquisition experiment.", {dependsOn:["launch-list-plan"], order:70}),
+  task("launch-3-listings", "Publish the first three Etsy listings", "experiment", "launch", "2026-08-23", 90,
+    "Three listings are live, proofread, priced, tagged, and connected to source tracking.",
+    "Begins observable demand testing.", {priority:"P1", dependsOn:["launch-photo","launch-intake"], order:80, milestone:"First listings live"}),
+  task("launch-ig", "Schedule four CTA-bearing Instagram posts", "experiment", "launch", "2026-08-28", 90,
+    "Four posts are scheduled across two weeks with a trackable CTA; visits, inquiries, and orders will be logged.",
+    "Tests whether existing visual content can generate qualified interest.", {
+      dependsOn:["launch-3-listings"], order:90,
+      metric:{name:"Instagram-to-inquiry evidence", baseline:"No recent cadence", target:"Log reach, profile visits, qualified inquiries, and paid orders", reviewDate:"2026-09-07"}
+    }),
+  task("launch-finance", "Separate finances and log August, including a zero month", "action", "launch", "2026-08-31", 30,
+    "Business transactions use a separate account or ledger and August has a complete Tracker row even if every amount is zero.",
+    "Creates an unbiased actuals history.", {priority:"P1", order:100}),
+  task("launch-8-listings", "Publish five more listings and QA the path", "experiment", "launch", "2026-09-04", 180,
+    "Eight total listings are live; mobile inquiry, personalization, policies, and checkout paths are tested.",
+    "Completes the initial assortment and reduces launch friction.", {dependsOn:["launch-3-listings"], order:110, milestone:"Eight listings live"}),
+  task("launch-review", "Conduct the 30-day evidence review", "gate", "launch", "2026-09-07", 45,
+    "Each key assumption is classified as untested, observed, supported, contradicted, or inconclusive, and the next sprint is selected.",
+    "Prevents premature conclusions from insufficient exposure.", {priority:"P1", dependsOn:["launch-ig","launch-finance","launch-8-listings"], order:120, milestone:"Launch review complete"}),
+
+  task("validate-weekly", "Log four weekly funnel observations", "experiment", "validate", "2026-10-05", 80,
+    "Four observations include listing visits, inquiries, quotes, orders, price accepted, source, time, and margin per hour.",
+    "Separates an acquisition problem from an offer or pricing problem.", {priority:"P1", dependsOn:["launch-review"], order:210}),
+  task("validate-q4", "Set the Q4 capacity and order-cutoff plan", "action", "validate", "2026-09-15", 45,
+    "Holiday offers, weekly capacity, order cutoff, and overflow response are documented.",
+    "Protects delivery quality during the most time-sensitive period.", {seasonal:true, dependsOn:["launch-review"], order:220}),
+  task("validate-market", "Evaluate one local-market test", "experiment", "validate", "2026-09-25", 60,
+    "Three candidate events are compared on fee, audience, inventory requirement, break-even units, and schedule; apply only if feasible.",
+    "Tests an offline acquisition channel without treating attendance as success.", {dependsOn:["launch-review"], order:230}),
+  task("validate-review", "Conduct the 60-day demand review", "gate", "validate", "2026-10-07", 60,
+    "The review identifies whether evidence is sufficient, which offer/channel is best supported, and whether to continue, revise acquisition, revise the offer, or pause.",
+    "Converts observations into an explicit decision.", {priority:"P1", dependsOn:["validate-weekly","validate-q4"], order:240, milestone:"Demand review complete"}),
+
+  task("prove-history", "Complete three consecutive monthly records, including zeros", "milestone", "prove", "2026-11-01", 30,
+    "August, September, and October each contain a complete logged row regardless of revenue.",
+    "Creates the minimum operational history for a 90-day review.", {priority:"P1", dependsOn:["validate-review"], order:310}),
+  task("prove-unit", "Estimate observed unit economics from paid orders", "experiment", "prove", "2026-11-03", 75,
+    "For each offer with paid orders, record median production time, realized price, cost, and contribution per hour; fewer than five orders remains preliminary evidence.",
+    "Tests whether sales are economically worth fulfilling.", {dependsOn:["validate-review"], order:320}),
+  task("prove-review", "Make the 90-day go, revise, pause, or stop decision", "gate", "prove", "2026-11-06", 60,
+    "A documented decision cites demand evidence, unit economics, capacity, and data limitations.",
+    "Prevents an indefinite hobby plan from being mistaken for traction.", {priority:"P1", dependsOn:["prove-history","prove-unit"], order:330, milestone:"90-day decision made"}),
+
+  task("traction-pattern-signal", "Validate demand for a first PDF pattern", "gate", "traction", "", 60,
+    "Repeated customer/content signals or a preorder test support developing a pattern; otherwise the gate remains open.",
+    "Prevents automatic Year-2 revenue from an untested product.", {dependsOn:["prove-review"], order:410}),
+  task("traction-pattern", "Launch and measure the first PDF pattern", "experiment", "traction", "", 240,
+    "The pattern is tested, published, and tracked for sales, support burden, and refunds.",
+    "Tests scalable revenue with explicit evidence.", {
+      dependsOn:["traction-pattern-signal"], order:420, milestone:"First pattern launched",
+      impact:{label:"Pattern monthly-sales sensitivity", scope:"full", streamId:"patterns", field:"u", low:3, base:12, high:18, caveat:"Assumes the pattern launches on the modeled schedule; completion alone does not validate sales."}
+    }),
+  task("scale-kit", "Pass the beginner-kit evidence gate", "gate", "scale", "", 90,
+    "A tested pattern, beginner usability evidence, component costs, and support requirements justify a kit pilot.",
+    "Prevents inventory investment before the instructions work.", {dependsOn:["traction-pattern"], order:510}),
+  task("scale-workshop", "Pass the workshop break-even and interest gate", "gate", "scale", "", 60,
+    "Documented local interest and a seat-level break-even calculation support one pilot.",
+    "Separates event enthusiasm from viable economics.", {dependsOn:["prove-review"], order:520}),
+  task("scale-membership", "Pass the recurring-content demand gate", "gate", "scale", "", 90,
+    "Repeated content demand and an explicit production calendar support a small paid beta; follower count alone does not qualify.",
+    "Avoids an arbitrary audience-size threshold.", {dependsOn:["traction-pattern"], order:530}),
+  task("scale-wholesale", "Pass the wholesale margin and capacity gate", "gate", "scale", "", 75,
+    "Wholesale price, retailer margin, payment terms, batch capacity, and cash needs meet preset thresholds.",
+    "Prevents revenue growth that destroys owner earnings.", {dependsOn:["prove-review"], order:540}),
+  task("fulltime-decision", "Complete the full-time decision review", "gate", "fulltime", "", 120,
+    "Every required readiness gate passes using current data; remaining uncertainties and downside plan are documented.",
+    "Makes leaving employment a gated decision rather than a score threshold.", {dependsOn:["prove-review"], order:610, milestone:"Full-time decision reviewed"})
+];
+
+const DEFAULT_STREAMS = [
+  {id:"custom", name:"Custom commissions", color:"--s1", status:"planned", start:1, u:1.5, ug:28, p:85, pg:25, cogs:8, fees:2.9, hpu:6.5, fh:0, rh:0, on:true, unit:"pieces/mo", priority:2, evidenceLevel:"hypothesis", observations:0,
+    why:"Personalized name and gift hoops made to order. Price and time must be validated from paid work."},
+  {id:"finished", name:"Finished goods & fairs", color:"--s2", status:"planned", start:1, u:4.5, ug:15, p:44, pg:8, cogs:20, fees:9.5, hpu:3.2, fh:0, rh:0, on:true, unit:"pieces/mo", priority:3, evidenceLevel:"hypothesis", observations:0,
+    why:"Ready-made pieces sold online or locally. Channel fees and inventory risk differ."},
+  {id:"patterns", name:"PDF patterns", color:"--s3", status:"hypothesis", start:2, u:12, ug:65, p:9, pg:3, cogs:2, fees:9.5, hpu:0.15, fh:40, rh:50, on:true, unit:"sales/mo", priority:1, evidenceLevel:"hypothesis", observations:0,
+    why:"A potential scalable stream, excluded from the core case until its evidence gate passes."},
+  {id:"kits", name:"Kits", color:"--s4", status:"hypothesis", start:3, u:8, ug:55, p:34, pg:3, cogs:23, fees:9.5, hpu:0.5, fh:24, rh:20, on:true, unit:"kits/mo", priority:2, evidenceLevel:"hypothesis", observations:0,
+    why:"Requires a tested pattern, usable instructions, component costing, and inventory cash."},
+  {id:"workshops", name:"Workshops", color:"--s5", status:"hypothesis", start:3, u:2.3, ug:70, p:60, pg:6, cogs:15, fees:2.9, hpu:0.9, fh:0, rh:0, on:true, unit:"seats/mo", priority:2, evidenceLevel:"hypothesis", observations:0,
+    why:"Requires documented local interest and a seat-level break-even test."},
+  {id:"member", name:"Membership & content", color:"--s6", status:"hypothesis", start:3, u:25, ug:95, p:7, pg:4, cogs:4, fees:2.9, hpu:0, fh:30, rh:90, on:true, unit:"avg members", priority:3, evidenceLevel:"hypothesis", observations:0,
+    why:"Requires recurring-content demand and a sustainable production calendar; followers alone are insufficient."}
+];
+
+const DEFAULTS = {
+  meta:{name:"Present Stitch Biz Dashboard", v:APP_VERSION, saved:"", created:APP_START, migratedFrom:null, migrationNotice:false, lastBackup:""},
+  settings:{
+    r:25, horizon:5, tv:0, scenario:"base", target:3000, targetBasis:"pretax", readinessPct:75,
+    hours:[8,10,14,18,25], maxHpw:40, ohm:45, ohg:25, adminH:96,
+    cap:true, capacityMode:"margin", startupCosts:0, workingCapital:0,
+    transferability:false, replacementLaborRate:20, hourlyFloor:20, theme:"auto"
+  },
+  streams:DEFAULT_STREAMS,
+  phases:PHASES,
+  tasks:DEFAULT_TASKS,
+  tracker:[{m:"2026-08", logged:true, rev:0, cost:0, hrs:0, orders:0, views:0, inquiries:0, quotes:0, fol:0, email:0, repeatOrders:0, completedOrders:0, onTimeOrders:0, backlogWeeks:0, note:""}],
+  ready:{fund:false, insurance:false, taxBenefits:false},
+  momentum:{total:0, weekKey:"", weekPoints:0, weeklyGoal:30, history:[], celebrated:[]},
+  sources:SOURCES
 };
 
-/* ---------- financial model ----------
-   Demand: units grow per stream. Capacity: Maggie's hours.
-   With settings.cap on, hour-consuming production is trimmed to fit
-   the hours she actually has — unserved demand is reported as `lost`. */
-function runModel(S, scenKey){
-  var st = S.settings, SC = SCEN[scenKey || st.scenario];
-  var H = st.horizon, years = [];
-  for (var y=1; y<=H; y++){
-    var rows = S.streams.map(function(s){
-      if (!s.on) return {s:s, active:false};
-      var eff = s.start + (s.start>1 ? SC.d : 0);
-      var t = y - eff;
-      if (t < 0) return {s:s, active:false};
-      return {s:s, active:true,
-              units: s.u * SC.u * Math.pow(1 + (s.ug*SC.g)/100, t),
-              price: s.p * SC.p * Math.pow(1 + s.pg/100, t)};
-    });
-    var fixedH = 0, varH = 0;
-    rows.forEach(function(r){
-      if (!r.active) return;
-      fixedH += r.s.fh;
-      varH += r.units*12*r.s.hpu;
-    });
-    var avail = st.hpw*52*Math.pow(1+st.hg/100, y-1);
-    var availVar = Math.max(0, avail - fixedH - st.adminH);
-    var factor = 1;
-    if (st.cap && varH > availVar && varH > 0) factor = availVar/varH;
-    var revBy = {}, rev=0, revUncap=0, cogs=0, fees=0, usedVar=0;
-    rows.forEach(function(r){
-      revBy[r.s.id] = 0;
-      if (!r.active) return;
-      var u = r.s.hpu > 0 ? r.units*factor : r.units;
-      var rv = u * r.price * 12;
-      revBy[r.s.id] = rv; rev += rv;
-      revUncap += r.units * r.price * 12;
-      cogs += rv * r.s.cogs/100; fees += rv * r.s.fees/100;
-      usedVar += u*12*r.s.hpu;
-    });
-    var oh = st.ohm*12*Math.pow(1+st.ohg/100, y-1);
-    var sde = rev - cogs - fees - oh;
-    var need = varH + fixedH + st.adminH;
-    var used = usedVar + fixedH + st.adminH;
-    years.push({y:y, revBy:revBy, rev:rev, lost:revUncap-rev, cogs:cogs, fees:fees, oh:oh, sde:sde,
-                need:need, used:used, avail:avail, capped:factor<0.999,
-                util:avail>0?need/avail:0, wage:used>0?sde/used:0});
+let S = deepClone(DEFAULTS);
+let currentTab = "overview";
+let canStore = false;
+let saveTimer = null;
+let undoStack = [];
+let modalReturnFocus = null;
+
+function deepClone(value){ return JSON.parse(JSON.stringify(value)); }
+function esc(value){ return String(value ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function clamp(value,min,max){ const n=Number(value); return Number.isFinite(n)?Math.min(max,Math.max(min,n)):min; }
+function number(value,fallback=0){ const n=Number(value); return Number.isFinite(n)?n:fallback; }
+function todayISO(){
+  const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,"0"); const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function weekKey(date=new Date()){
+  const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+  const day=d.getUTCDay()||7; d.setUTCDate(d.getUTCDate()+4-day);
+  const start=new Date(Date.UTC(d.getUTCFullYear(),0,1)); const week=Math.ceil((((d-start)/86400000)+1)/7);
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2,"0")}`;
+}
+function formatMoney(v,compact=true){
+  if(!Number.isFinite(v)) return "Not estimable";
+  const sign=v<0?"−":""; const a=Math.abs(v);
+  if(compact&&a>=1e6) return `${sign}$${(a/1e6).toFixed(1)}M`;
+  if(compact&&a>=10000) return `${sign}$${(a/1000).toFixed(1)}k`;
+  return `${sign}$${Math.round(a).toLocaleString()}`;
+}
+function formatPct(v,digits=0){ return Number.isFinite(v)?`${(v*100).toFixed(digits)}%`:"—"; }
+function dateLabel(iso){
+  if(!iso) return "No date";
+  const d=new Date(`${iso}T12:00:00`); if(Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:d.getFullYear()!==new Date().getFullYear()?"numeric":undefined});
+}
+function daysUntil(iso){
+  if(!iso) return 9999;
+  const a=new Date(`${todayISO()}T12:00:00`), b=new Date(`${iso}T12:00:00`);
+  return Math.round((b-a)/86400000);
+}
+function uid(prefix="task"){ return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`; }
+
+function defaultStreamExtras(stream){
+  const digital = stream.id === "patterns" || stream.id === "member";
+  const direct = stream.id === "custom" || stream.id === "workshops" || stream.id === "member";
+  return {
+    channel: direct ? "direct" : "etsy",
+    fixedFee: direct ? 0.30 : 0.25,
+    listingFee: direct ? 0 : 0.20,
+    offsiteRate: 0,
+    packaging: digital ? 0 : (stream.id === "kits" ? 3.50 : 2.25),
+    shipping: 0,
+    rework: digital ? 0.15 : 1.50
+  };
+}
+
+function normalizeStream(raw, fallback){
+  const base = Object.assign({}, fallback || DEFAULT_STREAMS[0], defaultStreamExtras(fallback || raw || DEFAULT_STREAMS[0]));
+  const out = Object.assign(base, raw || {});
+  out.id = String(out.id || uid("stream"));
+  out.name = String(out.name || "Untitled stream").slice(0,100);
+  out.color = String(out.color || out.c || "--s1");
+  out.status = ["planned","hypothesis","validated"].includes(out.status) ? out.status : "planned";
+  out.start = clamp(out.start,1,20); out.u = clamp(out.u,0,100000); out.ug = clamp(out.ug,-100,1000);
+  out.p = clamp(out.p,0,100000); out.pg = clamp(out.pg,-100,1000); out.cogs = clamp(out.cogs,0,100);
+  out.fees = clamp(out.fees,0,100); out.hpu = clamp(out.hpu,0,10000); out.fh = clamp(out.fh,0,100000); out.rh = clamp(out.rh,0,100000);
+  out.priority = clamp(out.priority,1,99); out.observations = Math.round(clamp(out.observations,0,100000));
+  out.channel = out.channel === "direct" ? "direct" : "etsy";
+  ["fixedFee","listingFee","packaging","shipping","rework"].forEach(k=>{ out[k]=clamp(out[k],0,100000); });
+  out.offsiteRate = clamp(out.offsiteRate,0,100);
+  out.on = out.on !== false;
+  out.unit = String(out.unit || "units/mo").slice(0,40);
+  out.why = String(out.why || "").slice(0,1000);
+  out.evidenceLevel = ["hypothesis","observed","supported","contradicted","inconclusive"].includes(out.evidenceLevel) ? out.evidenceLevel : "hypothesis";
+  return out;
+}
+
+function normalizeTrackerRow(raw){
+  const row = Object.assign({m:"",logged:false,rev:0,cost:0,hrs:0,orders:0,views:0,inquiries:0,quotes:0,fol:0,email:0,repeatOrders:0,completedOrders:0,onTimeOrders:0,backlogWeeks:0,note:""}, raw || {});
+  row.m = /^\d{4}-\d{2}$/.test(String(row.m)) ? String(row.m) : "";
+  row.logged = Boolean(row.logged || row.rev || row.cost || row.hrs || row.orders);
+  ["rev","cost","hrs","orders","views","inquiries","quotes","fol","email","repeatOrders","completedOrders","onTimeOrders","backlogWeeks"].forEach(k=>{ row[k]=clamp(row[k],0,100000000); });
+  row.note = String(row.note || "").slice(0,1000);
+  return row;
+}
+
+function normalizeTask(raw, fallback){
+  const b = fallback || task(uid(),"Untitled task","action","launch","",30,"Define what complete means.","Added by the user.");
+  const out = Object.assign({},b,raw || {});
+  out.id = String(out.id || uid()); out.title = String(out.title || out.t || "Untitled task").slice(0,180);
+  out.type = ["action","experiment","gate","milestone"].includes(out.type) ? out.type : "action";
+  out.phaseId = PHASES.some(p=>p.id===out.phaseId) ? out.phaseId : "imported";
+  out.dueDate = /^\d{4}-\d{2}-\d{2}$/.test(String(out.dueDate || "")) ? String(out.dueDate) : "";
+  out.effortMinutes = Math.round(clamp(out.effortMinutes,5,100000));
+  out.definitionOfDone = String(out.definitionOfDone || "Define what complete means.").slice(0,1500);
+  out.why = String(out.why || "").slice(0,1500); out.priority = out.priority === "P1" ? "P1" : "P2";
+  out.dependsOn = Array.isArray(out.dependsOn) ? [...new Set(out.dependsOn.map(String).filter(Boolean))] : [];
+  out.status = ["available","active","blocked","waiting","completed","validated"].includes(out.status) ? out.status : (out.done ? "completed" : "available");
+  out.order = number(out.order,0); out.points = [5,10,20].includes(Number(out.points)) ? Number(out.points) : (out.effortMinutes<=30?5:out.effortMinutes<=90?10:20);
+  out.result = String(out.result || "").slice(0,2000); out.completedAt = String(out.completedAt || "");
+  out.pointsAwarded = Boolean(out.pointsAwarded); out.evidenceBonusAwarded = Boolean(out.evidenceBonusAwarded);
+  out.seasonal = Boolean(out.seasonal); out.milestone = String(out.milestone || "").slice(0,120); out.imported = Boolean(out.imported);
+  return out;
+}
+
+function normalizeSettings(raw={}){
+  const st = Object.assign({},DEFAULTS.settings,raw);
+  st.r=clamp(st.r,0,100); st.horizon=Math.round(clamp(st.horizon,1,20)); st.tv=clamp(st.tv,0,10);
+  st.scenario=SCENARIOS[st.scenario]?st.scenario:"base"; st.target=clamp(st.target,0,10000000);
+  st.readinessPct=clamp(st.readinessPct,1,100); st.maxHpw=clamp(st.maxHpw,1,80);
+  st.hours=Array.isArray(st.hours)&&st.hours.length?st.hours.map(v=>clamp(v,0,st.maxHpw)).slice(0,20):DEFAULTS.settings.hours.slice();
+  while(st.hours.length<st.horizon) st.hours.push(st.hours[st.hours.length-1]);
+  st.ohm=clamp(st.ohm,0,1000000); st.ohg=clamp(st.ohg,-100,1000); st.adminH=clamp(st.adminH,0,100000);
+  st.startupCosts=clamp(st.startupCosts,0,100000000); st.workingCapital=clamp(st.workingCapital,0,100000000);
+  st.replacementLaborRate=clamp(st.replacementLaborRate,0,10000); st.hourlyFloor=clamp(st.hourlyFloor,0,10000);
+  st.cap=true; st.capacityMode=st.capacityMode==="strategic"?"strategic":"margin";
+  st.transferability=Boolean(st.transferability); st.theme=["auto","light","dark"].includes(st.theme)?st.theme:"auto";
+  return st;
+}
+
+function mergeV2(raw){
+  const out=deepClone(DEFAULTS);
+  out.meta=Object.assign(out.meta,raw.meta||{}, {v:APP_VERSION});
+  out.settings=normalizeSettings(raw.settings||{});
+  const rawStreams=Array.isArray(raw.streams)?raw.streams:[];
+  out.streams=rawStreams.length?rawStreams.map((s,i)=>normalizeStream(s,DEFAULT_STREAMS.find(d=>d.id===s.id)||DEFAULT_STREAMS[i])):deepClone(DEFAULT_STREAMS).map(normalizeStream);
+  const rawTasks=Array.isArray(raw.tasks)?raw.tasks:[];
+  const byId=new Map(rawTasks.map(t=>[String(t.id||""),t]));
+  out.tasks=DEFAULT_TASKS.map(d=>normalizeTask(byId.get(d.id)||d,d));
+  rawTasks.filter(t=>!DEFAULT_TASKS.some(d=>d.id===String(t.id||""))).forEach(t=>out.tasks.push(normalizeTask(t)));
+  out.tracker=(Array.isArray(raw.tracker)?raw.tracker:[]).map(normalizeTrackerRow).filter(r=>r.m);
+  if(!out.tracker.length) out.tracker=deepClone(DEFAULTS.tracker);
+  out.tracker.sort((a,b)=>a.m.localeCompare(b.m));
+  out.ready=Object.assign({},DEFAULTS.ready,raw.ready||{});
+  out.ready.fund=Boolean(out.ready.fund); out.ready.insurance=Boolean(out.ready.insurance||out.ready.ins); out.ready.taxBenefits=Boolean(out.ready.taxBenefits);
+  out.momentum=Object.assign({},DEFAULTS.momentum,raw.momentum||{});
+  out.momentum.total=clamp(out.momentum.total,0,10000000); out.momentum.weekPoints=clamp(out.momentum.weekPoints,0,10000000);
+  out.momentum.weeklyGoal=clamp(out.momentum.weeklyGoal,5,1000); out.momentum.history=Array.isArray(out.momentum.history)?out.momentum.history.slice(-500):[];
+  out.momentum.celebrated=Array.isArray(out.momentum.celebrated)?out.momentum.celebrated:[];
+  out.sources=SOURCES;
+  out.wholesale=Object.assign({cost:12,targetMargin:50,retailerMargin:50},raw.wholesale||{});
+  ["cost","targetMargin","retailerMargin"].forEach(k=>{out.wholesale[k]=clamp(out.wholesale[k],0,k==="cost"?100000:99);});
+  return out;
+}
+
+function migrateV1(raw){
+  const out=deepClone(DEFAULTS);
+  const old=raw&&typeof raw==="object"?raw:{};
+  const os=old.settings||{};
+  const hpw=clamp(os.hpw,0,80), hg=clamp(os.hg,0,1000)/100;
+  out.settings=normalizeSettings(Object.assign({},os,{hours:Array.from({length:Math.max(5,number(os.horizon,5))},(_,i)=>Math.min(number(os.maxHpw,40),hpw*Math.pow(1+hg,i))),maxHpw:number(os.maxHpw,40)}));
+  if(Array.isArray(old.streams)&&old.streams.length){
+    out.streams=old.streams.map((s,i)=>normalizeStream(Object.assign({},s,{color:s.color||s.c,rh:number(s.fh,0),fh:0,status:["custom","finished"].includes(s.id)?"planned":"hypothesis"}),DEFAULT_STREAMS.find(d=>d.id===s.id)||DEFAULT_STREAMS[i]));
   }
-  var r = st.r/100, npv=0, cum=0, disc=[];
-  years.forEach(function(yr){
-    npv += yr.sde/Math.pow(1+r, yr.y);
-    cum += yr.sde;
-    disc.push(npv);
-  });
-  var tv = st.tv>0 ? st.tv*Math.max(years[H-1].sde,0)/Math.pow(1+r,H) : 0;
-  return {years:years, npv:npv+tv, npvOps:npv, tv:tv, cum:cum, disc:disc,
-          repl: years[H-1].sde/12/st.target, finalSde: years[H-1].sde};
-}
-
-/* margin per hour by stream (steady state = each stream's 3rd active year, base params) */
-function marginPerHour(S){
-  return S.streams.filter(function(s){return s.on;}).map(function(s){
-    var t = 2; // 3rd active year
-    var units = s.u*Math.pow(1+s.ug/100, t), price = s.p*Math.pow(1+s.pg/100, t);
-    var rev = units*price*12;
-    var margin = rev*(1 - s.cogs/100 - s.fees/100);
-    var hrs = units*12*s.hpu + s.fh;
-    return {id:s.id, name:s.name, c:s.c, v: hrs>0 ? margin/hrs : 0};
-  }).sort(function(a,b){return b.v-a.v;});
-}
-
-/* ---------- formatting ---------- */
-function fm$(v){
-  var neg = v<0 ? "−" : "";
-  v = Math.abs(v);
-  if (v>=1e6) return neg+"$"+(v/1e6).toFixed(1)+"M";
-  if (v>=10000) return neg+"$"+(v/1000).toFixed(1)+"k";
-  if (v>=1000) return neg+"$"+(v/1000).toFixed(2)+"k";
-  return neg+"$"+Math.round(v);
-}
-function fm$f(v){
-  var neg = v<0 ? "−" : ""; v=Math.abs(v);
-  return neg+"$"+Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-function fmPct(v){ return Math.round(v*100)+"%"; }
-function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-function cv(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
-function niceTicks(max, n){
-  n = n||4;
-  if (max<=0) return [0,1];
-  var raw = max/n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
-  var step = [1,1.5,2,2.5,3,4,5,7.5,10].map(function(m){return m*mag;})
-    .find(function(s){return Math.ceil(max/s)<=n;}) || 10*mag;
-  var top = Math.ceil(max/step - 0.001)*step;
-  var ticks=[]; for(var v=0; v<=top+step*0.001; v+=step) ticks.push(v);
-  return ticks;
-}
-
-/* ---------- tooltip ---------- */
-var tipEl;
-function showTip(html, x, y){
-  tipEl.innerHTML = html; tipEl.style.display = "block";
-  var w = tipEl.offsetWidth, h = tipEl.offsetHeight;
-  var px = Math.min(Math.max(8, x - w/2), window.innerWidth - w - 8);
-  var py = y - h - 14; if (py < 8) py = y + 18;
-  tipEl.style.left = px+"px"; tipEl.style.top = py+"px";
-}
-function hideTip(){ tipEl.style.display = "none"; }
-
-function bindHover(node, htmlFn){
-  function mv(e){ showTip(htmlFn(), e.clientX, e.clientY); }
-  node.addEventListener("pointerenter", mv);
-  node.addEventListener("pointermove", mv);
-  node.addEventListener("pointerleave", hideTip);
-}
-
-/* ---------- stacked revenue columns ---------- */
-function stackedChart(container, model, S){
-  var W = Math.max(280, container.clientWidth), H = 250;
-  var padL = 44, padR = 8, padT = 10, padB = 24;
-  var iw = W - padL - padR, ih = H - padT - padB;
-  var years = model.years;
-  var maxRev = Math.max.apply(null, years.map(function(y){return y.rev;}).concat([1]));
-  var ticks = niceTicks(maxRev, 4);
-  var tmax = ticks[ticks.length-1];
-  var band = iw / years.length;
-  var bw = Math.min(24, band*0.55);
-  var active = S.streams.filter(function(s){return s.on;});
-  var svg = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Projected revenue by stream per year">';
-  ticks.forEach(function(t){
-    var y = padT + ih - (t/tmax)*ih;
-    svg += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--grid)" stroke-width="1" shape-rendering="crispEdges"/>';
-    svg += '<text x="'+(padL-6)+'" y="'+(y+3.5)+'" text-anchor="end" font-size="10.5" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">'+fm$(t)+'</text>';
-  });
-  var baseY = padT + ih;
-  svg += '<line x1="'+padL+'" y1="'+baseY+'" x2="'+(W-padR)+'" y2="'+baseY+'" stroke="var(--axis)" stroke-width="1" shape-rendering="crispEdges"/>';
-  years.forEach(function(yr, i){
-    var cx = padL + band*i + band/2;
-    var x = cx - bw/2;
-    var acc = 0;
-    var segs = active.map(function(s){ return {s:s, v: yr.revBy[s.id]||0}; }).filter(function(o){return o.v>0.5;});
-    segs.forEach(function(o, j){
-      var h = (o.v/tmax)*ih;
-      var yTop = baseY - acc - h;
-      acc += h;
-      var isTop = (j === segs.length-1);
-      var gap = isTop ? 0 : 2;
-      var hh = Math.max(0, h - gap);
-      if (hh < 0.5) return;
-      if (isTop && hh > 4){
-        svg += '<path d="M'+x+' '+(yTop+hh)+' L'+x+' '+(yTop+4)+' Q'+x+' '+yTop+' '+(x+4)+' '+yTop+' L'+(x+bw-4)+' '+yTop+' Q'+(x+bw)+' '+yTop+' '+(x+bw)+' '+(yTop+4)+' L'+(x+bw)+' '+(yTop+hh)+' Z" fill="var('+o.s.c+')"/>';
-      } else {
-        svg += '<rect x="'+x+'" y="'+yTop+'" width="'+bw+'" height="'+hh+'" fill="var('+o.s.c+')"/>';
-      }
-    });
-    svg += '<text x="'+cx+'" y="'+(H-7)+'" text-anchor="middle" font-size="11" fill="var(--ink-3)">Y'+yr.y+'</text>';
-    svg += '<rect class="hband" data-i="'+i+'" x="'+(padL+band*i)+'" y="'+padT+'" width="'+band+'" height="'+ih+'" fill="transparent"/>';
-  });
-  svg += '</svg>';
-  container.innerHTML = svg;
-  container.querySelectorAll(".hband").forEach(function(r){
-    var i = +r.getAttribute("data-i"), yr = years[i];
-    bindHover(r, function(){
-      var rows = active.map(function(s){
-        var v = yr.revBy[s.id]||0; if (v<0.5) return "";
-        return '<div class="r"><span><span class="sw" style="background:var('+s.c+')"></span>'+esc(s.name)+'</span><b>'+fm$(v)+'</b></div>';
-      }).join("");
-      return '<div class="t">Year '+yr.y+'</div>'+rows+
-        '<div class="r" style="margin-top:3px;border-top:1px solid var(--grid);padding-top:3px"><span>Revenue</span><b>'+fm$(yr.rev)+'</b></div>'+
-        '<div class="r"><span>Owner earnings</span><b>'+fm$(yr.sde)+'</b></div>';
-    });
-  });
-}
-
-/* ---------- SDE line chart (emphasis + context) ---------- */
-function sdeChart(container, model){
-  var W = Math.max(280, container.clientWidth), H = 230;
-  var padL = 44, padR = 52, padT = 12, padB = 24;
-  var iw = W - padL - padR, ih = H - padT - padB;
-  var years = model.years;
-  var sde = years.map(function(y){return y.sde;});
-  var cum = model.disc;
-  var all = sde.concat(cum).concat([0]);
-  var maxV = Math.max.apply(null, all), minV = Math.min.apply(null, all);
-  var ticks = niceTicks(maxV, 3);
-  var tmax = ticks[ticks.length-1];
-  var lo = Math.min(0, minV);
-  function yPos(v){ return padT + ih - ((v-lo)/(tmax-lo))*ih; }
-  function xPos(i){ return padL + (years.length===1 ? iw/2 : (i/(years.length-1))*iw); }
-  var svg = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Owner earnings per year and cumulative discounted value">';
-  ticks.forEach(function(t){
-    var y = yPos(t);
-    svg += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="var(--grid)" stroke-width="1" shape-rendering="crispEdges"/>';
-    svg += '<text x="'+(padL-6)+'" y="'+(y+3.5)+'" text-anchor="end" font-size="10.5" fill="var(--ink-3)" style="font-variant-numeric:tabular-nums">'+fm$(t)+'</text>';
-  });
-  svg += '<line x1="'+padL+'" y1="'+yPos(0)+'" x2="'+(W-padR)+'" y2="'+yPos(0)+'" stroke="var(--axis)" stroke-width="1" shape-rendering="crispEdges"/>';
-  function path(vals){ return vals.map(function(v,i){ return (i?"L":"M")+xPos(i)+" "+yPos(v); }).join(" "); }
-  svg += '<path d="'+path(cum)+'" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
-  svg += '<path d="'+path(sde)+'" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
-  var li = years.length-1;
-  svg += '<circle cx="'+xPos(li)+'" cy="'+yPos(cum[li])+'" r="4.5" fill="var(--ink-3)" stroke="var(--surface-1)" stroke-width="2"/>';
-  svg += '<circle cx="'+xPos(li)+'" cy="'+yPos(sde[li])+'" r="4.5" fill="var(--accent)" stroke="var(--surface-1)" stroke-width="2"/>';
-  var lY1 = yPos(sde[li]), lY2 = yPos(cum[li]);
-  if (Math.abs(lY1-lY2) < 14){ if (lY1 < lY2){ lY1 -= 7; lY2 += 7; } else { lY1 += 7; lY2 -= 7; } }
-  svg += '<text x="'+(xPos(li)+8)+'" y="'+(lY1+3.5)+'" font-size="11" font-weight="600" fill="var(--ink-1)">'+fm$(sde[li])+'</text>';
-  svg += '<text x="'+(xPos(li)+8)+'" y="'+(lY2+3.5)+'" font-size="11" fill="var(--ink-2)">'+fm$(cum[li])+'</text>';
-  years.forEach(function(yr,i){
-    svg += '<text x="'+xPos(i)+'" y="'+(H-7)+'" text-anchor="middle" font-size="11" fill="var(--ink-3)">Y'+yr.y+'</text>';
-    svg += '<rect class="hband" data-i="'+i+'" x="'+(xPos(i)-iw/(2*Math.max(years.length-1,1)))+'" y="'+padT+'" width="'+(iw/Math.max(years.length-1,1))+'" height="'+ih+'" fill="transparent"/>';
-  });
-  svg += '</svg>';
-  container.innerHTML = svg;
-  container.querySelectorAll(".hband").forEach(function(r){
-    var i = +r.getAttribute("data-i"), yr = years[i];
-    bindHover(r, function(){
-      return '<div class="t">Year '+yr.y+'</div>'+
-        '<div class="r"><span><span class="sw" style="background:var(--accent)"></span>Owner earnings</span><b>'+fm$f(yr.sde)+'</b></div>'+
-        '<div class="r"><span><span class="sw" style="background:var(--ink-3)"></span>Cumulative, discounted</span><b>'+fm$f(cum[i])+'</b></div>'+
-        '<div class="r"><span>Hours worked</span><b>'+Math.round(yr.used)+'</b></div>'+
-        '<div class="r"><span>Effective wage</span><b>$'+yr.wage.toFixed(0)+'/hr</b></div>';
-    });
-  });
-}
-
-/* ---------- margin per hour horizontal bars ---------- */
-function marginChart(container, S){
-  var data = marginPerHour(S);
-  var W = Math.max(280, container.clientWidth);
-  var rowH = 44, padT = 4, padL = 8, padR = 56;
-  var H = padT + data.length*rowH + 6;
-  var maxV = Math.max.apply(null, data.map(function(d){return d.v;}).concat([1]));
-  var iw = W - padL - padR;
-  var svg = '<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Contribution margin per hour of Maggie&#39;s time, by stream">';
-  data.forEach(function(d, i){
-    var y = padT + i*rowH;
-    var bw = Math.max(3, (d.v/maxV)*iw);
-    svg += '<text x="'+padL+'" y="'+(y+12)+'" font-size="12" fill="var(--ink-2)">'+esc(d.name)+'</text>';
-    var bh = 16, by = y + 18;
-    svg += '<path d="M'+padL+' '+by+' L'+(padL+bw-4)+' '+by+' Q'+(padL+bw)+' '+by+' '+(padL+bw)+' '+(by+4)+' L'+(padL+bw)+' '+(by+bh-4)+' Q'+(padL+bw)+' '+(by+bh)+' '+(padL+bw-4)+' '+(by+bh)+' L'+padL+' '+(by+bh)+' Z" fill="var('+d.c+')"/>';
-    svg += '<text x="'+(padL+bw+7)+'" y="'+(by+bh/2+4)+'" font-size="12" font-weight="600" fill="var(--ink-1)" style="font-variant-numeric:tabular-nums">$'+d.v.toFixed(0)+'/hr</text>';
-  });
-  svg += '</svg>';
-  container.innerHTML = svg;
-}
-
-/* ---------- sparkline ---------- */
-function sparkline(vals, w, h){
-  w = w||110; h = h||30;
-  if (!vals.length) return "";
-  vals = vals.slice(-12);
-  var max = Math.max.apply(null, vals), min = Math.min.apply(null, vals);
-  if (max === min){ max = min + 1; }
-  var pad = 4;
-  function x(i){ return pad + (vals.length===1 ? (w-2*pad)/2 : (i/(vals.length-1))*(w-2*pad)); }
-  function y(v){ return h - pad - ((v-min)/(max-min))*(h-2*pad); }
-  var p = vals.map(function(v,i){ return (i?"L":"M")+x(i).toFixed(1)+" "+y(v).toFixed(1); }).join(" ");
-  var li = vals.length-1;
-  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" aria-hidden="true">'+
-    '<path d="'+p+'" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'+
-    '<circle cx="'+x(li).toFixed(1)+'" cy="'+y(vals[li]).toFixed(1)+'" r="3.5" fill="var(--accent)" stroke="var(--surface-1)" stroke-width="2"/></svg>';
-}
-
-/* ---------- legend builder ---------- */
-function legendHtml(streams){
-  return '<div class="legend">'+streams.map(function(s){
-    return '<span class="k"><span class="sw" style="background:var('+s.c+')"></span>'+esc(s.name)+'</span>';
-  }).join("")+'</div>';
-}
-
-/* ================= renderers ================= */
-var TABS = [
-  {id:"overview", label:"Overview"},
-  {id:"plan",     label:"Valuation"},
-  {id:"streams",  label:"Streams & Pricing"},
-  {id:"roadmap",  label:"Roadmap"},
-  {id:"tracker",  label:"Tracker"},
-  {id:"bench",    label:"Benchmarks"},
-  {id:"data",     label:"Data"}
-];
-var currentTab = "overview";
-var mainEl;
-
-function num(v, d){ var n = parseFloat(v); return isNaN(n) ? d : n; }
-
-function nextTask(){
-  var t = S.tasks.find(function(x){return !x.done && x.pri==="P1";}) ||
-          S.tasks.find(function(x){return !x.done;});
-  if (t) return {txt:t.t, src:"Task board"};
-  for (var i=0;i<S.roadmap.length;i++){
-    var it = S.roadmap[i].items.find(function(x){return !x.done;});
-    if (it) return {txt:it.t, src:S.roadmap[i].ph};
-  }
-  return {txt:"All clear — add the next milestone on the Roadmap tab.", src:""};
-}
-
-function readiness(){
-  var st = S.settings, rows = S.tracker.filter(function(r){return r.rev>0 || r.cost>0 || r.hrs>0;});
-  var last3 = rows.slice(-3);
-  var avgSde = last3.length ? last3.reduce(function(a,r){return a+(r.rev-r.cost);},0)/last3.length : 0;
-  var incomePts = Math.max(0, Math.min(40, (avgSde/(0.6*st.target))*40));
-  var trendPts = 0;
-  if (rows.length>=2 && rows[rows.length-1].rev > rows[rows.length-2].rev) trendPts = 10;
-  var manual = (S.ready.fund?10:0)+(S.ready.ins?10:0)+(S.ready.backlog?10:0)+(S.ready.email?10:0)+(S.ready.repeat?10:0);
-  var score = Math.round(incomePts + trendPts + manual);
-  return {score:score, incomePts:Math.round(incomePts), trendPts:trendPts, manual:manual, avgSde:avgSde};
-}
-
-/* ---------- OVERVIEW ---------- */
-function renderOverview(el){
-  var m = runModel(S);
-  var st = S.settings;
-  var rd = readiness();
-  var nt = nextTask();
-  var rows = S.tracker;
-  var last = rows[rows.length-1] || {rev:0,cost:0,hrs:0,fol:0,email:0};
-  var prev = rows[rows.length-2];
-  var sde = last.rev - last.cost;
-  var wage = last.hrs>0 ? sde/last.hrs : 0;
-  var mC = runModel(S,"cons"), mB = runModel(S,"base"), mS = runModel(S,"stretch");
-  var finalYr = m.years[m.years.length-1];
-  var capYr = st.cap ? m.years.find(function(y){return y.lost>50;}) : null;
-  var overCap = !st.cap ? m.years.find(function(y){return y.util>1.05;}) : null;
-  var lostTot = m.years.reduce(function(a,y){return a+y.lost;},0);
-
-  var html = '';
-  html += '<div class="card">'+
-    '<div class="lbl" style="font-size:12px;color:var(--ink-2);font-weight:550">Planning valuation — '+SCEN[st.scenario].label+' scenario</div>'+
-    '<div class="hero">'+fm$(m.npv)+'</div>'+
-    '<div class="hero-sub">NPV of '+st.horizon+' years of owner earnings at '+st.r+'% discount'+(st.tv>0?(' + terminal value ×'+st.tv):'')+'. A planning estimate built on pre-revenue assumptions — not a market appraisal. Tune everything on the Valuation tab.</div>'+
-    '<div class="grid3" style="margin-top:12px">'+
-      '<div class="tile"><div class="lbl">Conservative</div><div class="val">'+fm$(mC.npv)+'</div></div>'+
-      '<div class="tile"><div class="lbl">Base</div><div class="val">'+fm$(mB.npv)+'</div></div>'+
-      '<div class="tile"><div class="lbl">Stretch</div><div class="val">'+fm$(mS.npv)+'</div></div>'+
-      '<div class="tile"><div class="lbl">Year-'+st.horizon+' earnings</div><div class="val">'+fm$(finalYr.sde/12)+'<span style="font-size:13px;color:var(--ink-2)">/mo</span></div>'+
-      '<div class="dlt">'+fmPct(m.repl)+' of $'+st.target+'/mo target</div></div>'+
-    '</div>'+
-    (capYr ? '<div class="pill-warn">⚠ Hours are the bottleneck from year '+capYr.y+': ~'+fm$(lostTot)+' of demand over '+st.horizon+' yrs goes unserved at planned hours. More hours, higher prices, or digital mix would capture it.</div>' : '')+
-    (overCap ? '<div class="pill-warn">⚠ Capacity: Year '+overCap.y+' needs ~'+Math.round(overCap.need/52)+' hrs/wk vs '+Math.round(overCap.avail/52)+' planned (cap is off, so the NPV includes work she has no hours for).</div>' : '')+
-  '</div>';
-
-  html += '<div class="card"><h2>Next task</h2>'+
-    '<div style="font-size:15px;font-weight:600;margin:6px 0 2px">'+esc(nt.txt)+'</div>'+
-    (nt.src?'<div class="muted">'+esc(nt.src)+'</div>':'')+
-    '<div style="margin-top:10px"><button class="ghost" id="ovGoRoad">Open roadmap →</button></div></div>';
-
-  html += '<div class="card"><div class="flex-between"><h2>Full-time readiness</h2><span class="badge">'+rd.score+' / 100</span></div>'+
-    '<div class="meter"><i style="width:'+Math.min(100,rd.score)+'%"></i></div>'+
-    '<div class="note" style="margin-top:8px">Income '+rd.incomePts+'/40 (3-mo avg earnings vs 60% of target) · Trend '+rd.trendPts+'/10 · Safety checklist '+rd.manual+'/50</div>'+
-    '<ul class="check" id="readyList">'+
-      [["fund","6-month personal emergency fund saved"],
-       ["ins","Health-insurance plan priced & chosen"],
-       ["backlog","≥ 8 weeks of orders or recurring revenue booked"],
-       ["email","Email list ≥ 500"],
-       ["repeat","Repeat-customer rate ≥ 20%"]].map(function(p){
-        return '<li class="'+(S.ready[p[0]]?"done":"")+'"><input type="checkbox" data-k="'+p[0]+'" '+(S.ready[p[0]]?"checked":"")+'><span>'+p[1]+'</span></li>';
-      }).join("")+
-    '</ul>'+
-    '<div class="muted" style="margin-top:6px">Benchmark: 57% of workers say a side business must replace ≥75% of salary before they’d quit (FlexJobs 2025). Gate, don’t guess.</div></div>';
-
-  html += '<div class="grid3">'+
-    '<div class="tile"><div class="lbl">Latest month revenue</div><div class="val">'+fm$(last.rev)+'</div>'+
-      (prev?'<div class="dlt '+(last.rev>=prev.rev?"up":"down")+'">'+(last.rev>=prev.rev?"▲":"▼")+' vs '+esc(prev.m)+'</div>':'<div class="dlt">log months in Tracker</div>')+'</div>'+
-    '<div class="tile"><div class="lbl">Latest month earnings</div><div class="val">'+fm$(sde)+'</div><div class="dlt">'+(last.hrs>0?('$'+wage.toFixed(0)+'/hr effective'):"—")+'</div></div>'+
-    '<div class="tile"><div class="lbl">IG followers</div><div class="val">'+(last.fol||0)+'</div>'+
-      (prev&&prev.fol?'<div class="dlt '+(last.fol>=prev.fol?"up":"down")+'">'+(last.fol>=prev.fol?"▲ +":"▼ ")+(last.fol-prev.fol)+'</div>':'<div class="dlt">first lever: consistency</div>')+'</div>'+
-    '<div class="tile"><div class="lbl">Email subscribers</div><div class="val">'+(last.email||0)+'</div><div class="dlt">the anti-algorithm asset</div></div>'+
-  '</div>';
-
-  html += '<div class="callout"><b>Reality check (why the Conservative tab exists):</b> the mean active Etsy shop grosses ≈ $1.9k/yr and the median US side hustle nets $200/mo — most craft shops stay hobbies. The plan above beats those base rates only through consistent posting, personalization niche, and (later) digital leverage. Evidence on the Benchmarks tab.</div>';
-
-  el.innerHTML = html;
-  el.querySelector("#ovGoRoad").addEventListener("click", function(){ switchTab("roadmap"); });
-  el.querySelectorAll('#readyList input').forEach(function(cb){
-    cb.addEventListener("change", function(){ S.ready[cb.getAttribute("data-k")] = cb.checked; renderCurrent(); });
-  });
-}
-
-/* ---------- VALUATION ---------- */
-function renderPlan(el){
-  var st = S.settings;
-  var html = '';
-
-  html += '<div class="card"><h2>Model controls</h2><div class="note">Every number is an assumption you can change — results update live below. Defaults are benchmarked (see Streams & Benchmarks tabs).</div>'+
-    '<label class="f">Scenario</label><div class="seg" id="segScen">'+
-      Object.keys(SCEN).map(function(k){return '<button data-k="'+k+'">'+SCEN[k].label+'</button>';}).join("")+'</div>'+
-    '<div class="grid2" style="margin-top:4px">'+
-      '<div><label class="f">Horizon (years)</label><div class="seg" id="segHor">'+[3,5,7,10].map(function(h){return '<button data-h="'+h+'">'+h+'</button>';}).join("")+'</div></div>'+
-      '<div><label class="f">Terminal value (× final-year earnings)</label><div class="seg" id="segTv">'+[0,1,1.5,2].map(function(t){return '<button data-t="'+t+'">×'+t+'</button>';}).join("")+'</div></div>'+
-    '</div>'+
-    '<label class="f">Discount rate: <b id="rVal">'+st.r+'%</b> <span class="muted">(20–30% is a defensible floor for a solo pre-revenue venture; 40%+ = seed-stage)</span></label>'+
-    '<input type="range" id="rSlide" min="10" max="50" step="1" value="'+st.r+'">'+
-    '<div class="grid2">'+
-      '<div><label class="f">Target income ($/mo, net to Maggie)</label><input type="number" id="inTarget" value="'+st.target+'"></div>'+
-      '<div><label class="f">Overhead ($/mo, yr 1)</label><input type="number" id="inOhm" value="'+st.ohm+'"></div>'+
-      '<div><label class="f">Hours/week, yr 1</label><input type="number" id="inHpw" value="'+st.hpw+'" step="0.5"></div>'+
-      '<div><label class="f">Hours growth %/yr</label><input type="number" id="inHg" value="'+st.hg+'"></div>'+
-    '</div>'+
-    '<label class="f">Cap production by available hours <span class="muted">(on = handmade output can’t exceed her hours; trimmed demand shows as Unserved below)</span></label>'+
-    '<div class="seg" id="segCap"><button data-c="1">On</button><button data-c="0">Off</button></div>'+
-  '</div>';
-
-  html += '<div id="planOut"></div>';
-  el.innerHTML = html;
-
-  function segPaint(){
-    el.querySelectorAll("#segScen button").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-k")===st.scenario); });
-    el.querySelectorAll("#segHor button").forEach(function(b){ b.classList.toggle("active", +b.getAttribute("data-h")===st.horizon); });
-    el.querySelectorAll("#segTv button").forEach(function(b){ b.classList.toggle("active", +b.getAttribute("data-t")===st.tv); });
-    el.querySelectorAll("#segCap button").forEach(function(b){ b.classList.toggle("active", (b.getAttribute("data-c")==="1")===st.cap); });
-  }
-
-  function updatePlanOut(){
-    var out = el.querySelector("#planOut");
-    if (!out) return;
-    var m = runModel(S);
-    var active = S.streams.filter(function(s){return s.on;});
-    var finalYr = m.years[m.years.length-1];
-    var lostTot = m.years.reduce(function(a,y){return a+y.lost;},0);
-    var overCap = !st.cap ? m.years.find(function(y){return y.util>1.05;}) : null;
-    var o = '';
-
-    o += '<div class="card">'+
-      '<div class="lbl" style="font-size:12px;color:var(--ink-2);font-weight:550">'+SCEN[st.scenario].label+' · '+st.horizon+'-yr NPV @ '+st.r+'% · capacity cap '+(st.cap?'on':'off')+'</div>'+
-      '<div class="hero">'+fm$(m.npv)+'</div>'+
-      '<div class="hero-sub">'+fm$(m.npvOps)+' from operating earnings'+(m.tv>0?(' + '+fm$(m.tv)+' terminal value'):'; terminal value ×0 (an owner-stitched business has little transferable value — sale multiples of 2–3× earnings only apply once patterns, kits or a brand can run without her)')+'. Undiscounted total: '+fm$(m.cum)+'.</div>'+
-      '<div class="grid2" style="margin-top:12px">'+
-        '<div class="tile"><div class="lbl">Year-'+st.horizon+' earnings</div><div class="val">'+fm$(finalYr.sde/12)+'<span style="font-size:13px;color:var(--ink-2)">/mo</span></div>'+
-          '<div class="dlt">'+fmPct(m.repl)+' of the $'+Math.round(st.target).toLocaleString()+'/mo target</div></div>'+
-        '<div class="tile"><div class="lbl">'+(st.cap?'Unserved demand ('+st.horizon+' yrs)':'Demand beyond her hours')+'</div><div class="val">'+(st.cap?fm$(lostTot):(overCap?'Yr '+overCap.y+'+':'none'))+'</div>'+
-          '<div class="dlt">'+(st.cap?(lostTot>50?'hours are the binding constraint':'plan fits her hours'):'cap is off — NPV may include unstitchable work')+'</div></div>'+
-      '</div>'+
-      (st.cap && lostTot>50 ? '<div class="pill-warn">⚠ '+fm$(lostTot)+' of demand can’t be served at planned hours — more hours, higher prices, or digital mix would capture it.</div>' : '')+
-      (overCap ? '<div class="pill-warn">⚠ Year '+overCap.y+' needs ~'+Math.round(overCap.need/52)+' hrs/wk vs '+Math.round(overCap.avail/52)+' planned (cap is off, so the NPV includes work she has no hours for).</div>' : '')+
-      (st.horizon>5?'<div class="pill-warn">⚠ Growth defaults were calibrated for 5 years — over '+st.horizon+' they compound optimistically. Trim volume-growth %s on the Streams tab before trusting this number.</div>':'')+
-    '</div>';
-
-    o += '<div class="card"><h2>Revenue by stream</h2><div class="note">Projected gross revenue per year. Tap a column for detail; table view below.</div>'+
-      legendHtml(active)+'<div class="chart-wrap" id="chStack"></div>'+
-      '<details><summary>Table view</summary><div class="tscroll" id="tblStack"></div></details></div>';
-
-    o += '<div class="card"><h2>Owner earnings & valuation build-up</h2><div class="note">Earnings = revenue − materials − platform fees − overhead, before Maggie’s pay and taxes (SDE convention). Gray line = cumulative discounted value → ends at the NPV.</div>'+
-      '<div class="legend"><span class="k"><span class="sw" style="background:var(--accent)"></span>Owner earnings (per year)</span><span class="k"><span class="sw" style="background:var(--ink-3)"></span>Cumulative, discounted</span></div>'+
-      '<div class="chart-wrap" id="chSde"></div></div>';
-
-    o += '<div class="card"><h2>Year by year</h2><div class="tscroll"><table class="data"><thead><tr><th>Yr</th><th>Revenue</th><th>Unserved</th><th>Materials</th><th>Fees</th><th>Overhead</th><th>Earnings</th><th>$/mo</th><th>Hrs/wk</th><th>Demand</th><th>$/hr</th></tr></thead><tbody>'+
-      m.years.map(function(y){
-        return '<tr><td>Y'+y.y+'</td><td>'+fm$f(y.rev)+'</td><td'+(y.lost>50?' style="color:var(--crit)"':'')+'>'+(y.lost>50?fm$f(y.lost):'—')+'</td><td>'+fm$f(y.cogs)+'</td><td>'+fm$f(y.fees)+'</td><td>'+fm$f(y.oh)+'</td><td><b>'+fm$f(y.sde)+'</b></td><td>'+fm$f(y.sde/12)+'</td><td>'+(y.used/52).toFixed(1)+'</td><td'+(y.util>1.05?' style="color:var(--crit);font-weight:600"':'')+'>'+fmPct(y.util)+'</td><td>$'+y.wage.toFixed(0)+'</td></tr>';
-      }).join("")+'</tbody></table></div>'+
-      '<div class="muted" style="margin-top:6px">Demand = hours demand wants ÷ hours planned. Hrs/wk = hours actually worked. With the cap on, years over 100% get trimmed to fit — the trimmed revenue shows as Unserved. With the cap off, over 100% means the NPV includes work she has no hours for.</div></div>';
-
-    var rates = [15,20,25,30,35];
-    o += '<div class="card"><h2>Sensitivity — NPV by discount rate</h2><div class="tscroll"><table class="data"><thead><tr><th>Scenario</th>'+
-      rates.map(function(r){return '<th>'+r+'%</th>';}).join("")+'</tr></thead><tbody>'+
-      Object.keys(SCEN).map(function(k){
-        var save2 = st.r, cells = rates.map(function(r){ st.r = r; var mm = runModel(S,k); return '<td>'+fm$(mm.npv)+'</td>'; }).join("");
-        st.r = save2;
-        return '<tr><td>'+SCEN[k].label+'</td>'+cells+'</tr>';
-      }).join("")+'</tbody></table></div></div>';
-
-    o += '<div class="callout"><b>Method & honesty notes.</b> (1) This is a DCF of projected owner earnings — for a pre-revenue micro-business it is a planning tool, not a price someone would pay. (2) Discount rate: small-business valuations typically use ~12–20% for established firms and 30–70% for seed-stage ventures; the 25% default treats this as a high-risk but founder-run project. (3) Revenue is min(demand, capacity): unit volumes model demand, and with the cap on, hour-consuming production is trimmed to the hours Maggie actually has — so hours, prices, and mix all move the valuation, as they should. (4) Target income moves the readiness gate and the replacement %, not the NPV — a goal isn’t a cash flow. (5) Most value arrives in years 3–5 from streams that don’t exist yet — that is the model telling you where to invest, and also its biggest uncertainty. Re-run quarterly against Tracker actuals.</div>';
-
-    out.innerHTML = o;
-    stackedChart(out.querySelector("#chStack"), m, S);
-    sdeChart(out.querySelector("#chSde"), m);
-    out.querySelector("#tblStack").innerHTML = '<table class="data"><thead><tr><th>Stream</th>'+m.years.map(function(y){return '<th>Y'+y.y+'</th>';}).join("")+'</tr></thead><tbody>'+
-      active.map(function(s){
-        return '<tr><td>'+esc(s.name)+'</td>'+m.years.map(function(y){return '<td>'+fm$f(y.revBy[s.id]||0)+'</td>';}).join("")+'</tr>';
-      }).join("")+
-      '<tr><td><b>Total</b></td>'+m.years.map(function(y){return '<td><b>'+fm$f(y.rev)+'</b></td>';}).join("")+'</tbody></table>';
-  }
-
-  var updT;
-  function updDeb(){ clearTimeout(updT); updT = setTimeout(updatePlanOut, 250); }
-
-  el.querySelectorAll("#segScen button").forEach(function(b){ b.addEventListener("click", function(){ st.scenario = b.getAttribute("data-k"); segPaint(); save(); updatePlanOut(); }); });
-  el.querySelectorAll("#segHor button").forEach(function(b){ b.addEventListener("click", function(){ st.horizon = +b.getAttribute("data-h"); segPaint(); save(); updatePlanOut(); }); });
-  el.querySelectorAll("#segTv button").forEach(function(b){ b.addEventListener("click", function(){ st.tv = +b.getAttribute("data-t"); segPaint(); save(); updatePlanOut(); }); });
-  el.querySelectorAll("#segCap button").forEach(function(b){ b.addEventListener("click", function(){ st.cap = b.getAttribute("data-c")==="1"; segPaint(); save(); updatePlanOut(); }); });
-  var rs = el.querySelector("#rSlide");
-  rs.addEventListener("input", function(){ st.r = +rs.value; el.querySelector("#rVal").textContent = st.r+"%"; save(); updDeb(); });
-  function liveNum(id, key, min){
-    el.querySelector("#"+id).addEventListener("input", function(e){
-      var v = parseFloat(e.target.value);
-      if (!isNaN(v) && isFinite(v) && v >= min){ st[key] = v; save(); updDeb(); }
-    });
-  }
-  liveNum("inTarget", "target", 1);
-  liveNum("inOhm", "ohm", 0);
-  liveNum("inHpw", "hpw", 0.5);
-  liveNum("inHg", "hg", 0);
-
-  segPaint();
-  updatePlanOut();
-}
-
-/* ---------- STREAMS & PRICING ---------- */
-function renderStreams(el){
-  var html = '';
-  html += '<div class="card"><h2>Where an hour of stitching pays best</h2><div class="note">Contribution margin per hour of Maggie’s time, each stream in its 3rd active year (base assumptions). This chart is the strategy: handwork earns today, digital + teaching scale tomorrow.</div>'+
-    '<div class="chart-wrap" id="chMargin"></div>'+
-    '<div class="muted">Membership & patterns look high per hour because marginal cost ≈ 0 — but they only sell once an audience exists. Custom work funds the audience-building.</div></div>';
-
-  html += '<div class="card"><h2>Pricing calculator</h2><div class="note">Floor price for one piece. Charging less = paying customers for the privilege of working.</div>'+
-    '<div class="grid2">'+
-      '<div><label class="f">Hours of stitching</label><input type="number" id="pcH" value="6" step="0.5"></div>'+
-      '<div><label class="f">Your hourly rate ($)</label><input type="number" id="pcR" value="20"></div>'+
-      '<div><label class="f">Materials ($)</label><input type="number" id="pcM" value="7"></div>'+
-      '<div><label class="f">Platform fees (%)</label><input type="number" id="pcF" value="13"></div>'+
-    '</div><div id="pcOut" style="margin-top:10px"></div>'+
-    '<div class="muted" style="margin-top:6px">Beginners typically price $20–35/hr, experienced hands $40–75/hr. Wholesale = your price ×2 becomes the retail price.</div></div>';
-
-  html += '<div class="card"><h2>Revenue stream assumptions</h2><div class="note">Toggle streams on/off and edit the levers — the Valuation tab recomputes instantly.</div>'+
-    S.streams.map(function(s, i){
-      return '<div class="stream-card">'+
-        '<div class="sh"><span class="sw" style="background:var('+s.c+')"></span><span class="nm">'+esc(s.name)+'</span>'+
-        '<span class="muted">yr '+s.start+'+</span><input type="checkbox" data-i="'+i+'" class="stOn" '+(s.on?"checked":"")+'></div>'+
-        '<div class="muted" style="margin-top:4px">'+esc(s.why)+'</div>'+
-        '<div class="mini-grid">'+
-          '<div><label class="f">'+esc(s.unit)+', yr 1</label><input type="number" step="0.1" class="stIn" data-i="'+i+'" data-k="u" value="'+s.u+'"></div>'+
-          '<div><label class="f">Volume growth %/yr</label><input type="number" class="stIn" data-i="'+i+'" data-k="ug" value="'+s.ug+'"></div>'+
-          '<div><label class="f">Price $'+(s.id==="member"?"/member/mo":"")+'</label><input type="number" step="0.5" class="stIn" data-i="'+i+'" data-k="p" value="'+s.p+'"></div>'+
-          '<div><label class="f">Price growth %/yr</label><input type="number" class="stIn" data-i="'+i+'" data-k="pg" value="'+s.pg+'"></div>'+
-        '</div>'+
-        '<details><summary>Advanced (costs, fees, hours)</summary><div class="mini-grid">'+
-          '<div><label class="f">Materials % of price</label><input type="number" class="stIn" data-i="'+i+'" data-k="cogs" value="'+s.cogs+'"></div>'+
-          '<div><label class="f">Platform fees %</label><input type="number" class="stIn" data-i="'+i+'" data-k="fees" value="'+s.fees+'"></div>'+
-          '<div><label class="f">Hours per unit</label><input type="number" step="0.05" class="stIn" data-i="'+i+'" data-k="hpu" value="'+s.hpu+'"></div>'+
-          '<div><label class="f">Fixed hours/yr</label><input type="number" class="stIn" data-i="'+i+'" data-k="fh" value="'+s.fh+'"></div>'+
-          '<div><label class="f">Starts in year</label><input type="number" min="1" class="stIn" data-i="'+i+'" data-k="start" value="'+s.start+'"></div>'+
-        '</div></details>'+
-      '</div>';
-    }).join("")+'</div>';
-
-  html += '<div class="card"><h2>Benchmark price sheet (2025–26, sourced)</h2><div class="tscroll"><table class="data"><thead><tr><th>Item</th><th>Typical</th><th>Premium</th></tr></thead><tbody>'+
-    [["Custom 6″ hoop (hand)","$100–175","$250+"],
-     ["Pet/family portrait (thread-painted)","$85–190 outline","$600–900 (Staub)"],
-     ["Ready-made hoop, Etsy","$18–40","$40–90 artist one-off"],
-     ["PDF pattern","$3–8","$17–29 bundle"],
-     ["Beginner kit (brand shops)","$30–44","$50 (Clever Poppy)"],
-     ["Workshop seat (US)","$50–70","$100"],
-     ["Membership / club","$3–10 /mo","$15–18 /mo w/ materials"],
-     ["Nano sponsorship (1–10k)","$10–100 /post","$200"],
-     ["Wholesale","50% of retail","—"],
-     ["Etsy all-in fees","≈12–13% + $0.20","+15% offsite-ad orders"]].map(function(r){
-      return '<tr><td style="text-align:left">'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>';
-    }).join("")+'</tbody></table></div>'+
-    '<div class="src">Sources: Etsy fee schedule (Feb 2026); The Creative’s Hour pricing guide (Apr 2026); stitchingsabbatical.com price list; ClassBento US listings; artist shops (cleverpoppy.com, jessicalongembroidery.com, cozybluehandmade.com); IMH/Stan creator-rate guides (2026).</div></div>';
-
-  el.innerHTML = html;
-  marginChart(el.querySelector("#chMargin"), S);
-
-  function pcCalc(){
-    var h = num(el.querySelector("#pcH").value,6), r = num(el.querySelector("#pcR").value,20),
-        mt = num(el.querySelector("#pcM").value,7), f = num(el.querySelector("#pcF").value,13)/100;
-    var floor = (mt + h*r)/(1-Math.min(f,0.9));
-    var out = '<div class="grid2">'+
-      '<div class="tile"><div class="lbl">Floor price (direct)</div><div class="val">'+fm$f(floor)+'</div></div>'+
-      '<div class="tile"><div class="lbl">If wholesaling: retail</div><div class="val">'+fm$f(floor*2)+'</div><div class="dlt">you receive '+fm$f(floor)+'</div></div></div>';
-    el.querySelector("#pcOut").innerHTML = out;
-  }
-  ["pcH","pcR","pcM","pcF"].forEach(function(id){ el.querySelector("#"+id).addEventListener("input", pcCalc); });
-  pcCalc();
-
-  el.querySelectorAll(".stOn").forEach(function(cb){
-    cb.addEventListener("change", function(){ S.streams[+cb.getAttribute("data-i")].on = cb.checked; renderCurrent(); });
-  });
-  var stT;
-  el.querySelectorAll(".stIn").forEach(function(inp){
-    inp.addEventListener("input", function(){
-      var s = S.streams[+inp.getAttribute("data-i")], k = inp.getAttribute("data-k");
-      var v = parseFloat(inp.value);
-      if (isNaN(v) || !isFinite(v) || v < 0) return;
-      s[k] = v;
-      save();
-      clearTimeout(stT);
-      stT = setTimeout(function(){ var c = el.querySelector("#chMargin"); if (c) marginChart(c, S); }, 250);
-    });
-  });
-}
-
-/* ---------- ROADMAP ---------- */
-function renderRoadmap(el){
-  var html = '';
-  var open = S.tasks.filter(function(t){return !t.done;}).length;
-  html += '<div class="card"><div class="flex-between"><h2>Task board</h2><span class="badge">'+open+' open</span></div>'+
-    '<div id="taskList">'+S.tasks.map(function(t,i){
-      return '<div class="task-row"><input type="checkbox" data-i="'+i+'" class="tkDone" '+(t.done?"checked":"")+' style="width:17px;height:17px;accent-color:var(--accent)">'+
-        '<span class="pri '+t.pri+'">'+t.pri+'</span><span style="'+(t.done?"color:var(--ink-3);text-decoration:line-through":"")+'">'+esc(t.t)+'</span>'+
-        '<button class="x tkDel" data-i="'+i+'">✕</button></div>';
-    }).join("")+'</div>'+
-    '<div class="addrow"><input type="text" id="tkNew" placeholder="Add a task…"><select id="tkPri" style="width:76px"><option>P1</option><option selected>P2</option></select><button class="primary" id="tkAdd">Add</button></div></div>';
-
-  S.roadmap.forEach(function(ph, pi){
-    var done = ph.items.filter(function(i){return i.done;}).length;
-    var pct = ph.items.length ? Math.round(done/ph.items.length*100) : 0;
-    html += '<div class="card"><div class="phase-head"><h2>'+esc(ph.ph)+'</h2><span class="muted">'+esc(ph.when)+' · '+done+'/'+ph.items.length+'</span></div>'+
-      '<div class="pbar"><i style="width:'+pct+'%"></i></div>'+
-      '<ul class="check">'+ph.items.map(function(it, ii){
-        return '<li class="'+(it.done?"done":"")+'"><input type="checkbox" class="rdItem" data-p="'+pi+'" data-i="'+ii+'" '+(it.done?"checked":"")+'><span>'+esc(it.t)+'</span></li>';
-      }).join("")+'</ul></div>';
-  });
-
-  el.innerHTML = html;
-  el.querySelectorAll(".tkDone").forEach(function(cb){ cb.addEventListener("change", function(){ S.tasks[+cb.getAttribute("data-i")].done = cb.checked; renderCurrent(); }); });
-  el.querySelectorAll(".tkDel").forEach(function(b){ b.addEventListener("click", function(){ S.tasks.splice(+b.getAttribute("data-i"),1); renderCurrent(); }); });
-  el.querySelector("#tkAdd").addEventListener("click", function(){
-    var v = el.querySelector("#tkNew").value.trim();
-    if (v){ S.tasks.push({t:v, pri:el.querySelector("#tkPri").value, done:false}); renderCurrent(); }
-  });
-  el.querySelectorAll(".rdItem").forEach(function(cb){
-    cb.addEventListener("change", function(){ S.roadmap[+cb.getAttribute("data-p")].items[+cb.getAttribute("data-i")].done = cb.checked; renderCurrent(); });
-  });
-}
-
-/* ---------- TRACKER ---------- */
-function renderTracker(el){
-  var rows = S.tracker;
-  var html = '';
-  html += '<div class="card"><h2>Log a month</h2><div class="note">Five minutes on the 1st of each month. Actuals beat assumptions — export from the Data tab and send to Claude to re-benchmark the plan.</div>'+
-    '<div class="grid2">'+
-      '<div><label class="f">Month</label><input type="month" id="trM" value="2026-09"></div>'+
-      '<div><label class="f">Revenue ($)</label><input type="number" id="trR" value="0"></div>'+
-      '<div><label class="f">Costs: materials + fees + overhead ($)</label><input type="number" id="trC" value="0"></div>'+
-      '<div><label class="f">Hours worked</label><input type="number" id="trH" value="0"></div>'+
-      '<div><label class="f">Orders</label><input type="number" id="trO" value="0"></div>'+
-      '<div><label class="f">IG followers</label><input type="number" id="trF" value="0"></div>'+
-      '<div><label class="f">Email subs</label><input type="number" id="trE" value="0"></div>'+
-    '</div><div style="margin-top:10px"><button class="primary" id="trAdd">Save month</button></div></div>';
-
-  var nz = rows.filter(function(r){return r.rev>0||r.hrs>0||r.fol>0;});
-  html += '<div class="card"><h2>Trends</h2>'+
-    '<div class="grid3">'+
-      '<div class="tile"><div class="lbl">Revenue</div>'+sparkline(nz.map(function(r){return r.rev;}))+'</div>'+
-      '<div class="tile"><div class="lbl">Earnings</div>'+sparkline(nz.map(function(r){return r.rev-r.cost;}))+'</div>'+
-      '<div class="tile"><div class="lbl">Followers</div>'+sparkline(nz.map(function(r){return r.fol;}))+'</div>'+
-      '<div class="tile"><div class="lbl">$/hr</div>'+sparkline(nz.map(function(r){return r.hrs>0?(r.rev-r.cost)/r.hrs:0;}))+'</div>'+
-    '</div>'+
-    (nz.length<2?'<div class="muted" style="margin-top:8px">Sparklines appear after two logged months.</div>':'')+
-  '</div>';
-
-  html += '<div class="card"><h2>History</h2><div class="tscroll"><table class="data"><thead><tr><th>Month</th><th>Revenue</th><th>Costs</th><th>Earnings</th><th>Hrs</th><th>$/hr</th><th>Orders</th><th>IG</th><th>Email</th><th></th></tr></thead><tbody>'+
-    rows.map(function(r,i){
-      var sde = r.rev-r.cost;
-      return '<tr><td>'+esc(r.m)+'</td><td>'+fm$f(r.rev)+'</td><td>'+fm$f(r.cost)+'</td><td><b>'+fm$f(sde)+'</b></td><td>'+r.hrs+'</td><td>'+(r.hrs>0?"$"+(sde/r.hrs).toFixed(0):"—")+'</td><td>'+r.orders+'</td><td>'+r.fol+'</td><td>'+r.email+'</td>'+
-      '<td><button class="x trDel" data-i="'+i+'" style="border:none;background:none;color:var(--ink-3);cursor:pointer">✕</button></td></tr>';
-    }).join("")+'</tbody></table></div></div>';
-
-  el.innerHTML = html;
-  el.querySelector("#trAdd").addEventListener("click", function(){
-    var r = {m:el.querySelector("#trM").value||"2026-09", rev:num(el.querySelector("#trR").value,0), cost:num(el.querySelector("#trC").value,0),
-             hrs:num(el.querySelector("#trH").value,0), orders:num(el.querySelector("#trO").value,0), fol:num(el.querySelector("#trF").value,0), email:num(el.querySelector("#trE").value,0)};
-    var ex = S.tracker.findIndex(function(x){return x.m===r.m;});
-    if (ex>=0) S.tracker[ex] = r; else S.tracker.push(r);
-    S.tracker.sort(function(a,b){return a.m<b.m?-1:1;});
-    renderCurrent();
-  });
-  el.querySelectorAll(".trDel").forEach(function(b){ b.addEventListener("click", function(){ S.tracker.splice(+b.getAttribute("data-i"),1); renderCurrent(); }); });
-}
-
-/* ---------- BENCHMARKS ---------- */
-var BENCH = [
-  {n:"Sarah K. Benning", f:"438k IG", m:"Monthly pattern drops ($20), originals, kits, book", l:"Went full-time after ~18 months of nights & weekends. <b>Recurring pattern drops = recurring revenue.</b>"},
-  {n:"Jessica Long Embroidery", f:"308k IG · 92k YT", m:"Kits $30–62 w/ video tutorials, patterns, 2 books — 90,937 lifetime Etsy sales", l:"<b>Kits + free YouTube tutorials</b> built the biggest Etsy engine in the niche."},
-  {n:"Clever Poppy (Julie)", f:"710k IG", m:"Beginner kits $40–50 → $37 course → Maker's Academy membership", l:"Started on maternity leave, husband now CEO. <b>Kit → course → membership funnel, email-first.</b>"},
-  {n:"Charles & Elin", f:"203k IG", m:"Online academy: courses $27–99, $399 bundle; YouTube as free funnel", l:"YouTube ad revenue ≈ $20–56/mo — trivial. <b>The courses are the money; content is the funnel.</b>"},
-  {n:"Michelle Staub · Stitching Sabbatical", f:"184k IG", m:"Pet portraits $600–900, 12+ week waitlist; Domestika course (14k students); book", l:"<b>The ceiling for personalized embroidery</b> — premium pricing via emotional niche + scarcity."},
-  {n:"Emillie Ferris", f:"202k IG", m:"Was $-heavy pet commissions → now patterns $14–21, books, pins", l:"Deliberately <b>pivoted from 18-hour commissions to products</b> once the audience existed."},
-  {n:"MCreativeJ (Melissa Galbraith)", f:"52k IG", m:"Kits, 3 books, guild workshops, wholesale, Domestika", l:"Mid-tier proof: <b>teaching + wholesale beats the algorithm</b> — no virality required."},
-  {n:"Trish Burr", f:"35k IG", m:"Books, PDF lessons $10–13, online classes $38–46", l:"A <b>35k-follower account can support a global niche education business</b> via authority."},
-  {n:"Cozyblue (Liz)", f:"38k IG", m:"Stitch Club subscription $15–18/mo — ran monthly for 11 years", l:"Recurring club longevity — and a caution: <b>solo capacity caps growth</b> (she scaled back in 2026)."},
-  {n:"And Other Adventures", f:"124k IG", m:"Kits $30–44, Faire wholesale, studio", l:"Candid 2021 post: growth plateaued post-Covid. <b>Kits are a business, not a lottery ticket.</b>"},
-  {n:"Sarah Homfray", f:"273k YT", m:"Video kits (7+ hrs HD + materials), distance classes, goldwork supplies", l:"<b>Long-form YouTube converts</b> to premium kits; credentials (Royal School) compound."},
-  {n:"Abbode (adjacent — machine)", f:"—", m:"Personalized embroidery events/retail: $719k (2023) → $1.6M (2024)", l:"Machine-based, so not her economics — but <b>proof of demand for personalized embroidered gifts</b>."}
-];
-
-function renderBench(el){
-  var html = '';
-  html += '<div class="card"><h2>Where Present Stitch is today</h2>'+
-    '<div class="note">@presentstitchembroidery · “Maggie”</div>'+
-    '<div style="font-size:13.5px;line-height:1.55">Publicly visible: ~12 posts of personalized name & gift pieces (TYLER, DAISY, THEO…), engagement 1–6 likes/post, and no posts in roughly 6 months. No Etsy shop, website, or link-in-bio found. Translation: <b>pre-audience, pre-revenue — the asset is the craft skill and the niche.</b> The first 90 days are about consistency, not perfection: the personalized-gift wedge is genuinely good (gifting ≈ 27% of Etsy sales and growing).</div></div>';
-
-  html += '<div class="card"><h2>How embroidery artists actually monetize</h2><div class="note">Every full-timer we found follows the same arc: handwork → audience → products (patterns/kits) → teaching/membership. None got there on commissions alone.</div>'+
-    BENCH.map(function(b){
-      return '<div class="bench-card"><div class="nm">'+b.n+'</div><div class="meta">'+b.f+' · '+b.m+'</div><div class="les">'+b.l+'</div></div>';
-    }).join("")+
-    '<div class="src">Follower counts via imginn mirror & socialcounts, Aug 8 2026 (third-party, approximate). Prices from artists’ own shops/pricing pages. No profiled hand-embroidery artist publishes revenue; Etsy sale counts and price lists are the hardest public proxies.</div></div>';
-
-  html += '<div class="card"><h2>Base rates — the honest denominators</h2>'+
-    '<ul class="check" style="font-size:13px">'+
-      ['Mean active Etsy shop grosses ≈ <b>$1.9k/yr</b> (2025: $10.46B GMS ÷ 5.6M sellers; median is lower)',
-       'Median US side hustle: <b>$200/mo</b> (Bankrate, Jun 2025)',
-       'Etsy active sellers fell <b>7.0M → 5.6M</b> in a year; marketplace GMS has shrunk 4 straight years',
-       '~30% of Etsy census respondents call the shop their sole occupation — engaged-respondent bias makes the true rate lower',
-       '57% of workers want <b>≥75% salary replacement</b> before quitting (FlexJobs 2025)'].map(function(t){
-        return '<li><span style="margin-left:2px">'+t+'</span></li>';
-      }).join("")+'</ul>'+
-    '<div class="muted" style="margin-top:6px">These aren’t reasons to skip it — they’re the reason the plan leans on personalization premiums, fairs, and (later) digital leverage instead of “list it and hope.”</div></div>';
-
-  html += '<div class="card"><h2>Growth channels, 2026</h2>'+
-    '<ul class="check" style="font-size:13px">'+
-      ['<b>Reels</b> still reach best for small accounts (~9.8% reach rate at 1–5k followers); carousels retain. Organic reach is structurally declining — treat IG as acquisition, not the asset.',
-       '<b>Email list</b> is the durable asset (arts/crafts opens ≈ 30–34%). Free mini-pattern = the signup magnet.',
-       '<b>Etsy search</b> is where personalized-gift buyers already are — reviews compound.',
-       '<b>Pinterest</b> (640M users, record 2026) suits evergreen pattern/kit discovery.',
-       '<b>YouTube</b> pays ≈ $2.4 RPM in craft — negligible ads, but it converts kits & courses like nothing else.'].map(function(t){
-        return '<li><span style="margin-left:2px">'+t+'</span></li>';
-      }).join("")+'</ul></div>';
-
-  html += '<div class="card"><h2>Seasonality planner</h2>'+
-    '<div class="tscroll"><table class="data"><thead><tr><th>Window</th><th>What</th><th>Do by</th></tr></thead><tbody>'+
-    [["Q4 (Oct–Dec)","≈ 30–31.5% of annual handmade sales; personalized gifts peak","Listings live mid-Sept; custom cutoff ~Dec 1"],
-     ["Mother’s Day (May)","Names, family, pet pieces bump","Promote from late March"],
-     ["Grad season (May–Jun)","Etsy reports double-digit graduation-gift growth","List in April"],
-     ["Weddings (Sep–Oct peak)","Bouquet/heirloom commissions booked 2–6 mo ahead","Market in spring–summer"],
-     ["Jan–Feb","Slowest retail — build patterns, kits, course content","Use the quiet quarter"]].map(function(r){
-      return '<tr><td style="text-align:left">'+r[0]+'</td><td style="text-align:left">'+r[1]+'</td><td style="text-align:left">'+r[2]+'</td></tr>';
-    }).join("")+'</tbody></table></div>'+
-    '<div class="src">Q4 share computed from Etsy SEC filings 2021–2025; occasions from Etsy Q2-24 exhibit; weddings from The Knot Real Weddings Study.</div></div>';
-
-  el.innerHTML = html;
-}
-
-/* ---------- DATA ---------- */
-function renderData(el){
-  var html = '';
-  html += '<div class="card"><h2>Backup & restore</h2><div class="note" id="saveNote"></div>'+
-    '<div class="seg" style="margin-bottom:8px"><button class="primary" id="exBtn">Copy JSON</button><button class="ghost" id="dlBtn">Download .json</button><button class="ghost" id="rsBtn">Reset to defaults</button></div>'+
-    '<textarea id="exArea" rows="6" spellcheck="false" style="font-size:11px"></textarea>'+
-    '<label class="f" style="margin-top:12px">Restore: paste a snapshot, then Apply</label>'+
-    '<textarea id="imArea" rows="4" spellcheck="false" placeholder="Paste exported JSON here…" style="font-size:11px"></textarea>'+
-    '<div style="margin-top:8px"><button class="primary" id="imBtn">Apply snapshot</button> <span id="imMsg" class="muted"></span></div></div>';
-
-  html += '<div class="card"><h2>About this model</h2><div style="font-size:13px;color:var(--ink-2);line-height:1.55">'+
-    'Built Aug 8, 2026 from: Etsy fee schedule & SEC filings; artist shop pages & interviews (Benning, Long, Clever Poppy, Charles & Elin, Staub, Galbraith, Burr, Cozyblue, Homfray); pricing guides (The Creative’s Hour, Apr 2026); BizBuySell 2025 multiples; Pepperdine/KPMG discount-rate surveys; Bankrate & FlexJobs 2025 surveys; Socialinsider/Metricool 2026 reach benchmarks. Assumptions are Maggie’s to overwrite — the sources just set the starting lines.<br><br>'+
-    '<b>Known limitations:</b> pre-revenue projections are speculative by nature; no profiled artist publishes revenue, so stream defaults are triangulated from prices × visible volume; the NPV is a planning number, not an appraisal; growth rates assume consistent weekly execution, which is the single biggest risk.</div></div>';
-
-  el.innerHTML = html;
-  el.querySelector("#saveNote").innerHTML = canStore
-    ? '<b>Autosave is on for this device</b> — changes persist in this browser automatically. Use the JSON export to back up, move to another device, or send your numbers to Claude for a plan review.'
-    : '<b>This viewer cannot save</b> — edits live only while the page is open. Export a snapshot (copy or download) and paste it back next time, or open the hosted version where autosave works.';
-  var ex = el.querySelector("#exArea");
-  function refresh(){ S.meta.saved = new Date().toISOString().slice(0,10); ex.value = JSON.stringify(S); }
-  refresh();
-  el.querySelector("#exBtn").addEventListener("click", function(){
-    refresh(); ex.select(); ex.setSelectionRange(0, 999999);
-    try { document.execCommand("copy"); } catch(e){}
-    if (navigator.clipboard) navigator.clipboard.writeText(ex.value).catch(function(){});
-    el.querySelector("#exBtn").textContent = "Copied ✓";
-    setTimeout(function(){ var b = el.querySelector("#exBtn"); if (b) b.textContent = "Copy JSON"; }, 1500);
-  });
-  el.querySelector("#dlBtn").addEventListener("click", function(){
-    refresh();
-    var blob = new Blob([ex.value], {type:"application/json"});
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "present-stitch-data-"+S.meta.saved+".json";
-    document.body.appendChild(a); a.click(); a.remove();
-  });
-  el.querySelector("#rsBtn").addEventListener("click", function(){
-    if (confirm("Reset everything to the built-in defaults?")){
-      S = JSON.parse(JSON.stringify(DEFAULTS));
-      if (canStore){ try { window.localStorage.removeItem(STORE_KEY); } catch(e){} }
-      renderCurrent();
+  out.tracker=(Array.isArray(old.tracker)?old.tracker:[]).map(r=>normalizeTrackerRow(Object.assign({},r,{logged:true}))).filter(r=>r.m);
+  if(!out.tracker.length) out.tracker=deepClone(DEFAULTS.tracker);
+  out.ready={fund:Boolean(old.ready&&old.ready.fund),insurance:Boolean(old.ready&&(old.ready.insurance||old.ready.ins)),taxBenefits:false};
+  const imported=[];
+  const oldItems=[];
+  if(Array.isArray(old.tasks)) old.tasks.forEach(x=>oldItems.push({title:x.t||x.title,done:x.done,priority:x.pri||"P2"}));
+  if(Array.isArray(old.roadmap)) old.roadmap.forEach(ph=>(ph.items||[]).forEach(x=>oldItems.push({title:x.t||x.title,done:x.done,priority:"P2",phase:ph.ph})));
+  const keywordMap=[
+    [/price|cost.*hour/i,"launch-price"],[/etsy shop|listing/i,"launch-8-listings"],[/instagram|\bIG\b|post/i,"launch-ig"],
+    [/finance|tracking|tracker/i,"launch-finance"],[/capacity|order limit|cutoff/i,"launch-limits"],[/pattern/i,"traction-pattern"],
+    [/workshop/i,"scale-workshop"],[/wholesale/i,"scale-wholesale"],[/full.?time|quit/i,"fulltime-decision"]
+  ];
+  oldItems.forEach((x,i)=>{
+    const match=keywordMap.find(([re])=>re.test(String(x.title||"")));
+    if(match){
+      const t=out.tasks.find(z=>z.id===match[1]);
+      if(t&&x.done){t.status="completed";t.completedAt="migrated";}
+    }else if(x.title){
+      imported.push(normalizeTask({id:`imported-${i}-${uid("v1")}`,title:String(x.title),type:"action",phaseId:"imported",dueDate:"",effortMinutes:30,definitionOfDone:"Review the imported v1 item and define its completion evidence.",why:x.phase?`Imported from ${x.phase}.`:"Imported from the v1 task list.",priority:x.priority,status:x.done?"completed":"available",order:700+i,imported:true}));
     }
   });
-  el.querySelector("#imBtn").addEventListener("click", function(){
-    try {
-      var obj = JSON.parse(el.querySelector("#imArea").value);
-      if (!obj || !obj.streams || !obj.settings) throw new Error("not a snapshot");
-      S = normalize(obj); el.querySelector("#imMsg").textContent = "Restored ✓";
-      setTimeout(renderCurrent, 400);
-    } catch(e){ el.querySelector("#imMsg").textContent = "Couldn’t parse that — paste the full exported JSON."; }
+  out.tasks.push(...imported);
+  out.meta=Object.assign(out.meta,{v:APP_VERSION,migratedFrom:1,migrationNotice:true,saved:new Date().toISOString()});
+  return mergeV2(out);
+}
+
+function validateSnapshotObject(obj){
+  if(!obj||typeof obj!=="object"||Array.isArray(obj)) throw new Error("Snapshot must be a JSON object.");
+  const v=number(obj.meta&&obj.meta.v,0);
+  if(v===1){
+    if(!obj.settings||!Array.isArray(obj.streams)) throw new Error("The v1 snapshot is incomplete.");
+    return migrateV1(obj);
+  }
+  if(v!==APP_VERSION) throw new Error("This file is not a supported Present Stitch snapshot.");
+  if(!obj.settings||!Array.isArray(obj.streams)||!obj.streams.length||!Array.isArray(obj.tasks)||!Array.isArray(obj.tracker)) throw new Error("The v2 snapshot is incomplete.");
+  if(obj.streams.some(s=>!s||!s.id||!s.name)) throw new Error("One or more revenue streams are invalid.");
+  if(obj.tasks.some(t=>!t||!t.id||!(t.title||t.t))) throw new Error("One or more tasks are invalid.");
+  return mergeV2(obj);
+}
+
+function tryStorage(){
+  try{ const k="psbd-storage-test"; localStorage.setItem(k,"1"); localStorage.removeItem(k); canStore=true; }catch(e){ canStore=false; }
+}
+function loadState(){
+  tryStorage();
+  if(!canStore) return deepClone(DEFAULTS);
+  try{
+    const v2=localStorage.getItem(STORE_KEY);
+    if(v2) return validateSnapshotObject(JSON.parse(v2));
+  }catch(e){ console.warn("Could not load v2 state",e); }
+  try{
+    const v1=localStorage.getItem(LEGACY_KEY);
+    if(v1){ const migrated=migrateV1(JSON.parse(v1)); localStorage.setItem(STORE_KEY,JSON.stringify(migrated)); return migrated; }
+  }catch(e){ console.warn("Could not migrate v1 state",e); }
+  return mergeV2(DEFAULTS);
+}
+function saveNow(){
+  if(!canStore) return;
+  try{ S.meta.saved=new Date().toISOString(); localStorage.setItem(STORE_KEY,JSON.stringify(S)); }catch(e){ console.warn("Autosave unavailable",e); }
+}
+function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveNow,120); }
+function snapshotForUndo(label){ undoStack.push({label,state:deepClone(S)}); if(undoStack.length>20) undoStack.shift(); }
+function undo(){ const item=undoStack.pop(); if(!item)return; S=item.state; save(); renderCurrent(); showToast(`Undid: ${item.label}`); }
+
+function pricingDetails(stream,price=stream.p){
+  const pct=clamp(stream.cogs,0,100)+clamp(stream.fees,0,100)+clamp(stream.offsiteRate,0,100);
+  const fixed=number(stream.fixedFee)+number(stream.listingFee)+number(stream.packaging)+number(stream.shipping)+number(stream.rework);
+  const contribution=price*(1-pct/100)-fixed;
+  return {pct,fixed,contribution,perHour:stream.hpu>0?contribution/stream.hpu:contribution};
+}
+
+function eligibleStreams(data,scope){
+  return data.streams.filter(s=>s.on&&(scope==="full"||s.status!=="hypothesis"));
+}
+
+function runModel(data=S,scenKey=data.settings.scenario,scope="core"){
+  const st=data.settings, scen=SCENARIOS[scenKey]||SCENARIOS.base, horizon=st.horizon;
+  const streams=eligibleStreams(data,scope); const years=[]; let npv=0, infeasible=false;
+  const effStart=s=>number(s.start,1)+(number(s.start,1)>1?scen.delay:0);
+  for(let yi=0;yi<horizon;yi++){
+    const y=yi+1, hpw=Math.min(st.maxHpw,number(st.hours[Math.min(yi,st.hours.length-1)],0));
+    const avail=Math.max(0,hpw*52); const active=streams.filter(s=>y>=effStart(s));
+    const fixedStream=active.reduce((sum,s)=>sum+(y===effStart(s)?number(s.fh):0)+number(s.rh),0);
+    const fixedHours=number(st.adminH)+fixedStream; let remaining=Math.max(0,avail-fixedHours);
+    if(fixedHours>avail) infeasible=true;
+    const offers=active.map(s=>{
+      const age=Math.max(0,y-effStart(s));
+      const units=Math.max(0,number(s.u)*12*scen.u*Math.pow(Math.max(0,1+(number(s.ug)*scen.g)/100),age));
+      const price=Math.max(0,number(s.p)*scen.p*Math.pow(Math.max(0,1+number(s.pg)/100),age));
+      const pd=pricingDetails(s,price);
+      return {s,units,price,pd,rank:st.capacityMode==="strategic"?-number(s.priority,99):pd.perHour};
+    }).sort((a,b)=>b.rank-a.rank||a.s.id.localeCompare(b.s.id));
+    let revenue=0, variableCost=0, variableHours=0, lostRevenue=0, fulfilledUnits=0, demandUnits=0;
+    const allocation=[];
+    offers.forEach(o=>{
+      demandUnits+=o.units;
+      const fulfill=fixedHours>avail||o.pd.contribution<=0?0:(o.s.hpu<=0?o.units:Math.min(o.units,remaining/number(o.s.hpu,1)));
+      const hrs=fulfill*number(o.s.hpu); remaining=Math.max(0,remaining-hrs);
+      const rev=fulfill*o.price, contrib=fulfill*o.pd.contribution;
+      revenue+=rev; variableCost+=rev-contrib; variableHours+=hrs; fulfilledUnits+=fulfill;
+      lostRevenue+=(o.units-fulfill)*o.price;
+      allocation.push({id:o.s.id,name:o.s.name,demand:o.units,fulfilled:fulfill,revenue:rev,contribution:contrib,hours:hrs,perHour:o.pd.perHour});
+    });
+    const overhead=number(st.ohm)*12*Math.pow(Math.max(0,1+number(st.ohg)/100),yi);
+    const oneTime=yi===0?number(st.startupCosts)+number(st.workingCapital):0;
+    const sde=revenue-variableCost-overhead-oneTime;
+    const used=fixedHours+variableHours;
+    const df=Math.pow(1+number(st.r)/100,y); npv+=sde/df;
+    years.push({y,hpw,avail,fixedHours,used,util:avail?used/avail:0,revenue,variableCost,overhead,oneTime,sde,wage:used>0?sde/used:0,lostRevenue,fulfilledUnits,demandUnits,allocation,infeasible:fixedHours>avail});
+  }
+  let terminal=0;
+  if(st.transferability&&number(st.tv)>0&&years.length){
+    const last=years[years.length-1]; const normalized=Math.max(0,last.sde-last.used*number(st.replacementLaborRate));
+    terminal=normalized*number(st.tv); npv+=terminal/Math.pow(1+number(st.r)/100,horizon);
+  }
+  return {scope,scenario:scenKey,years,npv,terminal,infeasible,warnings:[infeasible?"Fixed/admin hours exceed available capacity in at least one year.":""].filter(Boolean)};
+}
+
+function impactPreview(t){
+  if(!t||!t.impact) return null;
+  const baseline=runModel(S,S.settings.scenario,t.impact.scope||"core").npv;
+  const stream=S.streams.find(s=>s.id===t.impact.streamId); if(!stream)return null;
+  return ["low","base","high"].map(k=>{
+    const copy=deepClone(S), target=copy.streams.find(s=>s.id===t.impact.streamId); target[t.impact.field]=number(t.impact[k]);
+    const value=runModel(copy,copy.settings.scenario,t.impact.scope||"core").npv;
+    return {case:k[0].toUpperCase()+k.slice(1),assumption:t.impact[k],value,delta:value-baseline};
   });
 }
 
-/* ---------- plumbing ---------- */
-var RENDER = {overview:renderOverview, plan:renderPlan, streams:renderStreams, roadmap:renderRoadmap, tracker:renderTracker, bench:renderBench, data:renderData};
+function isComplete(t){ return t.status==="completed"||t.status==="validated"; }
+function taskState(t){
+  if(isComplete(t)||t.status==="waiting") return t.status;
+  const blocked=t.dependsOn.some(id=>{const d=S.tasks.find(x=>x.id===id);return d&&!isComplete(d);});
+  return blocked?"blocked":(t.status==="active"?"active":"available");
+}
+function currentPhaseId(){
+  const ordered=["launch","validate","prove","traction","scale","fulltime","imported"];
+  return ordered.find(id=>S.tasks.some(t=>t.phaseId===id&&!isComplete(t)))||"fulltime";
+}
+function taskRank(t){
+  let score=0; const d=daysUntil(t.dueDate), phase=currentPhaseId();
+  if(t.seasonal) score+=400; if(t.phaseId===phase) score+=250; if(t.priority==="P1")score+=180;
+  if(d<=0)score+=350+Math.min(90,-d); else if(d<=7)score+=220-d*10; else if(d<=30)score+=80-d;
+  score+=S.tasks.filter(x=>x.dependsOn.includes(t.id)&&!isComplete(x)).length*45;
+  if(t.impact)score+=40; score+=Math.max(0,45-t.effortMinutes/6);
+  return score;
+}
+function rankedTasks(){
+  return S.tasks.filter(t=>!isComplete(t)&&taskState(t)!=="blocked"&&taskState(t)!=="waiting").sort((a,b)=>taskRank(b)-taskRank(a)||a.order-b.order||a.id.localeCompare(b.id));
+}
+function refreshMomentumWeek(){
+  const wk=weekKey(); if(S.momentum.weekKey!==wk){S.momentum.weekKey=wk;S.momentum.weekPoints=0;}
+}
+function awardTask(t,evidence=false){
+  refreshMomentumWeek(); let awarded=0;
+  if(!t.pointsAwarded){t.pointsAwarded=true;awarded+=t.points;}
+  if(evidence&&!t.evidenceBonusAwarded){t.evidenceBonusAwarded=true;awarded+=5;}
+  if(awarded){S.momentum.total+=awarded;S.momentum.weekPoints+=awarded;S.momentum.history.push({at:new Date().toISOString(),taskId:t.id,points:awarded});}
+  return awarded;
+}
 
-function switchTab(id){
-  currentTab = id;
-  document.querySelectorAll("nav.tabs button").forEach(function(b){
-    b.classList.toggle("active", b.getAttribute("data-t")===id);
-  });
-  document.querySelectorAll("section.tab").forEach(function(s){
-    s.classList.toggle("active", s.id==="tab-"+id);
-  });
-  hideTip();
-  renderCurrent();
-  window.scrollTo({top:0});
+function trackerRows(count=Infinity){ return S.tracker.filter(r=>r.logged).sort((a,b)=>a.m.localeCompare(b.m)).slice(-count); }
+function monthSerial(m){ const [y,mo]=String(m).split("-").map(Number); return y*12+mo; }
+function trackerMetrics(row){
+  const earnings=number(row.rev)-number(row.cost), orders=number(row.orders);
+  return {earnings,aov:orders?row.rev/orders:0,wage:row.hrs?earnings/row.hrs:0,inquiryConversion:row.inquiries?orders/row.inquiries:0,quoteAcceptance:row.quotes?orders/row.quotes:0};
+}
+function readiness(data=S){
+  const rows=data.tracker.filter(r=>r.logged).sort((a,b)=>a.m.localeCompare(b.m)), last6=rows.slice(-6); const consecutive=last6.length===6&&last6.every((r,i)=>i===0||monthSerial(r.m)===monthSerial(last6[i-1].m)+1);
+  const avgEarnings=last6.length?last6.reduce((a,r)=>a+trackerMetrics(r).earnings,0)/last6.length:0;
+  const avgHpw=last6.length?last6.reduce((a,r)=>a+number(r.hrs),0)/last6.length/4.33:0;
+  const maxObserved=last6.length?Math.max(...last6.map(r=>number(r.hrs)/4.33)):0;
+  const earningsPass=consecutive&&avgEarnings>=data.settings.target*(data.settings.readinessPct/100);
+  const sustainable=consecutive&&maxObserved<=data.settings.maxHpw&&avgHpw<=data.settings.hours[Math.min(data.settings.horizon-1,data.settings.hours.length-1)];
+  const completed=last6.reduce((a,r)=>a+number(r.completedOrders),0), repeat=last6.reduce((a,r)=>a+number(r.repeatOrders),0), orders=last6.reduce((a,r)=>a+number(r.orders),0);
+  const onTime=last6.reduce((a,r)=>a+number(r.onTimeOrders),0); const backlog=rows.length?number(rows[rows.length-1].backlogWeeks):0;
+  const repeatRate=orders?repeat/orders:0, onTimeRate=completed?onTime/completed:0;
+  const gates=[
+    {id:"history",name:"Six consecutive logged months",pass:consecutive,detail:`${last6.length}/6 recent months logged; zero months count.`},
+    {id:"earnings",name:"Owner-earnings threshold",pass:earningsPass,detail:`Six-month average ${formatMoney(avgEarnings)}/mo; requires ${formatMoney(data.settings.target*data.settings.readinessPct/100)}/mo (${data.settings.readinessPct}% of target).`},
+    {id:"hours",name:"Sustainable working hours",pass:sustainable,detail:`Average ${avgHpw.toFixed(1)} hrs/week; peak ${maxObserved.toFixed(1)} vs ${data.settings.maxHpw} maximum.`},
+    {id:"fund",name:"Emergency fund",pass:Boolean(data.ready.fund),detail:"User-confirmed six-month personal emergency fund."},
+    {id:"insurance",name:"Health insurance",pass:Boolean(data.ready.insurance),detail:"User-confirmed plan is priced and selected."},
+    {id:"tax",name:"Taxes and benefits",pass:Boolean(data.ready.taxBenefits),detail:"User-confirmed taxes, retirement, leave, and lost benefits are budgeted."},
+    {id:"demand",name:"Durable demand",pass:repeatRate>=.20||backlog>=8,detail:`Repeat rate ${formatPct(repeatRate)}; latest backlog ${backlog.toFixed(1)} weeks. Requires either 20% or 8 weeks.`},
+    {id:"delivery",name:"Reliable delivery",pass:completed>0&&onTimeRate>=.90,detail:`${completed?formatPct(onTimeRate):"No completed orders logged"}; requires at least 90%.`}
+  ];
+  return {ready:gates.every(g=>g.pass),gates,avgEarnings,avgHpw,repeatRate,onTimeRate};
+}
+
+function actualsSuggestion(streamId){
+  const rows=trackerRows(3), stream=S.streams.find(x=>x.id===streamId); if(!stream||!rows.length)return null;
+  const orders=rows.reduce((a,r)=>a+number(r.orders),0), rev=rows.reduce((a,r)=>a+number(r.rev),0), hrs=rows.reduce((a,r)=>a+number(r.hrs),0);
+  return {stream,months:rows.length,u:orders/rows.length,p:orders?rev/orders:stream.p,hpu:orders?hrs/orders:stream.hpu,orders};
+}
+
+const TABS=[
+  {id:"overview",label:"Overview"},{id:"valuation",label:"Valuation"},{id:"streams",label:"Streams & Pricing"},
+  {id:"roadmap",label:"Roadmap"},{id:"tracker",label:"Tracker"},{id:"evidence",label:"Evidence"},{id:"data",label:"Data"}
+];
+
+function field(label,value,attrs={}){
+  const id=attrs.id||uid("field"), type=attrs.type||"number";
+  const extra=Object.entries(attrs).filter(([k])=>!["id","type","help","options"].includes(k)).map(([k,v])=>`${k}="${esc(v)}"`).join(" ");
+  let control;
+  if(type==="select"){
+    control=`<select id="${id}" ${extra}>${(attrs.options||[]).map(o=>`<option value="${esc(o.value)}" ${String(o.value)===String(value)?"selected":""}>${esc(o.label)}</option>`).join("")}</select>`;
+  }else if(type==="textarea") control=`<textarea id="${id}" ${extra}>${esc(value)}</textarea>`;
+  else control=`<input id="${id}" type="${esc(type)}" value="${esc(value)}" ${extra}>`;
+  return `<div><label class="f" for="${id}">${esc(label)}</label>${control}${attrs.help?`<span class="field-help">${esc(attrs.help)}</span>`:""}</div>`;
+}
+
+function statusLabel(state){ return ({available:"Available",active:"Active",blocked:"Blocked",waiting:"Waiting for result",completed:"Completed",validated:"Validated"})[state]||state; }
+function taskCardHtml(t,compact=false){
+  const state=taskState(t), due=t.dueDate?dateLabel(t.dueDate):"No deadline";
+  const blockedBy=t.dependsOn.map(id=>S.tasks.find(x=>x.id===id)).filter(x=>x&&!isComplete(x)).map(x=>x.title);
+  const impactRows=!compact&&t.impact?impactPreview(t):null;
+  const buttons=[];
+  if(state==="available") buttons.push(`<button class="ghost" data-action="task-start" data-id="${esc(t.id)}">Start</button>`);
+  if(state==="available"||state==="active") buttons.push(`<button class="primary" data-action="task-done" data-id="${esc(t.id)}">${t.type==="experiment"?"Record result":"Mark complete"}</button>`);
+  if(state==="waiting") buttons.push(`<button class="primary" data-action="task-result" data-id="${esc(t.id)}">Add result</button>`);
+  if(compact) buttons.push(`<button class="ghost" data-action="open-roadmap">Open roadmap</button>`);
+  return `<article class="task-card ${isComplete(t)?"complete":""} ${state==="blocked"?"locked":""}" data-task-id="${esc(t.id)}">
+    <div class="flex-between"><div class="task-title">${esc(t.title)}</div>${compact?"":`<div class="task-tools">
+      <button data-action="task-move" data-dir="-1" data-id="${esc(t.id)}" aria-label="Move ${esc(t.title)} earlier">↑</button>
+      <button data-action="task-move" data-dir="1" data-id="${esc(t.id)}" aria-label="Move ${esc(t.title)} later">↓</button>
+      <button data-action="task-duplicate" data-id="${esc(t.id)}" aria-label="Duplicate ${esc(t.title)}">Duplicate</button>
+      <button data-action="task-edit" data-id="${esc(t.id)}" aria-label="Edit ${esc(t.title)}">Edit</button>
+      <button data-action="task-delete" data-id="${esc(t.id)}" aria-label="Delete ${esc(t.title)}">Delete</button>
+    </div>`}</div>
+    <div class="task-meta"><span class="status-chip ${state}">${statusLabel(state)}</span><span class="type-chip">${esc(t.type)}</span><span class="pri ${esc(t.priority)}">${esc(t.priority)}</span><span>${t.effortMinutes} min</span><span>${esc(due)}</span><span>${t.points} pts${t.type==="experiment"?" + 5 evidence":""}</span>${t.impact?`<span class="impact-chip">Impact preview</span>`:""}</div>
+    ${blockedBy.length?`<div class="task-detail"><b>Blocked by:</b> ${esc(blockedBy.join(", "))}</div>`:""}
+    ${!compact?`<div class="task-detail"><b>Done when:</b> ${esc(t.definitionOfDone)}</div><div class="task-detail"><b>Why:</b> ${esc(t.why)}</div>`:""}
+    ${!compact&&t.metric?`<div class="task-detail"><b>SMART measure:</b> ${esc(t.metric.name)} · ${esc(t.metric.baseline)} → ${esc(t.metric.target)} · review ${dateLabel(t.metric.reviewDate)}</div>`:""}
+    ${impactRows?`<div class="notice" style="margin-top:8px"><b>Planning sensitivity—not earned value:</b> ${impactRows.map(r=>`${r.case} ${formatMoney(r.delta,false)}`).join(" · ")}. ${esc(t.impact.caveat)}</div>`:""}
+    ${t.result?`<div class="notice good" style="margin-top:8px"><b>Evidence:</b> ${esc(t.result)}</div>`:""}
+    ${!isComplete(t)&&state!=="blocked"?`<div class="task-actions">${buttons.join("")}</div>`:""}
+  </article>`;
+}
+
+function chartTicks(max,n=4){
+  if(max<=0) return [0,1];
+  const raw=max/n, mag=Math.pow(10,Math.floor(Math.log10(raw)));
+  const step=[1,1.5,2,2.5,3,4,5,7.5,10].map(m=>m*mag).find(s=>Math.ceil(max/s)<=n)||10*mag;
+  const top=Math.ceil(max/step-0.001)*step, ticks=[];
+  for(let v=0;v<=top+step*0.001;v+=step) ticks.push(v);
+  return ticks;
+}
+function valuationChart(model,id){
+  const vals=model.years.map(y=>y.sde), maxV=Math.max(1,...vals), minV=Math.min(0,...vals);
+  const ticks=chartTicks(maxV,4), step=ticks[1]||ticks[ticks.length-1];
+  let lo=0;
+  if(minV<0){ lo=-Math.ceil(-minV/step)*step; for(let v=-step;v>=lo-step*0.001;v-=step) ticks.unshift(Math.round(v*100)/100); }
+  const top=ticks[ticks.length-1];
+  const w=640,h=248,padL=66,padR=14,padT=12,padB=26,iw=w-padL-padR,ih=h-padT-padB;
+  const yPos=v=>padT+ih*(1-(v-lo)/(top-lo));
+  const grid=ticks.map(t=>`<line x1="${padL}" y1="${yPos(t).toFixed(1)}" x2="${w-padR}" y2="${yPos(t).toFixed(1)}" stroke="var(--grid)" stroke-width="1"/><text x="${padL-7}" y="${(yPos(t)+4).toFixed(1)}" text-anchor="end" font-size="11.5" fill="var(--ink-3)">${formatMoney(t)}</text>`).join("");
+  const bw=Math.min(26,iw/model.years.length*.55);
+  const bars=model.years.map((y,i)=>{
+    const x=padL+(i+.5)*iw/model.years.length-bw/2, y0=yPos(0), yV=yPos(y.sde);
+    const rectY=Math.min(y0,yV), bh=Math.max(1,Math.abs(y0-yV));
+    const label=i===model.years.length-1?`<text x="${(x+bw/2).toFixed(1)}" y="${(yV+(y.sde>=0?-6:14)).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink-1)">${formatMoney(y.sde)}</text>`:"";
+    return `<rect x="${x.toFixed(1)}" y="${rectY.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="4" fill="var(--accent)"><title>Year ${y.y}: ${formatMoney(y.sde,false)} owner earnings</title></rect>${label}<text x="${(x+bw/2).toFixed(1)}" y="${h-8}" text-anchor="middle" font-size="12" fill="var(--ink-2)">Y${y.y}</text>`;
+  }).join("");
+  return `<figure class="chart-wrap"><svg class="chart-svg" viewBox="0 0 ${w} ${h}" role="img" aria-labelledby="${id}-title ${id}-desc"><title id="${id}-title">Projected annual owner earnings</title><desc id="${id}-desc">Bars show annual owner earnings after variable costs, overhead, and one-time costs for each modeled year; the axis shows dollar values.</desc>${grid}<line x1="${padL}" y1="${yPos(0).toFixed(1)}" x2="${w-padR}" y2="${yPos(0).toFixed(1)}" stroke="var(--axis)" stroke-width="1"/>${bars}</svg><figcaption class="muted">Owner earnings by modeled year. Exact values are in the table below.</figcaption></figure>`;
+}
+
+function modelTable(model){
+  return `<div class="tscroll"><table class="data"><caption class="sr-only">Year-by-year model results</caption><thead><tr><th>Year</th><th>Hours/wk</th><th>Revenue</th><th>Owner earnings</th><th>Effective $/hr</th><th>Capacity used</th><th>Unserved demand</th></tr></thead><tbody>${model.years.map(y=>`<tr><td>${y.y}</td><td>${y.hpw.toFixed(1)}</td><td>${formatMoney(y.revenue,false)}</td><td>${formatMoney(y.sde,false)}</td><td>${y.used?`$${y.wage.toFixed(0)}`:"—"}</td><td>${formatPct(y.util)}</td><td>${formatMoney(y.lostRevenue,false)}</td></tr>`).join("")}</tbody></table></div>`;
+}
+
+function ovSummaryInner(){
+  const core=runModel(S), full=runModel(S,S.settings.scenario,"full");
+  return `<div class="lbl">Primary planning measure</div><div class="hero">${formatMoney(core.npv)}</div><div class="hero-sub">${S.settings.horizon}-year discounted owner earnings · ${SCENARIOS[S.settings.scenario].label} scenario · core streams only. This is a planning estimate, not a market appraisal.</div>
+      <div class="grid4" style="margin-top:12px">
+        <div class="tile"><div class="lbl">Conservative core</div><div class="val">${formatMoney(runModel(S,"cons").npv)}</div></div>
+        <div class="tile"><div class="lbl">Base core</div><div class="val">${formatMoney(runModel(S,"base").npv)}</div></div>
+        <div class="tile"><div class="lbl">Stretch core</div><div class="val">${formatMoney(runModel(S,"stretch").npv)}</div></div>
+        <div class="tile"><div class="lbl">Hypothesis upside</div><div class="val">${formatMoney(full.npv-core.npv)}</div><div class="dlt">kept separate until validated</div></div>
+      </div>${core.infeasible?`<div class="notice warn" style="margin-top:10px"><b>Capacity is infeasible.</b> Fixed and admin hours exceed available hours in at least one year; the model does not hide the shortfall.</div>`:""}`;
+}
+function gatesGridInner(rd){
+  return rd.gates.map(g=>`<div class="gate ${g.pass?"pass":"fail"}"><div class="gate-name">${g.pass?"✓":"○"} ${esc(g.name)}</div><div class="gate-detail">${esc(g.detail)}</div></div>`).join("");
+}
+function valSummaryInner(){
+  const core=runModel(S), full=runModel(S,S.settings.scenario,"full"), fullDelta=full.npv-core.npv;
+  return `<div class="grid3"><div class="tile"><div class="lbl">Core case</div><div class="val">${formatMoney(core.npv)}</div></div><div class="tile"><div class="lbl">Full case</div><div class="val">${formatMoney(full.npv)}</div></div><div class="tile"><div class="lbl">Hypothesis upside</div><div class="val">${formatMoney(fullDelta)}</div><div class="dlt">${fullDelta>=0?"not yet evidenced":"hypotheses reduce value"}</div></div><div class="tile"><div class="lbl">Terminal value</div><div class="val">${formatMoney(core.terminal)}</div><div class="dlt">replacement labor deducted</div></div></div>
+      ${valuationChart(core,"owner-earnings-chart")}${modelTable(core)}`;
+}
+function streamKpisInner(s){
+  const pd=pricingDetails(s), minimum=s.hpu?((S.settings.hourlyFloor*s.hpu+pd.fixed)/(1-pd.pct/100)):0;
+  return `<div class="tile"><div class="lbl">Contribution/unit</div><div class="val">${formatMoney(pd.contribution,false)}</div></div><div class="tile"><div class="lbl">Contribution/hour</div><div class="val">${s.hpu?`$${pd.perHour.toFixed(0)}/hr`:"N/A"}</div></div><div class="tile"><div class="lbl">Price for $${S.settings.hourlyFloor}/hr floor</div><div class="val">${minimum>0?formatMoney(minimum,false):"N/A"}</div></div><div class="tile"><div class="lbl">Evidence</div><div class="val" style="font-size:18px">${s.observations} obs.</div></div>`;
+}
+function streamMathInner(s){
+  const pd=pricingDetails(s);
+  return `<b>Current math:</b> ${formatMoney(s.p,false)} price − ${pd.pct.toFixed(1)}% percentage costs − ${formatMoney(pd.fixed,false)} fixed sale costs = ${formatMoney(pd.contribution,false)} contribution before overhead.`;
+}
+function trackKpisInner(r){
+  const m=trackerMetrics(r);
+  return `<div class="tile"><div class="lbl">Owner earnings</div><div class="val">${formatMoney(m.earnings,false)}</div></div><div class="tile"><div class="lbl">Average order</div><div class="val">${r.orders?formatMoney(m.aov,false):"—"}</div></div><div class="tile"><div class="lbl">Effective $/hr</div><div class="val">${r.hrs?`$${m.wage.toFixed(0)}`:"—"}</div></div><div class="tile"><div class="lbl">Inquiry conversion</div><div class="val">${r.inquiries?formatPct(m.inquiryConversion):"—"}</div></div>`;
+}
+function wholesaleVals(){
+  const ws=S.wholesale, wholesale=ws.cost/(1-ws.targetMargin/100), retail=wholesale/(1-ws.retailerMargin/100);
+  return {wholesale,retail,cash:ws.cost*10};
+}
+let liveTimer=null, lastInputEl=null;
+function refreshLive(){
+  const patch=(id,html)=>{const el=document.getElementById(id);if(el)el.innerHTML=html;};
+  if(currentTab==="overview"){
+    const rd=readiness();
+    patch("ov-summary-live",ovSummaryInner());
+    patch("ov-gates-grid",gatesGridInner(rd));
+    const mc=document.getElementById("momentum-count");if(mc)mc.textContent=`${S.momentum.weekPoints} / ${S.momentum.weeklyGoal}`;
+    const mf=document.getElementById("momentum-fill");if(mf)mf.style.width=`${Math.min(100,S.momentum.weekPoints/S.momentum.weeklyGoal*100)}%`;
+  }else if(currentTab==="valuation"){
+    patch("val-summary-live",valSummaryInner());
+  }else if(currentTab==="streams"){
+    S.streams.forEach(s=>{patch(`stream-kpis-${s.id}`,streamKpisInner(s));patch(`stream-math-${s.id}`,streamMathInner(s));});
+    const wv=wholesaleVals();
+    patch("wholesale-min",formatMoney(wv.wholesale,false));patch("wholesale-retail",formatMoney(wv.retail,false));patch("wholesale-cash",formatMoney(wv.cash,false));
+  }else if(currentTab==="tracker"){
+    const rd=readiness();
+    S.tracker.forEach((r,i)=>patch(`track-kpis-${i}`,trackKpisInner(r)));
+    patch("trk-gates-grid",gatesGridInner(rd));
+  }
+}
+function handleMainInput(e){
+  const x=e.target;
+  if(!x||!(x.type==="number"||x.type==="text"||x.tagName==="TEXTAREA")) return;
+  if(x.closest("#quick-add-form")||x.closest("#add-month-form")||x.closest("#quick-log-form")||x.closest("#shift-dates-form")||x.id==="import-json"||x.id==="new-month") return;
+  if(x.value==="") return;
+  if(lastInputEl!==x){ snapshotForUndo(`edit ${x.dataset.setting||x.dataset.streamField||x.dataset.trackerField||"value"}`); lastInputEl=x; }
+  if(x.dataset.setting){ setPath(S,x.dataset.setting,inputValue(x)); S.settings=normalizeSettings(S.settings); }
+  else if(x.dataset.hoursIndex!==undefined){ const i=Number(x.dataset.hoursIndex); while(S.settings.hours.length<=i)S.settings.hours.push(S.settings.hours.at(-1)||0); S.settings.hours[i]=clamp(x.value,0,S.settings.maxHpw); }
+  else if(x.dataset.streamId&&x.dataset.streamField){ const s=S.streams.find(v=>v.id===x.dataset.streamId); if(!s)return; s[x.dataset.streamField]=inputValue(x); Object.assign(s,normalizeStream(s,s)); }
+  else if(x.dataset.trackerIndex!==undefined&&x.dataset.trackerField){ const i=Number(x.dataset.trackerIndex); if(!S.tracker[i])return; S.tracker[i][x.dataset.trackerField]=inputValue(x); S.tracker[i]=normalizeTrackerRow(S.tracker[i]); }
+  else { lastInputEl=null; return; }
+  save(); clearTimeout(liveTimer); liveTimer=setTimeout(refreshLive,220);
+}
+function backupNudgeHtml(){
+  if(!canStore)return "";
+  const hasData=S.momentum.total>0||S.tracker.some(r=>r.logged&&(r.rev>0||r.hrs>0||r.orders>0));
+  if(!hasData)return "";
+  const days=S.meta.lastBackup?Math.round((new Date(`${todayISO()}T12:00:00`)-new Date(`${S.meta.lastBackup}T12:00:00`))/86400000):null;
+  if(days!==null&&days<=30)return "";
+  return `<div class="notice warn"><b>Backup reminder.</b> ${days===null?"No snapshot has been exported yet":`The last snapshot export was ${days} days ago`} — autosave lives only in this browser, so a lost or reset phone loses the data. <button class="ghost" data-action="open-data">Open Data</button></div>`;
+}
+function renderOverview(el){
+  refreshMomentumWeek();
+  const core=runModel(S), full=runModel(S,S.settings.scenario,"full"), rd=readiness(), ranked=rankedTasks(), next=ranked[0], week=ranked.slice(1,4), waiting=S.tasks.filter(t=>taskState(t)==="waiting");
+  const last=trackerRows(1)[0], lm=last?trackerMetrics(last):null;
+  el.innerHTML=`
+    ${S.meta.migrationNotice?`<div class="notice good"><b>Your v1 data was migrated safely.</b> The old browser record is still untouched. Imported items appear in their own Roadmap phase. <button class="ghost" data-action="dismiss-migration">Dismiss</button></div>`:""}
+    ${backupNudgeHtml()}
+    <div class="card"><div id="ov-summary-live">${ovSummaryInner()}</div></div>
+    <div class="grid2">
+      <div class="card today-card"><div class="flex-between"><h2>Today</h2><span class="badge">Recommended next</span></div>${next?taskCardHtml(next,true):`<p class="note">No available tasks. Review waiting experiments or add the next task.</p>`}</div>
+      <div class="card"><div class="flex-between"><h2>Momentum</h2><span class="badge">${S.momentum.total} total pts</span></div><div class="hero" style="font-size:34px" id="momentum-count">${S.momentum.weekPoints} / ${S.momentum.weeklyGoal}</div><div class="meter" aria-label="Weekly Momentum progress"><i id="momentum-fill" style="width:${Math.min(100,S.momentum.weekPoints/S.momentum.weeklyGoal*100)}%"></i></div><div class="note" style="margin-top:8px">Points reward completed work. Experiments earn the evidence bonus only after a result is recorded.</div>${field("Weekly goal",S.momentum.weeklyGoal,{id:"momentum-goal",type:"number",min:5,max:1000,"data-setting":"momentum.weeklyGoal"})}</div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h2>This week</h2><div class="note">Ranked by deadlines, phase, critical-path unlocks, priority, impact, and effort.</div>${week.length?week.map(t=>taskCardHtml(t,true)).join(""):`<p class="muted">No additional available tasks.</p>`}</div>
+      <div class="card"><h2>Waiting for evidence</h2><div class="note">These experiments do not count as complete until the result is recorded.</div>${waiting.length?waiting.map(t=>taskCardHtml(t,true)).join(""):`<p class="muted">Nothing is waiting.</p>`}</div>
+    </div>
+    <div class="card"><div class="flex-between"><h2>Full-time readiness</h2><span class="badge">${rd.ready?"READY":"NOT READY"}</span></div><div class="note">Every gate must pass; strong performance in one area cannot compensate for a missing safety or evidence gate.</div><div class="grid2" id="ov-gates-grid">${gatesGridInner(rd)}</div><button class="ghost" data-action="open-tracker" style="margin-top:10px">Open readiness inputs</button></div>
+    <div class="grid4" id="ov-latest">
+      <div class="tile"><div class="lbl">Latest logged revenue</div><div class="val">${last?formatMoney(last.rev):"—"}</div><div class="dlt">${last?esc(last.m):"Add a Tracker month"}</div></div>
+      <div class="tile"><div class="lbl">Latest owner earnings</div><div class="val">${lm?formatMoney(lm.earnings):"—"}</div></div>
+      <div class="tile"><div class="lbl">Latest effective $/hr</div><div class="val">${lm&&last.hrs?`$${lm.wage.toFixed(0)}`:"—"}</div></div>
+      <div class="tile"><div class="lbl">Readiness gates</div><div class="val">${rd.gates.filter(g=>g.pass).length} / ${rd.gates.length}</div></div>
+    </div>`;
+}
+
+function renderValuation(el){
+  const st=S.settings, core=runModel(S), full=runModel(S,st.scenario,"full"), fullDelta=full.npv-core.npv;
+  el.innerHTML=`
+    <div class="card"><h2>${st.horizon}-year discounted owner earnings</h2><div class="note">Core planning value includes planned and validated streams. Hypothesis streams are shown as separate upside. Task checkboxes never change these numbers.</div>
+      <div id="val-summary-live">${valSummaryInner()}</div>
+    </div>
+    <div class="card"><h2>Scenario and horizon</h2><div class="note">Conservative, Base, and Stretch alter units, growth, price, and launch timing; the exact assumptions remain editable in Streams.</div>
+      <label class="f" id="scenario-label">Scenario</label><div class="seg" role="group" aria-labelledby="scenario-label">${Object.entries(SCENARIOS).map(([k,v])=>`<button data-action="set-scenario" data-value="${k}" aria-pressed="${st.scenario===k}">${v.label}</button>`).join("")}</div>
+      <div class="grid2">${field("Horizon (years)",st.horizon,{id:"setting-horizon",type:"number",min:1,max:20,"data-setting":"settings.horizon"})}${field("Discount rate (%)",st.r,{id:"setting-rate",type:"number",min:0,max:100,step:.5,"data-setting":"settings.r"})}</div>
+    </div>
+    <div class="card"><h2>Capacity and owner time</h2><div class="note">Annual capacity uses an explicit weekly schedule, capped at the editable maximum. Admin, one-time launch, and recurring production hours are reserved before demand is allocated.</div>
+      <div class="grid4">${Array.from({length:st.horizon},(_,i)=>field(`Year ${i+1} hours/week`,st.hours[Math.min(i,st.hours.length-1)],{id:`hours-${i}`,type:"number",min:0,max:st.maxHpw,step:.5,"data-hours-index":i})).join("")}</div>
+      <div class="grid3">${field("Maximum hours/week",st.maxHpw,{id:"setting-maxhpw",type:"number",min:1,max:80,step:.5,"data-setting":"settings.maxHpw"})}${field("Annual admin hours",st.adminH,{id:"setting-admin",type:"number",min:0,max:100000,"data-setting":"settings.adminH"})}${field("Contribution/hour floor",st.hourlyFloor,{id:"setting-floor",type:"number",min:0,max:10000,step:1,"data-setting":"settings.hourlyFloor"})}</div>
+      <label class="f" id="capacity-mode-label">Capacity allocation</label><div class="seg" role="group" aria-labelledby="capacity-mode-label"><button data-action="capacity-mode" data-value="margin" aria-pressed="${st.capacityMode==="margin"}">Max contribution/hour</button><button data-action="capacity-mode" data-value="strategic" aria-pressed="${st.capacityMode==="strategic"}">Strategic priority</button></div>
+      <div class="callout"><b>Capacity is always enforced:</b> demand above available owner hours is reported as unserved rather than included in earnings.</div>
+    </div>
+    <div class="card"><h2>Costs and terminal value</h2><div class="grid3">
+      ${field("Monthly overhead",st.ohm,{id:"setting-ohm",type:"number",min:0,step:1,"data-setting":"settings.ohm"})}
+      ${field("Annual overhead growth (%)",st.ohg,{id:"setting-ohg",type:"number",min:-100,max:1000,step:.5,"data-setting":"settings.ohg"})}
+      ${field("Startup costs",st.startupCosts,{id:"setting-startup",type:"number",min:0,step:1,"data-setting":"settings.startupCosts"})}
+      ${field("Working capital",st.workingCapital,{id:"setting-wc",type:"number",min:0,step:1,"data-setting":"settings.workingCapital"})}
+      ${field("Terminal multiple",st.tv,{id:"setting-tv",type:"number",min:0,max:10,step:.1,"data-setting":"settings.tv",help:"Defaults to zero."})}
+      ${field("Replacement labor $/hour",st.replacementLaborRate,{id:"setting-labor",type:"number",min:0,step:1,"data-setting":"settings.replacementLaborRate"})}
+      </div><label class="f"><input type="checkbox" data-setting="settings.transferability" ${st.transferability?"checked":""}> The business is demonstrably transferable without the owner</label><div class="callout"><b>Terminal-value rule:</b> it remains zero unless transferability is confirmed. When enabled, the model subtracts replacement labor from final-year earnings before applying the multiple.</div>
+    </div>
+    <div class="card"><h2>Task impact previews</h2><div class="note">These are isolated low/base/high sensitivities—not promised value, causal claims, or rewards. Nothing applies automatically.</div>${S.tasks.filter(t=>t.impact).map(t=>{const rows=impactPreview(t);return `<details><summary>${esc(t.impact.label)}</summary><p class="task-detail">${esc(t.impact.caveat)}</p><div class="tscroll"><table class="data impact-table"><thead><tr><th>Case</th><th>Assumption</th><th>Modeled value</th><th>Change vs current</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.case}</td><td>${esc(r.assumption)}</td><td>${formatMoney(r.value,false)}</td><td>${formatMoney(r.delta,false)}</td></tr>`).join("")}</tbody></table></div></details>`;}).join("")}</div>`;
+}
+
+function streamField(stream,label,key,opts={}){
+  const attrs=Object.assign({id:`stream-${stream.id}-${key}`,type:"number","data-stream-id":stream.id,"data-stream-field":key},opts);
+  return field(label,stream[key],attrs);
+}
+
+function renderStreams(el){
+  const ws=S.wholesale, wholesale=ws.cost/(1-ws.targetMargin/100), retail=wholesale/(1-ws.retailerMargin/100);
+  el.innerHTML=`
+    <div class="card"><h2>Streams and channel economics</h2><div class="note">Core valuation includes planned and validated streams. Hypothesis streams stay in the separate upside case until their evidence gate passes.</div><div class="legend">${S.streams.map(s=>`<span class="k"><span class="sw" style="background:var(${esc(s.color)})"></span>${esc(s.name)} · ${esc(s.status)}</span>`).join("")}</div></div>
+    ${S.streams.map(s=>{
+      const pd=pricingDetails(s), minimum=s.hpu?((S.settings.hourlyFloor*s.hpu+pd.fixed)/(1-pd.pct/100)):0;
+      return `<div class="stream-card"><div class="sh"><span class="sw" style="background:var(${esc(s.color)})"></span><div class="nm">${esc(s.name)}</div><span class="status-chip ${s.status==="validated"?"validated":""}">${esc(s.status)}</span><label><span class="sr-only">Include ${esc(s.name)}</span><input type="checkbox" data-stream-id="${esc(s.id)}" data-stream-field="on" ${s.on?"checked":""}></label></div>
+        <div class="grid4" style="margin-top:9px" id="stream-kpis-${esc(s.id)}">${streamKpisInner(s)}</div>
+        <details><summary>Edit assumptions and evidence</summary>
+          <div class="grid2">
+            ${streamField(s,"Stream name","name",{type:"text"})}
+            ${streamField(s,"Status","status",{type:"select",options:[{value:"planned",label:"Planned (core)"},{value:"hypothesis",label:"Hypothesis (upside only)"},{value:"validated",label:"Validated (core)"}]})}
+            ${streamField(s,"Channel","channel",{type:"select",options:[{value:"direct",label:"Direct / payment processor"},{value:"etsy",label:"Etsy"}]})}
+            ${streamField(s,"Evidence classification","evidenceLevel",{type:"select",options:["hypothesis","observed","supported","contradicted","inconclusive"].map(v=>({value:v,label:v[0].toUpperCase()+v.slice(1)}))})}
+          </div>
+          <button class="ghost" data-action="apply-fee-profile" data-id="${esc(s.id)}">Apply standard ${s.channel==="etsy"?"Etsy":"direct"} fee profile</button>
+          <div class="grid4">
+            ${streamField(s,"Start year","start",{min:1,max:20,step:1})}${streamField(s,`Starting ${s.unit}`,"u",{min:0,step:.1})}${streamField(s,"Annual unit growth (%)","ug",{min:-100,max:1000,step:.5})}${streamField(s,"Strategic priority (1 first)","priority",{min:1,max:99,step:1})}
+            ${streamField(s,"Starting price","p",{min:0,step:.01})}${streamField(s,"Annual price growth (%)","pg",{min:-100,max:1000,step:.5})}${streamField(s,"Owner hours/unit","hpu",{min:0,step:.05})}${streamField(s,"One-time launch hours","fh",{min:0,step:.5})}${streamField(s,"Recurring hours/yr","rh",{min:0,step:.5})}
+          </div>
+          <h3>Per-sale costs</h3><div class="grid4">
+            ${streamField(s,"Materials / COGS (%)","cogs",{min:0,max:100,step:.1})}${streamField(s,"Platform + processing (%)","fees",{min:0,max:100,step:.1})}${streamField(s,"Offsite ads (%)","offsiteRate",{min:0,max:100,step:.1})}${streamField(s,"Payment fixed fee","fixedFee",{min:0,step:.01})}
+            ${streamField(s,"Listing fee","listingFee",{min:0,step:.01})}${streamField(s,"Packaging / sale","packaging",{min:0,step:.01})}${streamField(s,"Shipping subsidy / sale","shipping",{min:0,step:.01})}${streamField(s,"Expected rework / sale","rework",{min:0,step:.01})}
+          </div>
+          <div class="grid2">${streamField(s,"Observed samples","observations",{min:0,step:1})}${streamField(s,"Evidence / rationale","why",{type:"textarea",rows:4})}</div>
+          <div class="callout" id="stream-math-${esc(s.id)}">${streamMathInner(s)}</div>
+        </details>
+      </div>`;
+    }).join("")}
+    <div class="card"><h2>Wholesale viability calculator</h2><div class="note">Wholesale price comes from cost and your target maker margin. Suggested retail then protects the retailer’s margin; it is not direct price × 2.</div>
+      <div class="grid3">${field("Fully loaded unit cost",ws.cost,{id:"wholesale-cost",type:"number",min:0,step:.01,"data-setting":"wholesale.cost"})}${field("Target maker margin (%)",ws.targetMargin,{id:"wholesale-maker",type:"number",min:0,max:99,step:.5,"data-setting":"wholesale.targetMargin"})}${field("Retailer margin (%)",ws.retailerMargin,{id:"wholesale-retailer",type:"number",min:0,max:99,step:.5,"data-setting":"wholesale.retailerMargin"})}<div class="tile"><div class="lbl">Minimum wholesale</div><div class="val" id="wholesale-min">${formatMoney(wholesale,false)}</div></div><div class="tile"><div class="lbl">Suggested retail</div><div class="val" id="wholesale-retail">${formatMoney(retail,false)}</div></div><div class="tile"><div class="lbl">Cash before 10 units</div><div class="val" id="wholesale-cash">${formatMoney(ws.cost*10,false)}</div></div></div>
+      <div class="callout"><b>Before accepting an order:</b> include payment terms, minimum order quantity, defects/returns, packaging, shipping, batch capacity, and working-capital timing.</div>
+    </div>`;
+}
+
+function renderRoadmap(el){
+  el.innerHTML=`
+    <div class="card"><div class="flex-between"><div><h2>Progressive 30 / 60 / 90-day roadmap</h2><div class="note">Dependencies expose the critical path. Every task has a definition of done, purpose, effort, status, priority, and evidence behavior.</div></div><span class="badge">${S.tasks.filter(isComplete).length} / ${S.tasks.length} complete</span></div>
+      <form class="quick-add" id="quick-add-form"><label class="sr-only" for="quick-task">New task</label><input id="quick-task" name="title" type="text" required maxlength="180" placeholder="Add a granular next task…"><label class="sr-only" for="quick-priority">Priority</label><select id="quick-priority" name="priority"><option>P1</option><option selected>P2</option></select><button class="primary" type="submit">Add task</button></form><div class="field-help">Press Enter in the task field to add. Use Edit to define evidence and dependencies.</div>
+      <form id="shift-dates-form" class="addrow" style="align-items:flex-end"><div style="flex:1"><label class="f" for="shift-days">Life happened? Shift every open due date by ± days</label><input id="shift-days" name="days" type="number" min="-365" max="365" step="1" value="0"></div><button class="ghost" type="submit">Shift dates</button></form>
+    </div>
+    <div class="phase-grid">${S.phases.map(ph=>{
+      const tasks=S.tasks.filter(t=>t.phaseId===ph.id).sort((a,b)=>a.order-b.order), done=tasks.filter(isComplete).length, pct=tasks.length?done/tasks.length*100:0;
+      return `<section class="card" aria-labelledby="phase-${esc(ph.id)}"><div class="phase-head"><div><h2 id="phase-${esc(ph.id)}">${esc(ph.name)}</h2><div class="note">${esc(ph.when)}</div></div><span class="badge">${done}/${tasks.length}</span></div><div class="pbar" role="progressbar" aria-label="${esc(ph.name)} completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><i style="width:${pct}%"></i></div>${tasks.length?tasks.map(t=>taskCardHtml(t)).join(""):`<p class="muted" style="margin-top:8px">No tasks in this phase.</p>`}</section>`;
+    }).join("")}</div>`;
+}
+
+function trackerField(row,index,label,key,opts={}){
+  return field(label,row[key],Object.assign({id:`track-${index}-${key}`,type:"number",min:0,step:key==="m"?undefined:.01,"data-tracker-index":index,"data-tracker-field":key},opts));
+}
+
+function renderTracker(el){
+  const rd=readiness(), rows=S.tracker, logged=trackerRows(), zeros=logged.filter(r=>r.rev===0&&r.cost===0&&r.hrs===0&&r.orders===0).length;
+  const selected=S.meta.suggestionStream&&S.streams.some(s=>s.id===S.meta.suggestionStream)?S.meta.suggestionStream:S.streams[0].id;
+  const sug=actualsSuggestion(selected);
+  el.innerHTML=`
+    <div class="card"><h2>Quick log — about 60 seconds</h2><div class="note">The six numbers that matter, once a month. Saving marks the month as logged (zeros count); everything else can stay 0 and be refined later in the detailed editor below.</div>
+      <form id="quick-log-form"><div class="grid3">
+        ${field("Month",nextLogMonth(),{id:"ql-m",type:"month",name:"m",required:"required"})}
+        ${field("Revenue ($)",0,{id:"ql-rev",name:"rev",min:0,step:.01})}
+        ${field("Cash costs ($)",0,{id:"ql-cost",name:"cost",min:0,step:.01})}
+        ${field("Owner hours",0,{id:"ql-hrs",name:"hrs",min:0,step:.5})}
+        ${field("Orders",0,{id:"ql-orders",name:"orders",min:0,step:1})}
+        ${field("IG followers",0,{id:"ql-fol",name:"fol",min:0,step:1})}
+        ${field("Email subscribers",0,{id:"ql-email",name:"email",min:0,step:1})}
+      </div><button class="primary" type="submit" style="margin-top:10px">Save month</button></form>
+    </div>
+    <div class="card"><div class="flex-between"><div><h2>Monthly actuals</h2><div class="note">Logged zero months count. This prevents missing periods from silently inflating readiness or trends.</div></div><span class="badge">${logged.length} logged · ${zeros} zero</span></div>
+      <form id="add-month-form" class="addrow"><label class="sr-only" for="new-month">Month</label><input id="new-month" type="month" name="month" required><button class="primary" type="submit">Add month</button></form>
+    </div>
+    ${rows.map((r,i)=>{const m=trackerMetrics(r);return `<div class="card"><div class="flex-between"><div><h2>${esc(r.m)}</h2><div class="note">${r.logged?"Included in readiness history":"Draft—not counted until logged"}</div></div><button class="ghost" data-action="delete-month" data-index="${i}" aria-label="Delete ${esc(r.m)}">Delete month</button></div>
+      <div class="grid4" id="track-kpis-${i}">${trackKpisInner(r)}</div>
+      <details><summary>Edit ${esc(r.m)} inputs</summary><label class="f"><input type="checkbox" data-tracker-index="${i}" data-tracker-field="logged" ${r.logged?"checked":""}> This month is complete and logged (including if zero)</label>
+        <div class="grid4">${trackerField(r,i,"Revenue","rev")}${trackerField(r,i,"Cash costs","cost")}${trackerField(r,i,"Owner hours","hrs")}${trackerField(r,i,"Orders","orders",{step:1})}${trackerField(r,i,"Views / visits","views",{step:1})}${trackerField(r,i,"Qualified inquiries","inquiries",{step:1})}${trackerField(r,i,"Quotes sent","quotes",{step:1})}${trackerField(r,i,"Followers","fol",{step:1})}${trackerField(r,i,"Email subscribers","email",{step:1})}${trackerField(r,i,"Repeat orders","repeatOrders",{step:1})}${trackerField(r,i,"Completed orders","completedOrders",{step:1})}${trackerField(r,i,"On-time orders","onTimeOrders",{step:1})}${trackerField(r,i,"Backlog (weeks)","backlogWeeks",{step:.1})}</div>${trackerField(r,i,"Notes","note",{type:"textarea",rows:3})}</details>
+    </div>`;}).join("")}
+    <div class="card"><h2>Actual-to-plan suggestion</h2><div class="note">Uses the most recent three logged months. Preview first; accepting updates only the selected stream’s starting units, price, and hours/unit.</div>
+      ${field("Target stream",selected,{id:"suggestion-stream",type:"select","data-suggestion-stream":"true",options:S.streams.map(s=>({value:s.id,label:s.name}))})}
+      ${sug&&sug.orders?`<div class="tscroll"><table class="data"><thead><tr><th>Assumption</th><th>Current</th><th>Recent actuals</th></tr></thead><tbody><tr><td>Units/month</td><td>${sug.stream.u.toFixed(1)}</td><td>${sug.u.toFixed(1)}</td></tr><tr><td>Price</td><td>${formatMoney(sug.stream.p,false)}</td><td>${formatMoney(sug.p,false)}</td></tr><tr><td>Hours/unit</td><td>${sug.stream.hpu.toFixed(2)}</td><td>${sug.hpu.toFixed(2)}</td></tr></tbody></table></div><button class="primary" style="margin-top:10px" data-action="accept-suggestion" data-id="${esc(selected)}">Accept these assumptions</button>`:`<div class="notice warn">At least one paid order is needed across the recent logged months before the app can estimate unit economics.</div>`}
+    </div>
+    <div class="card"><div class="flex-between"><h2>Full-time readiness gates</h2><span class="badge">${rd.ready?"READY":"NOT READY"}</span></div><div class="grid2" id="trk-gates-grid">${gatesGridInner(rd)}</div>
+      <h3>Manual safety confirmations</h3><ul class="check"><li><label><input type="checkbox" data-ready="fund" ${S.ready.fund?"checked":""}> Six-month personal emergency fund</label></li><li><label><input type="checkbox" data-ready="insurance" ${S.ready.insurance?"checked":""}> Health-insurance plan priced and selected</label></li><li><label><input type="checkbox" data-ready="taxBenefits" ${S.ready.taxBenefits?"checked":""}> Taxes, retirement, leave, and lost benefits budgeted</label></li></ul>
+      <div class="grid2">${field("Pre-tax owner-earnings target / month",S.settings.target,{id:"readiness-target",type:"number",min:0,step:100,"data-setting":"settings.target"})}${field("Required share of target (%)",S.settings.readinessPct,{id:"readiness-pct",type:"number",min:1,max:100,step:1,"data-setting":"settings.readinessPct"})}</div>
+    </div>`;
+}
+
+function renderEvidence(el){
+  el.innerHTML=`
+    <div class="card"><h2>Evidence standard</h2><div class="note">The app distinguishes facts, observations, assumptions, and sensitivities so a plausible story is not mistaken for proof.</div>
+      <div class="evidence-row"><b>Primary source</b><span>Platform policy, company filing, or first-party reporting. Good for rules and context; not proof of this business’s results.</span></div>
+      <div class="evidence-row"><b>Direct observation</b><span>A dated view, inquiry, quote, order, price acceptance, production time, or cost from Present Stitch.</span></div>
+      <div class="evidence-row"><b>Supported assumption</b><span>Multiple relevant observations support the assumption; sample size and limits remain visible.</span></div>
+      <div class="evidence-row"><b>Hypothesis</b><span>Untested or weakly tested. Excluded from the core case when it represents an entire future stream.</span></div>
+      <div class="evidence-row"><b>Sensitivity</b><span>A transparent “what if” holding other inputs fixed. It is not a forecast of causal lift.</span></div>
+    </div>
+    <div class="card"><h2>Model methodology and limits</h2><ul class="warning-list">
+      <li>The primary label is <b>${S.settings.horizon}-year discounted owner earnings</b>, not company valuation.</li>
+      <li>Core streams are separated from hypothesis streams; task completion never changes financial assumptions.</li>
+      <li>Capacity reserves admin, one-time launch, and recurring production hours, then allocates variable work by contribution/hour or the selected strategic priority.</li>
+      <li>Fees, price, demand, growth, production time, and costs are editable assumptions. Actuals can update them only after explicit acceptance.</li>
+      <li>Terminal value defaults to zero and requires transferability; replacement labor is deducted before a multiple is applied.</li>
+      <li>Taxes, uncertainty distributions, financing, owner benefits, and market-sale discounts are not comprehensively modeled.</li>
+    </ul></div>
+    <div class="card"><h2>Source registry</h2><div class="note">Access dates and limitations are shown next to every contextual claim. Open links in a new tab to review the original source.</div><div class="source-list">${SOURCES.map(src=>`<article class="bench-card"><div class="nm">${esc(src.claim)}</div><div class="meta">${esc(src.publisher)} · ${esc(src.date)} · ${esc(src.quality)}</div><div class="les"><b>Use with care:</b> ${esc(src.note)}</div><a href="${esc(src.url)}" target="_blank" rel="noopener noreferrer">Open source<span class="sr-only">: ${esc(src.claim)}</span></a></article>`).join("")}</div></div>
+    <div class="card"><h2>Where Present Stitch started (Aug 2026)</h2><div class="task-detail">Publicly visible then: ~12 posts of personalized name and gift pieces, engagement of 1–6 likes per post, and no posts in roughly six months. No Etsy shop, website, or link-in-bio found. Translation: pre-audience and pre-revenue — the asset is the craft skill and a genuinely good niche (gifting ≈ 27% of Etsy sales; see the source registry). The first 90 days are about consistency, not perfection.</div></div>
+    <div class="card"><h2>Artist comparables</h2><div class="note">How established hand-embroidery artists actually monetize. Every full-timer follows the same arc: handwork → audience → products (patterns/kits) → teaching or membership. Context for planning — not evidence about Present Stitch.</div>${BENCH.map(b=>`<article class="bench-card"><div class="nm">${b.n}</div><div class="meta">${b.f} · ${b.m}</div><div class="les">${b.l}</div></article>`).join("")}<div class="src">Follower counts via third-party mirrors (imginn, socialcounts), accessed 2026-08-08; approximate. Prices from the artists' own shops and pricing pages. No profiled artist publishes revenue; Etsy sale counts and price lists are the hardest public proxies.</div></div>
+    <div class="card"><h2>Benchmark price sheet (2025–26)</h2><div class="tscroll"><table class="data"><caption class="sr-only">Typical and premium price points by product type</caption><thead><tr><th>Item</th><th>Typical</th><th>Premium</th></tr></thead><tbody>${PRICE_SHEET.map(r=>`<tr><td style="text-align:left">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody></table></div><div class="src">Sources: Etsy fee schedule (2026); The Creative's Hour pricing guide (Apr 2026); stitchingsabbatical.com price list; ClassBento US listings; artist shops (cleverpoppy.com, jessicalongembroidery.com, cozybluehandmade.com); creator-rate guides (2026).</div></div>
+    <div class="card"><h2>Seasonality planner</h2><div class="tscroll"><table class="data"><caption class="sr-only">Seasonal windows and preparation deadlines</caption><thead><tr><th>Window</th><th>What</th><th>Do by</th></tr></thead><tbody>${SEASONS.map(r=>`<tr><td style="text-align:left">${r[0]}</td><td style="text-align:left">${r[1]}</td><td style="text-align:left">${r[2]}</td></tr>`).join("")}</tbody></table></div><div class="src">Q4 share computed from Etsy SEC filings 2021–2025; occasions from Etsy quarterly reporting; weddings from The Knot Real Weddings Study.</div></div>
+    <div class="card"><h2>Decision rules</h2><div class="grid2"><div class="gate"><div class="gate-name">Continue</div><div class="gate-detail">The relevant metric has enough exposure, observed economics clear the floor, and capacity is sustainable.</div></div><div class="gate"><div class="gate-name">Revise</div><div class="gate-detail">Evidence locates a specific acquisition, offer, price, or fulfillment constraint worth another bounded test.</div></div><div class="gate"><div class="gate-name">Pause</div><div class="gate-detail">Exposure or operational capacity is insufficient; collect the missing evidence before expansion.</div></div><div class="gate"><div class="gate-name">Stop</div><div class="gate-detail">Repeated tests contradict the economics or demand assumption and a predefined limit has been reached.</div></div></div></div>`;
+}
+
+function renderData(el){
+  const snapshot=JSON.stringify(S,null,2);
+  el.innerHTML=`
+    <div class="card"><h2>Autosave and backup</h2><div class="notice ${canStore?"good":"warn"}">${canStore?"Changes autosave in this browser under the v2 key. If v1 data was migrated, its original record remains untouched.":"This viewer does not expose browser storage. Export a snapshot before closing."}</div>
+      <div class="seg"><button class="primary" data-action="copy-json">Copy JSON</button><button class="ghost" data-action="download-json">Download .json</button><button class="ghost" data-action="reset-data">Reset v2 defaults</button></div>
+      ${field("Current v2 snapshot",snapshot,{id:"export-json",type:"textarea",rows:12,spellcheck:"false",readonly:"readonly"})}
+    </div>
+    <div class="card"><h2>Restore a snapshot</h2><div class="note">Paste a complete v1 or v2 snapshot. Validation happens before the current state changes; incomplete or malformed data is rejected safely.</div>
+      ${field("Snapshot JSON","",{id:"import-json",type:"textarea",rows:8,spellcheck:"false",placeholder:"Paste a complete snapshot…"})}
+      <button class="primary" data-action="import-json">Validate and restore</button><div id="import-message" role="status" aria-live="polite" class="muted" style="margin-top:7px"></div>
+    </div>
+    <div class="card"><h2>Privacy and version</h2><p class="task-detail">All entered business data stays in this HTML file’s browser storage unless you copy, download, or share a snapshot. App schema version: ${APP_VERSION}. Built-in plan start: ${APP_START}.</p></div>`;
+}
+
+const RENDER={overview:renderOverview,valuation:renderValuation,streams:renderStreams,roadmap:renderRoadmap,tracker:renderTracker,evidence:renderEvidence,data:renderData};
+
+function setPath(obj,path,value){
+  const parts=path.split("."); let cur=obj;
+  parts.slice(0,-1).forEach(p=>{if(!cur[p]||typeof cur[p]!=="object")cur[p]={};cur=cur[p];});
+  cur[parts[parts.length-1]]=value;
+}
+function inputValue(input){ return input.type==="checkbox"?input.checked:(input.type==="number"?number(input.value,0):input.value); }
+
+function showToast(message,withUndo=false){
+  const toast=document.getElementById("toast"); if(!toast)return;
+  toast.innerHTML=`<span>${esc(message)}</span>${withUndo&&undoStack.length?`<button data-action="undo">Undo</button>`:""}`;
+  toast.hidden=false; clearTimeout(showToast.timer); showToast.timer=setTimeout(()=>{toast.hidden=true;},5000);
+}
+function closeModal(){
+  const backdrop=document.getElementById("modal"); if(!backdrop||backdrop.hidden)return;
+  backdrop.hidden=true; backdrop.querySelector(".modal-panel").innerHTML="";
+  if(modalReturnFocus&&document.contains(modalReturnFocus))modalReturnFocus.focus(); modalReturnFocus=null;
+}
+function openModal(title,body){
+  const backdrop=document.getElementById("modal"), panel=backdrop.querySelector(".modal-panel"); modalReturnFocus=document.activeElement;
+  panel.innerHTML=`<div class="modal-head"><h2 id="modal-title">${esc(title)}</h2><button type="button" class="modal-close" data-action="close-modal" aria-label="Close dialog">×</button></div>${body}`;
+  backdrop.hidden=false; const focus=panel.querySelector("input:not([type=hidden]),select,textarea,button"); if(focus)focus.focus();
+}
+function taskEditorHtml(t){
+  const fresh=!t, x=t||normalizeTask({id:uid(),title:"",phaseId:currentPhaseId(),order:Date.now(),definitionOfDone:"",why:""});
+  return `<form id="task-editor-form" data-id="${esc(x.id)}" data-new="${fresh}">
+    <div class="grid2">${field("Task title",x.title,{id:"edit-title",type:"text",required:"required",maxlength:180})}${field("Type",x.type,{id:"edit-type",type:"select",options:["action","experiment","gate","milestone"].map(v=>({value:v,label:v[0].toUpperCase()+v.slice(1)}))})}${field("Phase",x.phaseId,{id:"edit-phase",type:"select",options:S.phases.map(p=>({value:p.id,label:p.name}))})}${field("Priority",x.priority,{id:"edit-priority",type:"select",options:[{value:"P1",label:"P1 — critical"},{value:"P2",label:"P2 — supporting"}]})}${field("Due date",x.dueDate,{id:"edit-due",type:"date"})}${field("Effort (minutes)",x.effortMinutes,{id:"edit-effort",type:"number",min:5,step:5})}${field("Status",x.status,{id:"edit-status",type:"select",options:["available","active","waiting","completed","validated"].map(v=>({value:v,label:statusLabel(v)}))})}${field("Momentum points",x.points,{id:"edit-points",type:"select",options:[5,10,20].map(v=>({value:v,label:`${v} points`}))})}</div>
+    ${field("Definition of done",x.definitionOfDone,{id:"edit-dod",type:"textarea",rows:3,required:"required"})}${field("Why this task matters",x.why,{id:"edit-why",type:"textarea",rows:3})}
+    <fieldset style="border:0;margin-top:10px"><legend class="f">Dependencies</legend><div class="grid2">${S.tasks.filter(o=>o.id!==x.id).map(o=>`<label class="task-detail"><input type="checkbox" name="dependency" value="${esc(o.id)}" ${x.dependsOn.includes(o.id)?"checked":""}> ${esc(o.title)}</label>`).join("")||`<span class="muted">No other tasks yet.</span>`}</div></fieldset>
+    <label class="f"><input id="edit-seasonal" type="checkbox" ${x.seasonal?"checked":""}> Deadline is seasonal / time-sensitive</label>
+    <div class="task-actions"><button class="primary" type="submit">${fresh?"Add task":"Save changes"}</button><button class="ghost" type="button" data-action="close-modal">Cancel</button></div>
+  </form>`;
+}
+function openTaskEditor(t){ openModal(t?"Edit task":"Add task",taskEditorHtml(t)); }
+function openResultEditor(t){
+  openModal(`Record result: ${t.title}`,`<form id="task-result-form" data-id="${esc(t.id)}"><p class="task-detail">Record what happened, including the metric and limitation. Leaving this blank moves the experiment to <b>Waiting for result</b> and awards no points.</p>${field("Observed result",t.result,{id:"result-text",type:"textarea",rows:6,placeholder:"Example: 248 listing visits → 7 inquiries → 2 paid orders; $118 average price; small sample."})}<div class="task-actions"><button class="primary" type="submit">Save result status</button><button class="ghost" type="button" data-action="close-modal">Cancel</button></div></form>`);
+}
+
+function completeTask(t,result){
+  snapshotForUndo(`status of ${t.title}`);
+  if(t.type==="experiment"){
+    t.result=String(result||"").trim();
+    if(!t.result){t.status="waiting";t.completedAt="";save();renderCurrent();showToast("Experiment is waiting for a result",true);return;}
+    t.status="validated";t.completedAt=new Date().toISOString(); const pts=awardTask(t,true); closeModal();save();renderCurrent();showToast(`Evidence recorded · +${pts} Momentum`,true);
+  }else{
+    t.status="completed";t.completedAt=new Date().toISOString(); const pts=awardTask(t,false);
+    const celebrate=t.milestone&&!S.momentum.celebrated.includes(t.id); if(celebrate)S.momentum.celebrated.push(t.id);
+    save();renderCurrent();showToast(celebrate?`${t.milestone} · +${pts} Momentum`:`Task complete · +${pts} Momentum`,true);
+  }
+}
+
+function handleMainChange(e){
+  const x=e.target;
+  const skipSnap=(x===lastInputEl); lastInputEl=null;
+  if(x.dataset.setting){
+    if(!skipSnap)snapshotForUndo(`change ${x.dataset.setting}`); setPath(S,x.dataset.setting,inputValue(x)); S.settings=normalizeSettings(S.settings); save();renderCurrent();return;
+  }
+  if(x.dataset.hoursIndex!==undefined){
+    if(!skipSnap)snapshotForUndo("change capacity schedule"); const i=Number(x.dataset.hoursIndex); while(S.settings.hours.length<=i)S.settings.hours.push(S.settings.hours.at(-1)||0);S.settings.hours[i]=clamp(x.value,0,S.settings.maxHpw);save();renderCurrent();return;
+  }
+  if(x.dataset.streamId&&x.dataset.streamField){
+    const s=S.streams.find(v=>v.id===x.dataset.streamId);if(!s)return;if(!skipSnap)snapshotForUndo(`edit ${s.name}`);s[x.dataset.streamField]=inputValue(x);Object.assign(s,normalizeStream(s,s));save();renderCurrent();return;
+  }
+  if(x.dataset.trackerIndex!==undefined&&x.dataset.trackerField){
+    const i=Number(x.dataset.trackerIndex);if(!S.tracker[i])return;if(!skipSnap)snapshotForUndo(`edit ${S.tracker[i].m}`);S.tracker[i][x.dataset.trackerField]=inputValue(x);S.tracker[i]=normalizeTrackerRow(S.tracker[i]);save();renderCurrent();return;
+  }
+  if(x.dataset.ready){snapshotForUndo("change readiness confirmation");S.ready[x.dataset.ready]=x.checked;save();renderCurrent();return;}
+  if(x.dataset.suggestionStream){S.meta.suggestionStream=x.value;save();renderCurrent();}
+}
+
+function nextLogMonth(){
+  const logged=trackerRows();
+  if(!logged.length) return todayISO().slice(0,7);
+  const last=monthSerial(logged[logged.length-1].m), cur=monthSerial(todayISO().slice(0,7));
+  const next=Math.min(last+1,cur), y=Math.floor((next-1)/12), mo=next-y*12;
+  return `${y}-${String(mo).padStart(2,"0")}`;
+}
+function shiftISO(iso,days){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(String(iso||""))) return iso;
+  const d=new Date(`${iso}T12:00:00`); d.setDate(d.getDate()+days);
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function handleMainSubmit(e){
+  if(e.target.id==="quick-add-form"){
+    e.preventDefault();const fd=new FormData(e.target),title=String(fd.get("title")||"").trim();if(!title)return;
+    snapshotForUndo("add task");const phase=currentPhaseId(),max=Math.max(0,...S.tasks.filter(t=>t.phaseId===phase).map(t=>t.order));S.tasks.push(normalizeTask({id:uid(),title,type:"action",phaseId:phase,dueDate:"",effortMinutes:30,definitionOfDone:"Define the observable evidence that makes this complete.",why:"User-added next action.",priority:fd.get("priority"),order:max+10}));save();renderCurrent();showToast("Task added",true);return;
+  }
+  if(e.target.id==="quick-log-form"){
+    e.preventDefault();const fd=new FormData(e.target),m=String(fd.get("m")||"");
+    if(!/^\d{4}-\d{2}$/.test(m)){showToast("Pick a month first");return;}
+    snapshotForUndo(`quick log ${m}`);
+    const vals={m,logged:true,rev:number(fd.get("rev"),0),cost:number(fd.get("cost"),0),hrs:number(fd.get("hrs"),0),orders:number(fd.get("orders"),0),fol:number(fd.get("fol"),0),email:number(fd.get("email"),0)};
+    const i=S.tracker.findIndex(r=>r.m===m);
+    if(i>=0)S.tracker[i]=normalizeTrackerRow(Object.assign({},S.tracker[i],vals));
+    else S.tracker.push(normalizeTrackerRow(vals));
+    S.tracker.sort((a,b)=>a.m.localeCompare(b.m));
+    save();renderCurrent();showToast(`${m} logged`,true);return;
+  }
+  if(e.target.id==="shift-dates-form"){
+    e.preventDefault();const days=Math.round(clamp(new FormData(e.target).get("days"),-365,365));
+    if(!days){showToast("Enter a number of days (±)");return;}
+    snapshotForUndo(`shift dates by ${days} days`);
+    S.tasks.forEach(t=>{
+      if(isComplete(t))return;
+      if(t.dueDate)t.dueDate=shiftISO(t.dueDate,days);
+      if(t.metric&&t.metric.reviewDate)t.metric.reviewDate=shiftISO(t.metric.reviewDate,days);
+    });
+    S.phases.forEach(ph=>{
+      if(ph.start)ph.start=shiftISO(ph.start,days);
+      if(ph.end)ph.end=shiftISO(ph.end,days);
+      if(ph.start&&ph.end)ph.when=`${dateLabel(ph.start)} – ${dateLabel(ph.end)}`;
+    });
+    save();renderCurrent();showToast(`Open dates shifted ${days>0?"+":""}${days} days`,true);return;
+  }
+  if(e.target.id==="add-month-form"){
+    e.preventDefault();const m=String(new FormData(e.target).get("month")||"");if(!m)return;
+    if(S.tracker.some(r=>r.m===m)){showToast("That month already exists");return;}
+    snapshotForUndo("add tracker month");S.tracker.push(normalizeTrackerRow({m,logged:false}));S.tracker.sort((a,b)=>a.m.localeCompare(b.m));save();renderCurrent();showToast("Month added",true);
+  }
+}
+
+function switchTab(id,focusTab=false){
+  if(!RENDER[id])return;currentTab=id;
+  document.querySelectorAll('[role="tab"]').forEach(b=>{const active=b.dataset.tab===id;b.classList.toggle("active",active);b.setAttribute("aria-selected",String(active));b.tabIndex=active?0:-1;if(active&&focusTab)b.focus();});
+  document.querySelectorAll('[role="tabpanel"]').forEach(p=>{const active=p.id===`panel-${id}`;p.classList.toggle("active",active);p.hidden=!active;});
+  renderCurrent();window.scrollTo({top:0,behavior:"auto"});
 }
 function renderCurrent(){
-  save();
-  var el = document.getElementById("tab-"+currentTab);
-  if (el && RENDER[currentTab]) RENDER[currentTab](el);
+  const el=document.getElementById(`panel-${currentTab}`);if(el&&RENDER[currentTab])RENDER[currentTab](el);save();
+}
+function findTask(id){return S.tasks.find(t=>t.id===id);}
+function removeTask(id){S.tasks.forEach(t=>{t.dependsOn=t.dependsOn.filter(d=>d!==id);});S.tasks=S.tasks.filter(t=>t.id!==id);}
+function hasDependencyCycle(id,deps){
+  const seen=new Set();function walk(x){if(x===id)return true;if(seen.has(x))return false;seen.add(x);const t=findTask(x);return t?t.dependsOn.some(walk):false;}
+  return deps.some(walk);
 }
 
+async function copyText(text){
+  if(navigator.clipboard&&navigator.clipboard.writeText){try{await navigator.clipboard.writeText(text);return true;}catch(e){}}
+  const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy");}catch(e){}ta.remove();return ok;
+}
+
+function handleAction(e){
+  const b=e.target.closest&&e.target.closest("[data-action]");if(!b)return;const action=b.dataset.action,id=b.dataset.id;
+  if(action==="undo"){undo();return;}
+  if(action==="close-modal"){closeModal();return;}
+  if(action==="open-roadmap"){switchTab("roadmap");return;}
+  if(action==="open-tracker"){switchTab("tracker");return;}
+  if(action==="open-data"){switchTab("data");return;}
+  if(action==="dismiss-migration"){S.meta.migrationNotice=false;save();renderCurrent();return;}
+  if(action==="set-scenario"){snapshotForUndo("change scenario");S.settings.scenario=b.dataset.value;save();renderCurrent();showToast(`Scenario: ${SCENARIOS[S.settings.scenario].label}`,true);return;}
+  if(action==="capacity-mode"){snapshotForUndo("change capacity allocation");S.settings.capacityMode=b.dataset.value;save();renderCurrent();showToast("Capacity allocation updated",true);return;}
+  if(action==="task-start"){const t=findTask(id);if(!t)return;snapshotForUndo(`start ${t.title}`);t.status="active";save();renderCurrent();showToast("Task started",true);return;}
+  if(action==="task-done"){const t=findTask(id);if(!t)return;if(t.type==="experiment")openResultEditor(t);else completeTask(t);return;}
+  if(action==="task-result"){const t=findTask(id);if(t)openResultEditor(t);return;}
+  if(action==="task-edit"){const t=findTask(id);if(t)openTaskEditor(t);return;}
+  if(action==="task-duplicate"){
+    const t=findTask(id);if(!t)return;snapshotForUndo(`duplicate ${t.title}`);const copy=deepClone(t);copy.id=uid();copy.title=`${t.title} (copy)`;copy.status="available";copy.completedAt="";copy.result="";copy.pointsAwarded=false;copy.evidenceBonusAwarded=false;copy.order=t.order+1;copy.milestone="";S.tasks.push(normalizeTask(copy));save();renderCurrent();showToast("Task duplicated",true);return;
+  }
+  if(action==="task-move"){
+    const t=findTask(id);if(!t)return;const list=S.tasks.filter(x=>x.phaseId===t.phaseId).sort((a,c)=>a.order-c.order);const i=list.indexOf(t),j=i+Number(b.dataset.dir);if(j<0||j>=list.length)return;
+    snapshotForUndo(`reorder ${t.title}`);list.forEach((x,n)=>x.order=(n+1)*10);const old=t.order;t.order=list[j].order;list[j].order=old;save();renderCurrent();showToast("Task reordered",true);return;
+  }
+  if(action==="task-delete"){
+    const t=findTask(id);if(!t||!confirm(`Delete “${t.title}”?`))return;snapshotForUndo(`delete ${t.title}`);removeTask(id);save();renderCurrent();showToast("Task deleted",true);return;
+  }
+  if(action==="apply-fee-profile"){
+    const s=S.streams.find(x=>x.id===id);if(!s)return;snapshotForUndo(`apply ${s.channel} fee profile`);
+    if(s.channel==="etsy"){s.fees=9.5;s.fixedFee=.25;s.listingFee=.20;}else{s.fees=2.9;s.fixedFee=.30;s.listingFee=0;s.offsiteRate=0;}
+    save();renderCurrent();showToast("Standard fee profile applied",true);return;
+  }
+  if(action==="delete-month"){
+    const i=Number(b.dataset.index),r=S.tracker[i];if(!r||!confirm(`Delete tracker month ${r.m}?`))return;snapshotForUndo(`delete ${r.m}`);S.tracker.splice(i,1);save();renderCurrent();showToast("Month deleted",true);return;
+  }
+  if(action==="accept-suggestion"){
+    const sug=actualsSuggestion(id);if(!sug||!sug.orders)return;snapshotForUndo(`update ${sug.stream.name} from actuals`);sug.stream.u=Math.round(sug.u*10)/10;sug.stream.p=Math.round(sug.p*100)/100;sug.stream.hpu=Math.round(sug.hpu*100)/100;sug.stream.observations+=sug.orders;sug.stream.evidenceLevel=sug.orders>=5?"observed":"hypothesis";save();renderCurrent();showToast("Accepted recent actuals into plan",true);return;
+  }
+  if(action==="copy-json"){
+    S.meta.lastBackup=todayISO();save();
+    const text=JSON.stringify(S,null,2);copyText(text).then(ok=>showToast(ok?"Snapshot copied":"Could not copy; select the snapshot manually"));return;
+  }
+  if(action==="download-json"){
+    S.meta.lastBackup=todayISO();save();
+    const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`present-stitch-v2-${todayISO()}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);showToast("Snapshot downloaded");return;
+  }
+  if(action==="reset-data"){
+    if(!confirm("Reset the v2 dashboard to built-in defaults? Your older v1 browser record, if any, will not be deleted."))return;snapshotForUndo("reset v2 data");S=mergeV2(DEFAULTS);saveNow();applyTheme();renderCurrent();showToast("v2 defaults restored",true);return;
+  }
+  if(action==="import-json"){
+    const msg=document.getElementById("import-message"),ta=document.getElementById("import-json");
+    try{const candidate=validateSnapshotObject(JSON.parse(ta.value));snapshotForUndo("restore snapshot");S=candidate;saveNow();applyTheme();renderCurrent();showToast("Snapshot restored",true);}catch(err){if(msg){msg.textContent=err instanceof SyntaxError?"Invalid JSON. Paste the complete exported snapshot.":err.message;msg.className="error-text";}}
+  }
+}
+
+function handleDocumentSubmit(e){
+  if(e.target.id==="task-editor-form"){
+    e.preventDefault();const f=e.target,id=f.dataset.id,existing=findTask(id),deps=[...f.querySelectorAll('input[name="dependency"]:checked')].map(x=>x.value);
+    if(hasDependencyCycle(id,deps)){let err=f.querySelector(".error-text");if(!err){err=document.createElement("div");err.className="error-text";err.setAttribute("role","alert");f.appendChild(err);}err.textContent="Those dependencies create a cycle. Remove the circular link.";return;}
+    snapshotForUndo(existing?`edit ${existing.title}`:"add task");
+    const base=existing||normalizeTask({id,title:"",phaseId:currentPhaseId(),order:Math.max(0,...S.tasks.map(t=>t.order))+10});const wasComplete=isComplete(base);
+    Object.assign(base,{title:f.querySelector("#edit-title").value.trim(),type:f.querySelector("#edit-type").value,phaseId:f.querySelector("#edit-phase").value,priority:f.querySelector("#edit-priority").value,dueDate:f.querySelector("#edit-due").value,effortMinutes:number(f.querySelector("#edit-effort").value,30),status:f.querySelector("#edit-status").value,points:number(f.querySelector("#edit-points").value,10),definitionOfDone:f.querySelector("#edit-dod").value.trim(),why:f.querySelector("#edit-why").value.trim(),dependsOn:deps,seasonal:f.querySelector("#edit-seasonal").checked});
+    const cleaned=normalizeTask(base,base);if(existing)Object.assign(existing,cleaned);else S.tasks.push(cleaned);
+    if(!wasComplete&&isComplete(cleaned))awardTask(existing||cleaned,cleaned.status==="validated");
+    closeModal();save();renderCurrent();showToast(existing?"Task updated":"Task added",true);return;
+  }
+  if(e.target.id==="task-result-form"){
+    e.preventDefault();const t=findTask(e.target.dataset.id);if(t){const result=e.target.querySelector("#result-text").value;closeModal();completeTask(t,result);}return;
+  }
+}
+
+function systemIsDark(){return window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;}
+function applyTheme(){
+  const theme=S.settings.theme||"auto",root=document.documentElement;if(theme==="auto")root.removeAttribute("data-theme");else root.setAttribute("data-theme",theme);
+  const dark=theme==="dark"||(theme==="auto"&&systemIsDark());const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=dark?"#0d0d0d":"#f9f9f7";
+  const b=document.getElementById("themeBtn");if(b){b.textContent=`◐ ${theme[0].toUpperCase()+theme.slice(1)}`;b.setAttribute("aria-label",`Theme: ${theme}. Activate to change theme.`);}
+}
+function cycleTheme(){const order=["auto","light","dark"],i=order.indexOf(S.settings.theme);snapshotForUndo("change theme");S.settings.theme=order[(i+1)%order.length];applyTheme();save();showToast(`Theme: ${S.settings.theme}`,true);}
+
 function init(){
-  tipEl = document.getElementById("tip");
-  mainEl = document.getElementById("main");
-  var nav = document.getElementById("tabs");
-  nav.innerHTML = TABS.map(function(t){
-    return '<button data-t="'+t.id+'" class="'+(t.id===currentTab?"active":"")+'">'+t.label+'</button>';
-  }).join("");
-  mainEl.innerHTML = TABS.map(function(t){
-    return '<section class="tab'+(t.id===currentTab?" active":"")+'" id="tab-'+t.id+'"></section>';
-  }).join("");
-  nav.querySelectorAll("button").forEach(function(b){
-    b.addEventListener("click", function(){ switchTab(b.getAttribute("data-t")); });
+  S=loadState();S=mergeV2(S);refreshMomentumWeek();applyTheme();
+  const nav=document.getElementById("tabs"),main=document.getElementById("main");
+  nav.setAttribute("role","tablist");nav.setAttribute("aria-label","Dashboard sections");
+  nav.innerHTML=TABS.map(t=>`<button id="tab-${t.id}" role="tab" aria-controls="panel-${t.id}" aria-selected="${t.id===currentTab}" tabindex="${t.id===currentTab?0:-1}" data-tab="${t.id}" class="${t.id===currentTab?"active":""}">${esc(t.label)}</button>`).join("");
+  main.innerHTML=TABS.map(t=>`<section id="panel-${t.id}" class="tab ${t.id===currentTab?"active":""}" role="tabpanel" aria-labelledby="tab-${t.id}" ${t.id===currentTab?"":"hidden"}></section>`).join("");
+  if(!document.getElementById("modal"))document.body.insertAdjacentHTML("beforeend",`<div id="modal" class="modal-backdrop" hidden><div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title"></div></div><div id="toast" class="toast" role="status" aria-live="polite" hidden></div>`);
+  nav.addEventListener("click",e=>{const b=e.target.closest('[role="tab"]');if(b)switchTab(b.dataset.tab);});
+  nav.addEventListener("keydown",e=>{const tabs=[...nav.querySelectorAll('[role="tab"]')],i=tabs.indexOf(e.target);if(i<0)return;let j;if(e.key==="ArrowRight")j=(i+1)%tabs.length;else if(e.key==="ArrowLeft")j=(i-1+tabs.length)%tabs.length;else if(e.key==="Home")j=0;else if(e.key==="End")j=tabs.length-1;else return;e.preventDefault();switchTab(tabs[j].dataset.tab,true);});
+  main.addEventListener("change",handleMainChange);main.addEventListener("input",handleMainInput);main.addEventListener("submit",handleMainSubmit);
+  document.addEventListener("click",handleAction);document.addEventListener("submit",handleDocumentSubmit);
+  document.getElementById("themeBtn").addEventListener("click",cycleTheme);
+  document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal();});
+  document.addEventListener("keydown",e=>{
+    const modal=document.getElementById("modal");if(!modal||modal.hidden)return;if(e.key==="Escape"){e.preventDefault();closeModal();return;}if(e.key!=="Tab")return;
+    const focus=[...modal.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')];if(!focus.length)return;const first=focus[0],last=focus[focus.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
   });
-  document.getElementById("themeBtn").addEventListener("click", function(){
-    var r = document.documentElement;
-    var cur = r.getAttribute("data-theme");
-    var next = cur==="dark" ? "light" : "dark";
-    r.setAttribute("data-theme", next);
-    renderCurrent();
-  });
-  var rT;
-  window.addEventListener("resize", function(){ clearTimeout(rT); rT = setTimeout(renderCurrent, 200); });
-  document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "hidden") saveNow(); });
-  window.addEventListener("pagehide", saveNow);
-  document.addEventListener("pointerdown", function(e){
-    if (!e.target.closest || !e.target.closest(".hband")) hideTip();
-  });
+  if(window.matchMedia)window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{if(S.settings.theme==="auto")applyTheme();});
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")saveNow();});window.addEventListener("pagehide",saveNow);
   renderCurrent();
 }
-if (document.readyState === "loading"){
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
+
+
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
 
 </script>
 </body>
