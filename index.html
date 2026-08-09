@@ -255,6 +255,9 @@
   .modal-head h2{font-size:18px;}
   .modal-close{border:1px solid var(--ring);background:none;color:var(--ink-1);border-radius:8px;min-width:42px;}
   .field-help{display:block;font-size:11px;color:var(--ink-3);margin-top:2px;}
+  .guide-steps{margin:10px 0 0 20px;font-size:13.5px;line-height:1.55;}
+  .guide-steps li{margin-bottom:9px;}
+  .guide-steps b{font-weight:650;}
   .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:110;background:var(--ink-1);color:var(--page);border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 5px 18px rgba(0,0,0,.25);font-size:13px;}
   .toast[hidden]{display:none;}
   .toast button{min-height:32px;background:none;color:inherit;border:1px solid currentColor;border-radius:7px;padding:3px 8px;}
@@ -494,6 +497,331 @@ const V3_TASKS = [
   task("fulltime-decision","Complete the full-time decision review","gate","fulltime","",90,"Every computed readiness gate passes using current closed-period data and the downside plan is documented.","Makes leaving employment a derived decision.",{dependsOn:["prove-review"],order:810,milestone:"Full-time decision reviewed"})
 ];
 const DEFAULT_TASKS=V3_TASKS;
+
+const LNK={
+  fees:["Etsy fee schedule","https://help.etsy.com/hc/en-us/articles/115014483627-What-are-the-Fees-and-Taxes-for-Selling-on-Etsy"],
+  tags:["Etsy shop-optimization checklist","https://www.etsy.com/seller-handbook/article/checklist-optimize-your-shop-for-etsy/366470356778"],
+  irs:["IRS: sole proprietorships","https://www.irs.gov/businesses/small-businesses-self-employed/sole-proprietorships"],
+  usps:["USPS Ground Advantage","https://www.usps.com/ship/ground-advantage.htm"]
+};
+const GUIDES={
+"launch-measure-template":{s:[
+ "Open the Notes app and create a note called <b>Piece log</b>.",
+ "Paste this block once, then copy it for each piece: <b>Piece / Channel (direct or Etsy) / Price $ / Materials $ (floss, hoop, fabric, backing, packaging) / Active stitching hrs / Finishing hrs / Packaging hrs / Rework</b>.",
+ "Decide the timing rule now: use the phone stopwatch, start it when the needle moves, and pause it for every interruption. Elapsed days are not labor.",
+ "Decide the materials rule: count what the piece actually consumed — used floss is typically $0.50–1.50 per piece, hoops $1.50–3, plus fabric, backing, and the mailer.",
+ "Save the note. Done means the template exists and both rules are written down."],
+t:["Twenty minutes, one sitting. The template is the tool; the measuring happens in the next three tasks."]},
+"launch-measure-1":{s:[
+ "Pick a piece she would genuinely sell — a typical name hoop, not her fanciest showpiece.",
+ "Copy the template block in the Piece log note and fill in the piece name and intended channel.",
+ "Start the stopwatch when stitching starts; pause for every interruption; write the total in <b>Active stitching hrs</b> when finished.",
+ "Time finishing (backing, ironing, framing in the hoop) and packaging separately.",
+ "Tally materials at what they cost her and write the price she would charge."],
+t:["If the piece is already finished, reconstruct honestly from memory but mark it 'estimated' — then measure the next two live."]},
+"launch-measure-2":{s:[
+ "Pick a piece of different complexity than piece 1 — simpler or fancier — so the range means something.",
+ "Repeat the exact same procedure: copy the template block, stopwatch active stitching, time finishing and packaging, tally materials, note the intended price and channel."],
+t:["Same rules as piece 1 or the numbers are not comparable."]},
+"launch-measure-3":{s:[
+ "Pick the design she expects to sell most often — the bread-and-butter piece.",
+ "Repeat the same procedure and complete the third template block.",
+ "Glance across all three records and fix anything obviously mis-entered while memory is fresh."],
+t:["Three honest records beat ten guessed ones."]},
+"launch-measure":{s:[
+ "Line up the three records and find the middle value (the median) for: active hours, total hours, and materials cost.",
+ "Note the range too — fastest to slowest, cheapest to priciest.",
+ "Tap <b>Record evidence</b> on this task and type it in this shape: '3 pieces: 4.5–7.0 total hrs, median 5.5; materials $6–9, median $7; prices $85–120.'",
+ "Now move the numbers where they drive the model: Streams & Pricing → Custom commissions → Edit assumptions → set <b>Owner hours/unit</b> to the median total hours.",
+ "Set <b>Materials/COGS %</b> to median materials ÷ typical price × 100 (example: $7 ÷ $95 ≈ 7).",
+ "Classify the evidence (usually 'supported' if the three records are consistent) and pick a decision — normally 'continue'."],
+t:["This is the single highest-value data entry in the whole app: hours/unit and materials % flow straight into the valuation."]},
+"launch-price":{s:[
+ "Start from the contribution math on each stream card: price − percentage costs − fixed per-sale costs.",
+ "Compute the floor for direct sales: (materials + median hours × $20/hr) ÷ (1 − 0.029) then add the $0.30 fixed fee. Example at 5.5 hrs and $7 materials: about $121.",
+ "Compute the Etsy floor the same way with Etsy numbers: ÷ (1 − 0.095) and add roughly $0.45 in fixed fees plus $0.20 listing. Same example: about $130.",
+ "Set the sticker price at or above the floor, rounded to a charm price ($125, $135 — not $121.43).",
+ "Enter the chosen prices in Streams & Pricing → Custom commissions → <b>Starting price</b>, and keep the direct-vs-Etsy difference in the listing prices themselves.",
+ "Check the stream card now shows contribution/hour at or above the $20 floor — if it shows a warning, the price is too low."],
+t:["Charging less than the floor is paying customers to take her work. The app computes the required price on each stream card ('Price for $20/hr floor')."],
+l:["fees"]},
+"launch-offers":{s:[
+ "List every piece type she could sell, then cross out all but three. Constraint is the point.",
+ "For each survivor write one line: who buys it, for what occasion, at what price, with what options (cap fonts at 2–3 and palettes at 4–5), and the promised turnaround.",
+ "Sanity-check turnaround against capacity: at 8 hrs/wk and 5.5 hrs per piece, one piece per week is honest — promise 2–3 weeks, not 5 days.",
+ "Tap <b>Record evidence</b>: paste the three offer lines, classify (supported), and decide 'continue'."],
+t:["Three offers is a learnable assortment; ten is a guessing machine. Anything cut now can return once these three have data."]},
+"launch-limits":{s:[
+ "Compute weekly capacity: planned hours per week × roughly 70% (the rest goes to photos, messages, packing). At 8 hrs/wk that is ~5.5 stitching hours — about one custom piece.",
+ "Set the maximum open orders at 2–3× weekly output (3 open orders ≈ a 3-week queue).",
+ "Write the standard turnaround (queue length + one buffer week) and the holiday cutoff formula: last ship date − turnaround − 1 week buffer.",
+ "Write all three numbers at the top of the Piece log note where she will see them when a DM arrives.",
+ "Cross-check the Valuation tab → Capacity: Year-1 hours/week should match reality."],
+t:["Overbooking is the classic first-quarter failure: one viral post, ten orders, missed Christmas. The cutoff date protects her reviews."]},
+"launch-compliance":{s:[
+ "Search '[her state] sole proprietor requirements' and note whether a state/city business registration or license applies to home craft sellers (30 minutes, official .gov results only).",
+ "Decide hobby vs business posture: if she intends profit, it is self-employment income — plan to file Schedule C at tax time and keep every receipt.",
+ "Skip the EIN for now (her SSN works as a sole proprietor) unless a bank requires one — it is free from the IRS if needed.",
+ "Note that Etsy collects and remits sales tax on marketplace orders in nearly all states; direct (DM/fair) sales may need her own state sales-tax registration — write down which applies.",
+ "Save the checklist as a note titled <b>Compliance</b> with a done/not-done mark per line."],
+t:["Timebox this to one hour. The goal is a checklist of what applies, not a law degree — revisit before the first fair or the first $1k month."],
+l:["irs"]},
+"launch-policies":{s:[
+ "Personalization policy (3 sentences): buyer approves a spelling proof before stitching; no returns on personalized items except defects; one free revision at proof stage.",
+ "Shipping policy: processing time equals the turnaround from the limits task; shipped USPS Ground Advantage with tracking.",
+ "Photo policy: finished pieces may appear on the shop and Instagram unless the buyer opts out — one sentence in the listing.",
+ "IP rule (the important one): no trademarked characters, logos, or brand fonts — Disney, sports teams, and cartoon characters get shops suspended. Original designs and plain names only.",
+ "Paste the four blocks into a note now; they go into Etsy's policy fields during shop setup."],
+t:["The proof-approval step eliminates the #1 personalized-goods dispute: 'you spelled it wrong' becomes 'you approved it.'"]},
+"launch-intake":{s:[
+ "Create a free Google Form titled 'Present Stitch custom order' with: name, contact, occasion, exact text to stitch (copy-paste, spelling as final), color choices from the defined palettes, size, need-by date, and a photo-reference upload.",
+ "Write the DM reply template in Notes and keep it one tap away: 'Hi! I'd love to make this. Custom pieces start at $___ with a ___-week turnaround. Here's the order form: [link]. Once you're in, I'll send a proof to approve before I stitch.'",
+ "Set the payment rule: 50% non-refundable deposit to enter the queue, remainder before shipping — or full payment upfront via the Etsy listing.",
+ "Run one end-to-end test: submit the form yourself, send the proof, 'approve' it, and check every step works on a phone.",
+ "Mark complete only when a stranger could go from DM to paid order without her improvising."],
+t:["The form's 'exact text as final' field plus the proof step is the whole quality system for personalized work."]},
+"launch-shop-setup":{s:[
+ "On the Etsy app or site, start a shop; when asked for the name try <b>PresentStitch</b> (or PresentStitchCo if taken).",
+ "Complete identity and bank verification so payouts work — have ID and the business (or dedicated) account number ready.",
+ "Upload a shop icon (her cleanest hoop photo on a plain background) and a simple banner.",
+ "Paste the policy blocks from the policies task into the shop policies section, and write a two-sentence About ('Hand-stitched personalized gifts, made in ___. Every piece is stitched to order.').",
+ "Create one shipping profile: USPS Ground Advantage, processing time = the turnaround from the limits task.",
+ "Stop before listing anything — listings are their own tasks with their own QA."],
+t:["Budget an hour; verification sometimes takes a day to clear. The shop can sit empty until the listings batch is ready."]},
+"launch-list-plan":{s:[
+ "Make a simple table (Notes or paper) with a row per listing — eight rows across the three offers.",
+ "Columns: offer, the search phrase a buyer would type, title draft, price, personalization instructions, and 13 tags.",
+ "Use the title formula: what it is + who/occasion. Example: 'Custom Name Embroidery Hoop | Personalized Baby Gift | Nursery Wall Art'.",
+ "Starter tag set to adapt per listing: custom name sign, personalized baby gift, nursery name art, embroidered name hoop, new mom gift, baby shower gift, custom embroidery, name wall art, kids room decor, birth announcement, handmade gift for her, monogram hoop, personalized gift.",
+ "Vary a third of the tags between listings (weddings, pets, grandma gift...) so the eight listings cover different searches instead of competing for one.",
+ "Done when all eight rows are complete — this table is the production queue for photos and publishing."],
+t:["Use all 13 tags on every listing, multi-word phrases beat single words, and never repeat the identical tag set twice."],
+l:["tags"]},
+"launch-photo-plan":{s:[
+ "For each of the first three listings write a five-shot list: straight-on hero, close-up of stitch texture, scale shot (in hand or on a wall), styled lifestyle shot (nursery shelf, gift setting), and the packaging/gift presentation.",
+ "Pick the location and hour: the brightest window, mid-morning, camera between the window and the piece at about 45°.",
+ "Gather props into one box: white foam board (as light bounce and background), a wood tray, baby blanket, dried flowers, ribbon.",
+ "Schedule the shoot as one batch session on the calendar — batching three listings takes about 90 minutes; one-at-a-time takes three evenings."],
+t:["The hero shot decides the click; texture close-ups justify handmade prices."]},
+"launch-photo-shoot":{s:[
+ "Set up at the planned window; turn off ceiling lights (mixed light turns whites yellow).",
+ "Phone settings: wipe the lens, grid on, HDR on, never zoom — step closer instead. Tap the hoop to focus and slide exposure slightly down to protect fabric detail.",
+ "Work through the shot list; take 8–10 frames of each shot with tiny angle changes.",
+ "Check sharpness at full zoom-in every few shots — refocus and reshoot blur on the spot.",
+ "Finish all three listings in the session; leave the set up until exports are checked."],
+t:["Volume is free; reshoots are expensive. 120 frames for 15 keepers is normal."]},
+"launch-photo":{s:[
+ "Pick the best 5 frames per listing — sharpness first, then light, then styling.",
+ "Edit lightly in the phone editor: exposure up if dim, white balance until the fabric reads true, small crop to square. No filters — thread colors must match reality or returns follow.",
+ "Export at full resolution (2000px+ on the short side) and put each listing's five shots in its own album named after the listing.",
+ "Done when three albums of five edited photos exist and colors match the physical pieces side by side."],
+t:["Square 1:1 crops preview best in Etsy search."]},
+"launch-fulfillment":{s:[
+ "Package a real finished hoop exactly as if sold: tissue or bubble wrap, rigid mailer or small box, thank-you note, business-card-sized reorder card.",
+ "Weigh and measure the packed parcel on a kitchen scale (typical hoop parcels run 6–14 oz).",
+ "Price it: enter the weight on the USPS site for Ground Advantage (usually $5–8 under 1 lb) and note the cost — this sets the listing's shipping price.",
+ "Buy and print one real or test label (Etsy sells discounted labels once orders exist) and check the parcel survives a firm shake and a corner press.",
+ "Write the packing recipe (materials + minutes) into the Piece log note; packaging time and cost go into the stream's fixed per-sale costs."],
+t:["Free shipping baked into the price converts better on gifts; either way the cost must live somewhere the model can see it."],
+l:["usps"]},
+"launch-listing-1":{s:[
+ "Take the first row of the listing table and create the listing: title, the five photos, price, and quantity 1 (made to order: renew after each sale) or higher for repeatable pieces.",
+ "Turn personalization ON and paste the instruction: 'Type the exact name/text to stitch (spelling as final) + color choice. I'll send a proof to approve before stitching.'",
+ "Set processing time to the honest turnaround, attach the shipping profile, paste the description (hook line → what's included → how personalization works → sizing → care), and enter all 13 tags.",
+ "Publish ($0.20 listing fee), then QA on a phone in a private window: search the main phrase, open the listing, read every field aloud, and walk checkout to the payment screen.",
+ "Fix anything awkward immediately and note the QA result in the listing table."],
+t:["The read-aloud test catches the typos that torpedo trust on a personalized-goods shop."]},
+"launch-listing-2":{s:[
+ "Repeat the listing-1 procedure for row 2 of the table: create, personalization on, processing time, shipping profile, description, 13 tags, publish.",
+ "QA on the phone: search the target phrase, proofread aloud, checkout to payment.",
+ "Log the QA note in the table."],t:[]},
+"launch-listing-3":{s:[
+ "Repeat the procedure for row 3: create, publish, phone QA, log the result.",
+ "With three live, skim all three in a row as a buyer would — do they read like one coherent shop? Fix obvious inconsistencies in tone or pricing now."],t:[]},
+"launch-3-listings":{s:[
+ "Confirm all three listings show as Active in the Shop Manager and appear in search for at least one of their target phrases.",
+ "Tap <b>Record evidence</b> and paste: the three listing URLs, the live date, and anything QA caught.",
+ "Classify (supported) and decide 'continue' — the shop officially exists."],t:[]},
+"launch-ig":{s:[
+ "Plan four posts across two weeks: two reels (15–30 second stitching timelapse; hook text in the first second — 'Watch DAISY come to life'), one before/after carousel, one story set with a poll ('Whose name should I stitch next?').",
+ "Give every post the same call to action: 'DM me the name you'd want' or the link-in-bio to the Etsy shop.",
+ "Put the shop link in the bio now (Etsy shop URL or a free link page).",
+ "Schedule all four in the IG app or Meta's planner in one sitting; batching beats willpower.",
+ "Define what gets counted before posting: profile visits, DMs that ask price or how to order (qualified inquiries), and orders that mention Instagram — these go in the Tracker."],
+t:["Process video is the niche's native currency: the reel does not need her face or voice, just hands, thread, and a name appearing."]},
+"launch-finance":{s:[
+ "Open a separate free checking account (or dedicate one existing card) so business money never mixes with household money.",
+ "Create a receipts album in Photos and snap every supply purchase from now on.",
+ "In the app: Tracker → Quick log → select August and save it — zeros are the honest baseline and they count.",
+ "Note where fee data will come from later: Etsy's CSV export covers marketplace fees at tax time."],
+t:["The zero month matters: readiness math needs consecutive logged months, and August anchors the streak."],l:["irs"]},
+"launch-listings-4-5":{s:[
+ "Produce rows 4 and 5 of the listing table with the same procedure (photos may need one catch-up shoot using the standing set list).",
+ "Publish both, run the phone QA on each, and log results in the table."],t:[]},
+"launch-listings-6-7":{s:[
+ "Produce and publish rows 6 and 7 with the same create → publish → phone-QA → log loop.",
+ "Check tag coverage across all seven: they should collectively target at least four distinct occasions (baby, wedding, pet, home/gift)."],t:[]},
+"launch-listing-8":{s:[
+ "Publish the final row of the table with the standard procedure.",
+ "Then retest the whole path as a stranger: search, open, personalize, add to cart, checkout to the payment screen, and re-read shipping and processing promises.",
+ "Fix any friction and note it — this QA note feeds the milestone evidence."],t:[]},
+"launch-8-listings":{s:[
+ "Confirm eight Active listings in Shop Manager.",
+ "Tap <b>Record evidence</b>: paste the eight URLs plus the QA notes summary (what was found, what was fixed).",
+ "Classify and decide — 'continue' moves the plan into pure demand-testing."],t:[]},
+"launch-ig-result":{s:[
+ "After the two-week window, open IG Insights and pull per-post reach and profile visits.",
+ "Count qualified inquiries (DMs asking price/how to order) and any orders that came from Instagram — check the Tracker rows for the window.",
+ "Tap <b>Record evidence</b> and write the funnel: '4 posts → 2,100 reach → 38 profile visits → 3 inquiries → 1 order ($95).'",
+ "Classify honestly: supported (posts produce inquiries), contradicted (reach but zero inquiries), or inconclusive (too little exposure).",
+ "Decide: continue the cadence, revise the content/CTA, or pause IG and test another channel."],
+t:["Two weeks of data is a small sample — 'inconclusive · extend two more weeks' is a perfectly good verdict."]},
+"launch-review":{s:[
+ "Block 45 minutes with the app and the Piece log open; this is a meeting, not a vibe check.",
+ "For each launch assumption — price acceptance, demand existence, hours per piece, IG as a channel — assign one label: untested, observed, supported, contradicted, or inconclusive, each with its number.",
+ "Check capacity reality: did actual hours worked match the plan? Update Valuation hours if not.",
+ "Choose the next sprint from the evidence (usually: keep listing + start the validate-phase price test).",
+ "Tap <b>Record evidence</b> with the assumption labels and the sprint choice; classify and decide."],
+t:["The discipline is labeling assumptions with numbers attached — 'IG works' is not a label; '4 posts → 3 inquiries → 1 order' is."]},
+"validate-price":{s:[
+ "Pick ONE offer for the test and raise its quoted price 15–25% (example: $95 → $115) for a bounded window: two weeks or five quotes, whichever comes first.",
+ "Quote the new price to every new inquiry for that offer — no case-by-case discounts during the test.",
+ "Log every quote and its outcome in the Tracker month (quotes sent, orders) and in the byStream attribution.",
+ "At the window's end, record evidence: 'Quoted $115 to 5 inquiries → 3 accepted (60%).'",
+ "Classify: 3+ of 5 accepting supports the higher price — make it the new list price and update the stream's Starting price; 0–1 of 5 contradicts; in between, extend the window."],
+t:["Price tests only work when she holds the line for the whole window — one sympathy discount contaminates the sample."]},
+"validate-q4":{s:[
+ "Work backward from December 25: last safe ship date ≈ December 18 (Ground Advantage 2–5 days + buffer).",
+ "Custom-order cutoff = last ship date − turnaround − one buffer week (at a 3-week turnaround: about November 24).",
+ "Cap the holiday queue: weekly capacity × the weeks remaining before cutoff = the maximum orders she may accept; write the number down.",
+ "Draft the overflow reply now: 'My holiday slots are full — January orders get 10% off, want one?'",
+ "Diary two dates: November 1 to update every listing's processing time, and the cutoff date to switch listings to next-year delivery."],
+t:["Q4 is roughly 31% of the year in this market; the cutoff protects her reviews exactly when they matter most."]},
+"validate-market-compare":{s:[
+ "Find three candidate events within driving distance: search Facebook Events and local maker groups for 'craft fair', 'makers market', 'holiday bazaar'; school and church fairs are cheap and personalization-friendly.",
+ "For each, record: booth fee, expected foot traffic, audience fit for personalized gifts, inventory needed (15–25 finished pieces is a respectable table), and date conflicts.",
+ "Compute break-even units per event: booth fee ÷ average contribution per piece (a $60 booth at $40 contribution = 2 pieces to break even).",
+ "Rank the three and either pick one for the pilot task or explicitly decline all with a one-line reason."],
+t:["Small local fairs at $25–75 booths are the right first test; $300 juried shows come after demand is proven."]},
+"validate-market":{s:[
+ "If declining: record evidence with the reason ('all three under-trafficked or conflict with capacity') and decide — declining with a reason passes this experiment.",
+ "If running: build inventory to the plan without cannibalizing custom-order capacity; price everything with visible tags.",
+ "Kit the table: Square or PayPal reader plus cash float, price signage, a custom-orders sign-up sheet with QR to the order form, and business cards.",
+ "During the fair, tally three numbers on paper: visitors who stopped, conversations about custom orders, and sales with amounts.",
+ "Record evidence with the tallies plus total contribution vs hours spent (prep + fair + travel), classify, and decide whether fairs earn a repeat."],
+t:["The custom-order signups often out-earn the day's sales — a fair is also a lead generator, count it that way."]},
+"validate-weekly":{s:[
+ "Confirm the Tracker holds four comparable weekly observations inside the window: listing views, inquiries, quotes, orders — the monthly rows plus a weekly tally note is enough.",
+ "Record evidence summarizing the four weeks as a funnel: 'Views 480 → inquiries 9 → quotes 7 → orders 3.'",
+ "Classify by stability: four weeks that look alike are supported; wild swings are inconclusive and usually mean the sample is still too small."],t:[]},
+"validate-review":{s:[
+ "Block an hour; pull the funnel numbers from the four logged weeks.",
+ "Diagnose with ratios, not feelings: low views = acquisition problem; views but no inquiries = offer/photo problem; inquiries but no orders = price or trust problem.",
+ "Write one sentence naming the binding constraint, then pick the matching next move (more/better content vs. listing overhaul vs. price test).",
+ "Record evidence with the diagnosis and decide: continue, revise, or pause."],t:[]},
+"prove-history":{s:[
+ "Open the Tracker and confirm August, September, and October each show as logged closed months — including any zero months.",
+ "Fill gaps from bank statements and the receipts album if a month is missing; honest reconstruction beats a hole.",
+ "Record evidence: 'Aug/Sep/Oct logged; revenue $0/$180/$425; hours 12/19/24.'"],
+t:["Zero months are data, not failure — they anchor the readiness streak the full-time gate needs."]},
+"prove-unit":{s:[
+ "For each offer with at least one paid order, pull from the byStream attribution: median production time, realized price, materials, and contribution per hour.",
+ "Compare each offer's realized contribution/hour against the $20 floor and against the stream card's assumption.",
+ "Feed conclusions back: Tracker → Actual-to-plan suggestion → review the numbers → Accept, which updates the stream and logs provenance.",
+ "Record evidence per offer ('name hoops: 5 orders, median 5.2 hrs, realized $112, $17.80/hr'), classify — five or more orders reaches 'observed'.",
+ "Flag any offer earning under the floor for a price rise or retirement at the 90-day review."],t:[]},
+"prove-review":{s:[
+ "Schedule 60 minutes with Clark — this decision is a household decision.",
+ "Review in order: three-month earnings trend, realized $/hr vs the floor, demand signals (inquiries, repeats, backlog), and how the hours actually felt.",
+ "Pick one: continue (evidence supports the plan), revise (specific constraint found — name it), pause (life first), or stop (repeated contradiction).",
+ "Record evidence citing the numbers behind the choice and the named decision — this is the app's most important ledger entry so far."],t:[]},
+"traction-pattern-signal":{s:[
+ "Check for real demand signals: 3+ unprompted 'is there a pattern for this?' messages, a process reel with strong saves, or repeated how-did-you-make-this comments.",
+ "No signals? Run a cheap probe: one story poll ('Would you stitch this yourself with a pattern? $7') and count real yeses.",
+ "Gate passes only with concrete signals — record them verbatim as evidence and decide; otherwise record 'no demand signal yet' and leave the gate open without shame."],
+t:["This gate exists to stop 40 hours of pattern-making for zero buyers."]},
+"traction-pattern-brief":{s:[
+ "Choose the design: her most-asked-about motif, simplified to beginner stitches.",
+ "Write the one-page brief: skill level, finished size, stitch list, page count, launch price ($6–9), sales channel (Etsy digital download), and the success metric ('10 sales in 30 days').",
+ "Define the test plan in the brief: two beginner testers before publishing.",
+ "Attach the brief text as this task's completion note."],t:[]},
+"traction-pattern-draft":{s:[
+ "Photograph or chart every step of stitching the design — 5–8 step images plus the finished piece.",
+ "Assemble the PDF: cover with finished photo, materials list with exact floss colors, fabric-transfer instructions, step pages, finishing/backing instructions.",
+ "Export letter-size, under 20MB, filename with a version number (v1).",
+ "Test-open the PDF on a phone — most buyers will read it there."],t:[]},
+"traction-pattern-test":{s:[
+ "Recruit two genuine beginners (one friend, one volunteer from IG) and give them only the PDF — no coaching.",
+ "Watch or debrief: where did they stall, what did they misread, what did they Google?",
+ "Log every stall point; three stalls at the same step is a rewrite order, not a footnote.",
+ "Record evidence with both testers' outcomes and classify the usability honestly."],t:[]},
+"traction-pattern-publish":{s:[
+ "Revise the PDF against every logged stall point; bump the version.",
+ "Create the Etsy digital listing: instant download, five images (finished piece, page previews, materials flat-lay), pattern-specific tags (beginner embroidery pattern, PDF embroidery, DIY embroidery kit pattern...).",
+ "Price per the brief and publish; buy one copy yourself to verify the download works.",
+ "Update the Patterns stream's start-year assumption if the launch date moved."],t:[]},
+"traction-pattern":{s:[
+ "Run the 30-day measurement from the brief: sales count, refunds, and support DMs per sale.",
+ "Compare against the success metric and compute contribution vs the hours the pattern took to make.",
+ "Record evidence with the numbers; at 5+ sales flip the Patterns stream's evidence level via the Tracker acceptance flow — hitting the metric justifies changing the stream's status to validated, which moves it into the core valuation.",
+ "Decide: another pattern, revise pricing/marketing, or park digital for now."],t:[]},
+"scale-kit":{s:[
+ "Preconditions, in order: a pattern that passed its usability test, component costs summed from real suppliers (target under $8 per kit), assembly time under 30 minutes, and a support plan for beginner questions.",
+ "Prove demand before inventory: a preorder listing or story poll with 10 real commitments.",
+ "Record all four numbers as evidence and decide; the gate stays open until every precondition has a number."],t:[]},
+"scale-workshop":{s:[
+ "Get one real venue quote (library room, coffee shop, yarn store — often free to $50).",
+ "Compute break-even seats: (venue + per-head materials × seats) vs seats × ticket price at $45–70.",
+ "Collect at least six concrete interest names (not likes — names who said they would come to a date).",
+ "Record venue, math, and names as evidence; decide pilot or not."],t:[]},
+"scale-membership":{s:[
+ "Count recurring-content demand: 10+ people repeatedly engaging with patterns/tutorials, asks for 'more like this'.",
+ "Draft a three-month content calendar she could sustain at current hours — if the calendar does not survive contact with her week, the gate stays open.",
+ "Record demand count and the calendar as evidence; decide beta or wait."],
+t:["Cozyblue ran a club for 11 years and still had to scale back — sustainability is the whole gate."]},
+"scale-wholesale":{s:[
+ "Run the Wholesale viability calculator on the Streams tab with real numbers: fully loaded cost, her margin, retailer margin.",
+ "Have one real conversation with a local shop about their terms (net-30? minimum order?).",
+ "Check batch capacity: can she produce the minimum order inside her hours without starving retail?",
+ "Record calculator output, the shop's terms, and the capacity check; decide."],t:[]},
+"fulltime-decision":{s:[
+ "This gate unlocks only when all eight computed readiness gates are green — check the Overview.",
+ "Book a real meeting with Clark: review the readiness gates one by one, the runway number, and an actual health-insurance quote.",
+ "Write the downside plan: what happens month one if income halves; what the return-to-work path looks like.",
+ "Sleep on it, then record the decision with its date and reasoning — whatever the answer, this entry is the one the whole dashboard was built for."],t:[]},
+"validate-week-1":{s:[
+ "Define the week's window (Monday to Sunday) and keep it identical for all four weeks.",
+ "Tally four numbers: listing views (Etsy Stats), qualified inquiries (DMs that asked price or how to order), quotes sent, and paid orders.",
+ "Write them in the Tracker: add the counts to the month's views/inquiries/quotes/orders fields and note the week's tally in the month note ('W1: 96/2/2/1').",
+ "Spend two minutes on observations, not conclusions — one week proves nothing yet."],
+t:["Decide once what counts as a 'qualified inquiry' and never redefine it mid-stream, or the funnel becomes noise."]},
+"validate-week-2":{s:[
+ "Same window, same four tallies: views, qualified inquiries, quotes, orders.",
+ "Add the counts to the Tracker month and append the note ('W2: ...').",
+ "Resist reacting to one week's dip or spike — the review task compares all four."],t:[]},
+"validate-week-3":{s:[
+ "Third week, same procedure: tally the four funnel numbers with the same definitions.",
+ "Log in the Tracker month and append the weekly note.",
+ "If a number is zero, log the zero — missing weeks corrupt the comparison."],t:[]},
+"validate-week-4":{s:[
+ "Final week: tally, log, and append the note as before.",
+ "Line up the four notes — this is the dataset the weekly-observations milestone and the 60-day review run on."],t:[]}
+};
+const GUIDE_FALLBACK={s:[
+ "Write the finish line first: rewrite this task's 'Done when' as something observable a stranger could verify.",
+ "List the 3–5 physical steps between here and there, each small enough for one sitting.",
+ "Do step one immediately for 25 minutes — momentum beats planning.",
+ "When it is done, record what actually happened (numbers if any) in the completion note."],
+t:["This is a custom task, so the steps are generic. Tell Claude what the task involves and a tailored guide can be baked into the next update."]};
+function guideHtml(t){
+  const g=GUIDES[t.id]||GUIDE_FALLBACK;
+  return `<div class="task-detail" style="margin-top:0"><b>Done when:</b> ${esc(t.definitionOfDone)}</div>
+    <ol class="guide-steps">${g.s.map(s=>`<li>${s}</li>`).join("")}</ol>
+    ${g.t&&g.t.length?`<div class="callout">${g.t.map(x=>`<div><b>Tip:</b> ${x}</div>`).join("")}</div>`:""}
+    ${g.l&&g.l.length?`<div class="src">Sources: ${g.l.map(k=>`<a href="${esc(LNK[k][1])}" target="_blank" rel="noopener noreferrer">${esc(LNK[k][0])}</a>`).join(" · ")}</div>`:""}
+    <div class="task-actions" style="margin-top:12px"><button class="ghost" type="button" data-action="close-modal">Close</button></div>`;
+}
+
 
 const DEFAULT_STREAMS = [
   {id:"custom", name:"Custom commissions", color:"--s1", status:"planned", start:1, u:1.5, ug:28, p:85, pg:25, cogs:8, fees:2.9, hpu:6.5, fh:0, rh:0, on:true, unit:"pieces/mo", priority:2, evidenceLevel:"hypothesis", observations:0,
@@ -1026,7 +1354,7 @@ function taskCardHtml(t,compact=false){
   const blockedBy=t.dependsOn.map(id=>S.tasks.find(x=>x.id===id)).filter(x=>x&&!isComplete(x)).map(x=>x.title);
   if(t.id==="fulltime-decision"&&!readiness().ready)blockedBy.push("all computed readiness gates");
   const impactRows=!compact&&t.impact?impactPreview(t):null;
-  const buttons=[];
+  const buttons=[`<button class="ghost" data-action="task-guide" data-id="${esc(t.id)}">Guide</button>`];
   if(state==="available") buttons.push(`<button class="ghost" data-action="task-start" data-id="${esc(t.id)}">Start</button>`);
   if(state==="available"||state==="active") buttons.push(`<button class="primary" data-action="task-done" data-id="${esc(t.id)}">${t.type==="action"?"Mark complete":"Record evidence"}</button>`);
   if(state==="waiting") buttons.push(`<button class="primary" data-action="task-result" data-id="${esc(t.id)}">Add result</button>`);
@@ -1046,7 +1374,7 @@ function taskCardHtml(t,compact=false){
     ${!compact&&t.metric?`<div class="task-detail"><b>SMART measure:</b> ${esc(t.metric.name)} · baseline ${esc(t.metric.baseline)} → target ${esc(t.metric.target)}.<br><b>Exposure:</b> ${esc(t.metric.exposure||"Not set")} · <b>Decision rule:</b> ${esc(t.metric.decisionRule||"Not set")} · <b>Review:</b> ${dateLabel(t.metric.reviewDate)}</div>`:""}
     ${impactRows?`<div class="notice" style="margin-top:8px"><b>Planning sensitivity—not earned value:</b> ${impactRows.map(r=>`${r.case} ${formatMoney(r.delta,false)}`).join(" · ")}. ${esc(t.impact.caveat)}</div>`:""}
     ${t.result?`<div class="notice good" style="margin-top:8px"><b>Evidence:</b> ${esc(t.result)}${t.resultClassification?` · ${esc(t.resultClassification)}`:""}${t.decision?` · decision: ${esc(t.decision)}`:""}${t.evidenceAt?` · ${dateLabel(t.evidenceAt)}`:""}</div>`:""}
-    ${(isComplete(t)||state!=="blocked")&&buttons.length?`<div class="task-actions">${buttons.join("")}</div>`:""}
+    <div class="task-actions">${buttons.join("")}</div>
   </article>`;
 }
 
@@ -1328,6 +1656,8 @@ function selfTests(){
     push("Task dependency graph has no cycles",acyclic,"Every task remains completable.");
     const d=chartTicks(-500,12345,7);
     push("Chart axis always covers the data range",d.lo<=-500&&d.hi>=12345,"Bars can never overflow the plot.");
+    const guided=DEFAULT_TASKS.filter(t2=>GUIDES[t2.id]).length;
+    push("Every built-in task has a step-by-step guide",guided===DEFAULT_TASKS.length,`${guided} of ${DEFAULT_TASKS.length} default tasks have guides; custom tasks get the generic framework.`);
   }catch(e){push("Self-test runner",false,String(e&&e.message||e));}
   return out;
 }
@@ -1543,6 +1873,7 @@ function handleAction(e){
   if(action==="open-tracker"){switchTab("tracker");return;}
   if(action==="open-data"){switchTab("data");return;}
   if(action==="rerun-tests"){renderCurrent();showToast("Self-tests re-run");return;}
+  if(action==="task-guide"){const t=findTask(id);if(t)openModal(`How to: ${t.title}`,guideHtml(t));return;}
   if(action==="dismiss-migration"){S.meta.migrationNotice=false;save();renderCurrent();return;}
   if(action==="set-scenario"){snapshotForUndo("change scenario");S.settings.scenario=b.dataset.value;save();renderCurrent();showToast(`Scenario: ${SCENARIOS[S.settings.scenario].label}`,true);return;}
   if(action==="capacity-mode"){snapshotForUndo("change capacity allocation");S.settings.capacityMode=b.dataset.value;save();renderCurrent();showToast("Capacity allocation updated",true);return;}
